@@ -1,0 +1,7 @@
+{
+  "name": "Listify AI HQ",
+  "description": "A high-converting eBay and marketplace listing generator powered by AI (simulated), designed for professional resellers.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
