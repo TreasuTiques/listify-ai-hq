@@ -13,12 +13,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* ===================================================== */}
       <section className="relative pt-20 sm:pt-24 pb-28 sm:pb-36 bg-gradient-to-b from-white to-blue-50/60 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          {/* Hero Container */}
           <div className="relative bg-white/80 backdrop-blur rounded-[48px] border border-slate-200 shadow-[0_40px_120px_-40px_rgba(15,23,42,0.25)] p-8 sm:p-10 lg:p-16">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 items-center">
 
-              {/* LEFT */}
               <div>
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-slate-200 text-[#2563EB] text-[11px] font-bold uppercase tracking-widest mb-6 sm:mb-8 shadow-sm">
                   <span className="relative flex h-2 w-2">
@@ -40,27 +37,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   SEO-ready titles and clean HTML descriptions in seconds.
                 </p>
 
-                {/* Built for resellers micro-copy */}
                 <p className="text-sm text-slate-400 mb-8 sm:mb-10">
-                  Built for resellers like you.
+                  Built for resellers who list fast, batch hard, and care about clean listings.
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button
-                    onClick={() => onNavigate('/builder')}
-                    className="bg-[#2563EB] text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl hover:bg-blue-700 transition-all hover:-translate-y-1"
-                  >
-                    Create My First Listing Free
-                  </button>
-
-                  {/*
-                    Watch Demo moved below into testimonial strip
-                    (real modal/link later)
-                  */}
-                </div>
+                <button
+                  onClick={() => onNavigate('/builder')}
+                  className="bg-[#2563EB] text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl hover:bg-blue-700 transition-all hover:-translate-y-1"
+                >
+                  Create My First Listing Free
+                </button>
               </div>
 
-              {/* RIGHT — PRODUCT PREVIEW */}
               <div className="relative">
                 <div className="absolute -inset-6 bg-blue-300/20 blur-3xl rounded-[48px]"></div>
                 <div className="relative bg-white rounded-[32px] border border-slate-200 shadow-2xl p-4">
@@ -86,293 +74,149 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* NEW SECTION — FEATURE STRIP (TIGHT + PREMIUM) */}
-      {/* (Mobile spacing + icon alignment consistency only) */}
+      {/* FEATURE STRIP */}
       {/* ===================================================== */}
       <section className="py-12 sm:py-14 bg-white border-y border-slate-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-
-            <div className="p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+        <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[
+            ['🧠', 'AI Product Vision', 'Detects brand, model, and details from photos.'],
+            ['🏷', 'Cassini-Friendly Titles', 'Keyword-aware, buyer-search phrasing built-in.'],
+            ['🧾', 'Clean HTML Output', 'Copy and paste into eBay with zero cleanup.'],
+            ['⚡', 'Built For Speed', 'List faster so you can source and ship more.'],
+          ].map(([icon, title, desc]) => (
+            <div key={title} className="p-6 rounded-2xl border border-slate-100 shadow-sm">
               <div className="flex items-start gap-3">
-                <div className="text-2xl leading-none mt-0.5">🧠</div>
+                <div className="text-2xl leading-none mt-0.5">{icon}</div>
                 <div>
-                  <h4 className="font-bold text-[#0F172A]">AI Product Vision</h4>
-                  <p className="text-sm text-slate-500 mt-1">
-                    Detects brand, model, and details from photos.
-                  </p>
+                  <h4 className="font-bold text-[#0F172A]">{title}</h4>
+                  <p className="text-sm text-slate-500 mt-1">{desc}</p>
                 </div>
               </div>
             </div>
+          ))}
+        </div>
+        <p className="text-center mt-8 text-sm text-slate-500">
+          Less typing. More sourcing. More sales.
+        </p>
+      </section>
 
-            <div className="p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl leading-none mt-0.5">🏷</div>
-                <div>
-                  <h4 className="font-bold text-[#0F172A]">Cassini-Friendly Titles</h4>
-                  <p className="text-sm text-slate-500 mt-1">
-                    Keyword-aware, buyer-search phrasing built-in.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl leading-none mt-0.5">🧾</div>
-                <div>
-                  <h4 className="font-bold text-[#0F172A]">Clean HTML Output</h4>
-                  <p className="text-sm text-slate-500 mt-1">
-                    Copy and paste into eBay with zero cleanup.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl leading-none mt-0.5">⚡</div>
-                <div>
-                  <h4 className="font-bold text-[#0F172A]">Built For Speed</h4>
-                  <p className="text-sm text-slate-500 mt-1">
-                    List faster so you can source and ship more.
-                  </p>
-                </div>
-              </div>
-            </div>
-
+      {/* ===================================================== */}
+      {/* TESTIMONIALS + WATCH DEMO */}
+      {/* ===================================================== */}
+      <section className="py-14 bg-white">
+        <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="rounded-2xl border border-slate-200 p-6">
+            <p className="font-semibold text-[#0F172A]">
+              “I went from 10 listings a night to 30 without burning out.”
+            </p>
+            <p className="text-sm text-slate-500 mt-2">
+              Full-time reseller, electronics & media
+            </p>
           </div>
-
-          <div className="text-center mt-8 sm:mt-10 text-sm text-slate-500">
-            Less typing. More sourcing. More sales.
+          <div className="rounded-2xl border border-slate-200 p-6">
+            <p className="font-semibold text-[#0F172A]">
+              “No more fixing AI junk. I paste it straight into eBay and it just works.”
+            </p>
+            <p className="text-sm text-slate-500 mt-2">
+              Vintage & collectibles seller
+            </p>
           </div>
+          <div className="rounded-2xl border border-slate-200 p-6">
+            <p className="font-semibold text-[#0F172A]">
+              “This fits my storage unit workflow perfectly. Photos in, listings out.”
+            </p>
+            <p className="text-sm text-slate-500 mt-2">
+              Storage unit reseller, Arizona
+            </p>
+          </div>
+        </div>
+
+        <div className="text-center mt-10">
+          <button className="bg-white border border-slate-200 px-10 py-4 rounded-full font-semibold hover:bg-slate-50">
+            Watch Demo
+          </button>
         </div>
       </section>
 
       {/* ===================================================== */}
-      {/* NEW SECTION — SHORT TESTIMONIAL STRIP (FAKE FOR NOW) */}
-      {/* + Watch Demo button lives here (modal/link later) */}
+      {/* HOW IT WORKS */}
       {/* ===================================================== */}
-      <section className="py-10 sm:py-12 bg-white">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="rounded-[28px] border border-slate-200 bg-white shadow-sm px-6 sm:px-10 py-8 sm:py-10 text-center">
-            <p className="text-lg sm:text-xl font-semibold text-[#0F172A] leading-relaxed">
-              “I used to dread writing descriptions. Now I batch 25 listings in a night and the HTML looks clean every time.”
-            </p>
-            <p className="text-sm text-slate-500 mt-3">
-              — Storage unit reseller, SoCal
-            </p>
-
-            {/* Watch Demo (real modal/link later) */}
-            <button
-              type="button"
-              aria-label="Watch demo"
-              className="mt-6 bg-white text-slate-600 px-10 py-4 rounded-full text-lg font-semibold border border-slate-200 hover:bg-slate-50 transition"
-            >
-              Watch Demo
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* ===================================================== */}
-      {/* SECTION 2 — FULL SAMPLE LISTING (UNCHANGED) */}
-      {/* ===================================================== */}
-      <section className="py-24 sm:py-28 px-4 bg-slate-50">
-        <div className="max-w-5xl mx-auto">
-
-          <div className="text-center mb-12 sm:mb-14">
-            <h2 className="text-xs font-bold text-[#2563EB] uppercase tracking-[0.35em] mb-3">
-              Sample Listing Output
-            </h2>
-            <h3 className="text-3xl font-semibold text-[#0F172A] mb-3">
-              Exactly what your buyers will see.
-            </h3>
-            <p className="text-slate-500 max-w-2xl mx-auto">
-              This is a full, collector-grade eBay description generated from a single photo.
-              Clean HTML. Structured sections. Ready to copy and paste.
-            </p>
-          </div>
-
-          {/* SAMPLE LISTING CONTAINER */}
-          <div className="bg-white border border-slate-200 rounded-[32px] shadow-xl p-7 sm:p-12 max-w-3xl mx-auto space-y-10">
-
-            {/* TITLE */}
-            <section>
-              <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-2">
-                Title
-              </div>
-              <h4 className="text-2xl font-bold text-[#0F172A] leading-snug">
-                Commodore Plus 4 Canadian NTSC Le Nouveau Boxed Computer System 1984 Complete
-              </h4>
-            </section>
-
-            <hr />
-
-            {/* DESCRIPTION */}
-            <section>
-              <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">
-                Description
-              </div>
-              <p className="text-sm text-slate-700">
-                This unit is the rare <strong>Canadian NTSC Commodore Plus/4</strong> featuring the
-                bilingual <strong>“Le Nouveau”</strong> retail box. Designed as Commodore’s
-                productivity-focused system, the Plus/4 shipped with the built-in 3-Plus-1 software
-                suite and remains a standout piece of 8-bit computing history.
-              </p>
-            </section>
-
-            {/* HARDWARE */}
-            <section>
-              <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">
-                Hardware Specifications
-              </div>
-              <ul className="list-disc pl-5 text-sm text-slate-700 space-y-1">
-                <li><strong>Model:</strong> Commodore Plus/4 Canadian NTSC variant</li>
-                <li><strong>CPU:</strong> 7501 / 8501 family 8-bit processor</li>
-                <li><strong>ROM:</strong> 3-Plus-1 productivity suite</li>
-                <li><strong>Keyboard:</strong> Full travel dark case with light keycaps</li>
-                <li><strong>Region:</strong> North American NTSC</li>
-              </ul>
-            </section>
-
-            {/* CONDITION */}
-            <section>
-              <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">
-                Condition Summary
-              </div>
-              <p className="text-sm text-slate-700">
-                The console presents well with <strong>clean casing</strong>, intact legends, and
-                original foam inserts. The retail box shows honest shelf wear, creasing, and tape
-                from storage but continues to protect the contents effectively.
-              </p>
-              <p className="text-sm text-slate-700 mt-2">
-                This unit is sold as <strong>unverified / display-ready hardware</strong> and has not
-                been fully bench-tested with a monitor.
-              </p>
-            </section>
-
-            {/* SHIPPING */}
-            <section>
-              <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">
-                Shipping & Handling
-              </div>
-              <p className="text-sm text-slate-700">
-                We pack vintage hardware with <strong>heavy-duty bubble wrap</strong>, then
-                double-box for transit. Ships from a smoke-free environment with tracking uploaded
-                immediately.
-              </p>
-            </section>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ===================================================== */}
-      {/* NEW SECTION — PRICING EXPECTATION (VALUE FRAMING) */}
-      {/* ===================================================== */}
-      <section className="py-24 sm:py-28 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-14 items-center">
-
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-semibold text-[#0F172A] mb-12">
+            How it works
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             <div>
-              <div className="text-xs font-bold text-[#2563EB] uppercase tracking-[0.35em] mb-3">
-                Pricing Expectation
-              </div>
-              <h2 className="text-4xl font-semibold text-[#0F172A] mb-5">
-                Most sellers earn it back fast.
-              </h2>
-              <p className="text-slate-500 mb-8">
-                If your plan saves you even 10 minutes per listing, it pays for itself quickly —
-                especially when you’re doing batches.
+              <div className="text-4xl mb-4">📸</div>
+              <h4 className="font-bold">Upload Photos</h4>
+              <p className="text-slate-500 text-sm mt-2">
+                Use the same photos you already take for eBay.
               </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
-                  <div className="text-sm font-bold text-[#0F172A]">⏱ Time Saved</div>
-                  <div className="text-sm text-slate-500 mt-1">
-                    Turn 20 minutes into 2 minutes per listing.
-                  </div>
-                </div>
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
-                  <div className="text-sm font-bold text-[#0F172A]">📈 Better Keywords</div>
-                  <div className="text-sm text-slate-500 mt-1">
-                    Stronger titles = more search impressions.
-                  </div>
-                </div>
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
-                  <div className="text-sm font-bold text-[#0F172A]">🧾 Cleaner Listings</div>
-                  <div className="text-sm text-slate-500 mt-1">
-                    Structured HTML buyers actually read.
-                  </div>
-                </div>
-                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
-                  <div className="text-sm font-bold text-[#0F172A]">🚀 Batch Friendly</div>
-                  <div className="text-sm text-slate-500 mt-1">
-                    Built for storage unit hauls & estate piles.
-                  </div>
-                </div>
-              </div>
             </div>
-
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[32px] p-8 sm:p-10 text-white shadow-2xl border border-blue-500/20">
-              <h3 className="text-2xl font-bold mb-4">
-                Quick gut-check (real reseller math)
-              </h3>
-              <p className="text-blue-100 mb-8">
-                If you list 50 items/month and save ~10 minutes each, that’s ~8+ hours back.
-                That’s time you can spend sourcing, photographing, shipping, or actually sleeping.
+            <div>
+              <div className="text-4xl mb-4">🤖</div>
+              <h4 className="font-bold">AI Detects Details</h4>
+              <p className="text-slate-500 text-sm mt-2">
+                Brand, model, condition, and context automatically.
               </p>
-
-              <div className="bg-white/10 rounded-2xl p-6 border border-white/15">
-                <div className="text-sm font-bold uppercase tracking-[0.25em] text-blue-100 mb-2">
-                  The point
-                </div>
-                <div className="text-lg font-semibold leading-snug">
-                  Your plan shouldn’t feel like a cost — it should feel like a shortcut to more listings.
-                </div>
-              </div>
-
-              <button
-                onClick={() => onNavigate('/pricing')}
-                className="mt-8 bg-white text-blue-700 px-8 py-3 rounded-full font-bold hover:scale-105 transition"
-              >
-                View Pricing
-              </button>
             </div>
-
+            <div>
+              <div className="text-4xl mb-4">📋</div>
+              <h4 className="font-bold">Copy & Paste</h4>
+              <p className="text-slate-500 text-sm mt-2">
+                Drop it straight into eBay. No cleanup required.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ===================================================== */}
-      {/* NEW SECTION — FINAL CTA */}
+      {/* WHAT THIS IS / IS NOT */}
       {/* ===================================================== */}
-      <section className="py-24 sm:py-28 px-4 bg-slate-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="rounded-[40px] border border-slate-200 bg-white shadow-[0_40px_120px_-60px_rgba(15,23,42,0.35)] p-8 sm:p-10 md:p-14 text-center">
-            <h2 className="text-4xl font-bold text-[#0F172A] mb-4">
-              Stop typing. Start selling.
-            </h2>
-            <p className="text-slate-500 max-w-2xl mx-auto mb-8 sm:mb-10">
-              Your next listing is already waiting in your camera roll.
-              Generate your first one in seconds and keep the momentum going.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => onNavigate('/builder')}
-                className="bg-[#2563EB] text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl hover:bg-blue-700 transition-all hover:-translate-y-1"
-              >
-                Create My First Listing Free
-              </button>
-              <button
-                onClick={() => onNavigate('/pricing')}
-                className="bg-white text-slate-700 px-10 py-4 rounded-full text-lg font-semibold border border-slate-200 hover:bg-slate-50 transition"
-              >
-                See Plans
-              </button>
-            </div>
+      <section className="py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div>
+            <h3 className="font-bold text-lg mb-4">What this is</h3>
+            <ul className="text-slate-600 space-y-2">
+              <li>✔ Built specifically for eBay workflows</li>
+              <li>✔ Optimized for collectibles, electronics, media</li>
+              <li>✔ Designed for batch listing</li>
+            </ul>
           </div>
+          <div>
+            <h3 className="font-bold text-lg mb-4">What this is not</h3>
+            <ul className="text-slate-600 space-y-2">
+              <li>✘ Generic AI writing tool</li>
+              <li>✘ Dropshipping software</li>
+              <li>✘ Amazon-style listing generator</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* ===================================================== */}
+      {/* FUTURE PROOF TEASER */}
+      {/* ===================================================== */}
+      <section className="py-16 bg-slate-50 text-center">
+        <p className="text-slate-500">
+          More reseller-only tools are coming. Early users get access first.
+        </p>
+      </section>
+
+      {/* ===================================================== */}
+      {/* FINAL CTA */}
+      {/* ===================================================== */}
+      <section className="py-28 px-4 bg-white">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-4xl font-bold mb-6">Stop typing. Start selling.</h2>
+          <button
+            onClick={() => onNavigate('/builder')}
+            className="bg-[#2563EB] text-white px-12 py-5 rounded-full text-lg font-bold shadow-xl hover:bg-blue-700"
+          >
+            Create My First Listing Free
+          </button>
         </div>
       </section>
 
