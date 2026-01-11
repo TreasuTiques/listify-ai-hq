@@ -40,7 +40,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   SEO-ready titles and clean HTML descriptions in seconds.
                 </p>
 
-                {/* Micro-copy */}
+                {/* Built for resellers micro-copy */}
                 <p className="text-sm text-slate-400 mb-8 sm:mb-10">
                   Built for resellers like you.
                 </p>
@@ -52,6 +52,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   >
                     Create My First Listing Free
                   </button>
+
+                  {/*
+                    Watch Demo moved below into testimonial strip
+                    (real modal/link later)
+                  */}
                 </div>
               </div>
 
@@ -81,7 +86,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* FEATURE STRIP */}
+      {/* NEW SECTION — FEATURE STRIP (TIGHT + PREMIUM) */}
+      {/* (Mobile spacing + icon alignment consistency only) */}
       {/* ===================================================== */}
       <section className="py-12 sm:py-14 bg-white border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-4">
@@ -144,25 +150,28 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* TESTIMONIAL STRIP + WATCH DEMO */}
+      {/* NEW SECTION — SHORT TESTIMONIAL STRIP (FAKE FOR NOW) */}
+      {/* + Watch Demo button lives here (modal/link later) */}
       {/* ===================================================== */}
       <section className="py-10 sm:py-12 bg-white">
-        <div className="max-w-5xl mx-auto px-4 text-center">
-          <p className="text-lg sm:text-xl font-medium text-[#0F172A]">
-            “This replaced my entire listing workflow. I can knock out 20 listings
-            in the time it used to take me to write three.”
-          </p>
-          <p className="text-sm text-slate-500 mt-2">
-            — Vintage & storage unit reseller, California
-          </p>
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="rounded-[28px] border border-slate-200 bg-white shadow-sm px-6 sm:px-10 py-8 sm:py-10 text-center">
+            <p className="text-lg sm:text-xl font-semibold text-[#0F172A] leading-relaxed">
+              “I used to dread writing descriptions. Now I batch 25 listings in a night and the HTML looks clean every time.”
+            </p>
+            <p className="text-sm text-slate-500 mt-3">
+              — Storage unit reseller, SoCal
+            </p>
 
-          <button
-            type="button"
-            aria-label="Watch demo"
-            className="mt-6 bg-white text-slate-700 px-8 py-3 rounded-full font-semibold border border-slate-200 hover:bg-slate-50 transition"
-          >
-            Watch Demo
-          </button>
+            {/* Watch Demo (real modal/link later) */}
+            <button
+              type="button"
+              aria-label="Watch demo"
+              className="mt-6 bg-white text-slate-600 px-10 py-4 rounded-full text-lg font-semibold border border-slate-200 hover:bg-slate-50 transition"
+            >
+              Watch Demo
+            </button>
+          </div>
         </div>
       </section>
 
@@ -185,16 +194,187 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             </p>
           </div>
 
+          {/* SAMPLE LISTING CONTAINER */}
           <div className="bg-white border border-slate-200 rounded-[32px] shadow-xl p-7 sm:p-12 max-w-3xl mx-auto space-y-10">
-            {/* sample listing unchanged */}
+
+            {/* TITLE */}
+            <section>
+              <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-2">
+                Title
+              </div>
+              <h4 className="text-2xl font-bold text-[#0F172A] leading-snug">
+                Commodore Plus 4 Canadian NTSC Le Nouveau Boxed Computer System 1984 Complete
+              </h4>
+            </section>
+
+            <hr />
+
+            {/* DESCRIPTION */}
+            <section>
+              <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">
+                Description
+              </div>
+              <p className="text-sm text-slate-700">
+                This unit is the rare <strong>Canadian NTSC Commodore Plus/4</strong> featuring the
+                bilingual <strong>“Le Nouveau”</strong> retail box. Designed as Commodore’s
+                productivity-focused system, the Plus/4 shipped with the built-in 3-Plus-1 software
+                suite and remains a standout piece of 8-bit computing history.
+              </p>
+            </section>
+
+            {/* HARDWARE */}
+            <section>
+              <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">
+                Hardware Specifications
+              </div>
+              <ul className="list-disc pl-5 text-sm text-slate-700 space-y-1">
+                <li><strong>Model:</strong> Commodore Plus/4 Canadian NTSC variant</li>
+                <li><strong>CPU:</strong> 7501 / 8501 family 8-bit processor</li>
+                <li><strong>ROM:</strong> 3-Plus-1 productivity suite</li>
+                <li><strong>Keyboard:</strong> Full travel dark case with light keycaps</li>
+                <li><strong>Region:</strong> North American NTSC</li>
+              </ul>
+            </section>
+
+            {/* CONDITION */}
+            <section>
+              <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">
+                Condition Summary
+              </div>
+              <p className="text-sm text-slate-700">
+                The console presents well with <strong>clean casing</strong>, intact legends, and
+                original foam inserts. The retail box shows honest shelf wear, creasing, and tape
+                from storage but continues to protect the contents effectively.
+              </p>
+              <p className="text-sm text-slate-700 mt-2">
+                This unit is sold as <strong>unverified / display-ready hardware</strong> and has not
+                been fully bench-tested with a monitor.
+              </p>
+            </section>
+
+            {/* SHIPPING */}
+            <section>
+              <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">
+                Shipping & Handling
+              </div>
+              <p className="text-sm text-slate-700">
+                We pack vintage hardware with <strong>heavy-duty bubble wrap</strong>, then
+                double-box for transit. Ships from a smoke-free environment with tracking uploaded
+                immediately.
+              </p>
+            </section>
+
           </div>
         </div>
       </section>
 
       {/* ===================================================== */}
-      {/* PRICING + FINAL CTA (UNCHANGED) */}
+      {/* NEW SECTION — PRICING EXPECTATION (VALUE FRAMING) */}
       {/* ===================================================== */}
-      {/* rest of file unchanged */}
+      <section className="py-24 sm:py-28 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-14 items-center">
+
+            <div>
+              <div className="text-xs font-bold text-[#2563EB] uppercase tracking-[0.35em] mb-3">
+                Pricing Expectation
+              </div>
+              <h2 className="text-4xl font-semibold text-[#0F172A] mb-5">
+                Most sellers earn it back fast.
+              </h2>
+              <p className="text-slate-500 mb-8">
+                If your plan saves you even 10 minutes per listing, it pays for itself quickly —
+                especially when you’re doing batches.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
+                  <div className="text-sm font-bold text-[#0F172A]">⏱ Time Saved</div>
+                  <div className="text-sm text-slate-500 mt-1">
+                    Turn 20 minutes into 2 minutes per listing.
+                  </div>
+                </div>
+                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
+                  <div className="text-sm font-bold text-[#0F172A]">📈 Better Keywords</div>
+                  <div className="text-sm text-slate-500 mt-1">
+                    Stronger titles = more search impressions.
+                  </div>
+                </div>
+                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
+                  <div className="text-sm font-bold text-[#0F172A]">🧾 Cleaner Listings</div>
+                  <div className="text-sm text-slate-500 mt-1">
+                    Structured HTML buyers actually read.
+                  </div>
+                </div>
+                <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50">
+                  <div className="text-sm font-bold text-[#0F172A]">🚀 Batch Friendly</div>
+                  <div className="text-sm text-slate-500 mt-1">
+                    Built for storage unit hauls & estate piles.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[32px] p-8 sm:p-10 text-white shadow-2xl border border-blue-500/20">
+              <h3 className="text-2xl font-bold mb-4">
+                Quick gut-check (real reseller math)
+              </h3>
+              <p className="text-blue-100 mb-8">
+                If you list 50 items/month and save ~10 minutes each, that’s ~8+ hours back.
+                That’s time you can spend sourcing, photographing, shipping, or actually sleeping.
+              </p>
+
+              <div className="bg-white/10 rounded-2xl p-6 border border-white/15">
+                <div className="text-sm font-bold uppercase tracking-[0.25em] text-blue-100 mb-2">
+                  The point
+                </div>
+                <div className="text-lg font-semibold leading-snug">
+                  Your plan shouldn’t feel like a cost — it should feel like a shortcut to more listings.
+                </div>
+              </div>
+
+              <button
+                onClick={() => onNavigate('/pricing')}
+                className="mt-8 bg-white text-blue-700 px-8 py-3 rounded-full font-bold hover:scale-105 transition"
+              >
+                View Pricing
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ===================================================== */}
+      {/* NEW SECTION — FINAL CTA */}
+      {/* ===================================================== */}
+      <section className="py-24 sm:py-28 px-4 bg-slate-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="rounded-[40px] border border-slate-200 bg-white shadow-[0_40px_120px_-60px_rgba(15,23,42,0.35)] p-8 sm:p-10 md:p-14 text-center">
+            <h2 className="text-4xl font-bold text-[#0F172A] mb-4">
+              Stop typing. Start selling.
+            </h2>
+            <p className="text-slate-500 max-w-2xl mx-auto mb-8 sm:mb-10">
+              Your next listing is already waiting in your camera roll.
+              Generate your first one in seconds and keep the momentum going.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => onNavigate('/builder')}
+                className="bg-[#2563EB] text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl hover:bg-blue-700 transition-all hover:-translate-y-1"
+              >
+                Create My First Listing Free
+              </button>
+              <button
+                onClick={() => onNavigate('/pricing')}
+                className="bg-white text-slate-700 px-10 py-4 rounded-full text-lg font-semibold border border-slate-200 hover:bg-slate-50 transition"
+              >
+                See Plans
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
 
     </div>
   );
