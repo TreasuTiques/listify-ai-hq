@@ -7,6 +7,30 @@ interface LandingPageProps {
 const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   // State for the interactive sample listing component
   const [activeTab, setActiveTab] = useState<'preview' | 'html'>('preview');
+  const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
+
+  // The HTML content to be copied
+  const rawHtml = `<div style="font-family: sans-serif; padding: 20px; color: #333;">
+  <h1 style="color: #0F172A; font-size: 24px;">Commodore Plus 4 Canadian...</h1>
+  <div style="background: #F8FAFC; padding: 15px; border-radius: 8px; margin: 20px 0;">
+    <h3 style="margin-top: 0; font-size: 14px;">HARDWARE SPECIFICATIONS</h3>
+    <ul style="list-style: none; padding: 0;">
+      <li style="margin-bottom: 5px;"><strong>Model:</strong> Plus/4 Canadian</li>
+      <li><strong>Year:</strong> 1984</li>
+    </ul>
+  </div>
+  <p>Rare "Le Nouveau" variant in collector condition...</p>
+</div>`;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(rawHtml);
+      setCopyStatus('Copied!');
+      setTimeout(() => setCopyStatus('Copy Code'), 2000);
+    } catch (err) {
+      console.error('Failed to copy!', err);
+    }
+  };
 
   return (
     <div className="bg-white selection:bg-blue-100">
@@ -198,7 +222,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* NEW INTERACTIVE SAMPLE LISTING SECTION */}
+      {/* INTERACTIVE SAMPLE LISTING SECTION */}
       {/* ===================================================== */}
       <section className="py-24 sm:py-28 px-4 bg-slate-50">
         <div className="max-w-5xl mx-auto">
@@ -256,20 +280,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 <div className="bg-[#1E293B] p-8 sm:p-12 font-mono text-xs sm:text-sm text-indigo-200 overflow-x-auto h-full animate-in slide-in-from-right-4 duration-300">
                   <div className="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
                     <span className="text-slate-400 text-[10px] uppercase font-bold tracking-widest">Clean HTML Output</span>
-                    <button className="text-white bg-blue-600 px-4 py-1.5 rounded-lg text-xs font-sans font-bold hover:bg-blue-500 transition">Copy Code</button>
+                    <button 
+                      onClick={handleCopy}
+                      className="text-white bg-blue-600 px-4 py-1.5 rounded-lg text-xs font-sans font-bold hover:bg-blue-500 transition min-w-[100px]"
+                    >
+                      {copyStatus}
+                    </button>
                   </div>
                   <pre className="leading-relaxed whitespace-pre-wrap">
-{`<div style="font-family: sans-serif; padding: 20px; color: #333;">
-  <h1 style="color: #0F172A; font-size: 24px;">Commodore Plus 4 Canadian...</h1>
-  <div style="background: #F8FAFC; padding: 15px; border-radius: 8px; margin: 20px 0;">
-    <h3 style="margin-top: 0; font-size: 14px;">HARDWARE SPECIFICATIONS</h3>
-    <ul style="list-style: none; padding: 0;">
-      <li style="margin-bottom: 5px;"><strong>Model:</strong> Plus/4 Canadian</li>
-      <li><strong>Year:</strong> 1984</li>
-    </ul>
-  </div>
-  <p>Rare "Le Nouveau" variant in collector condition...</p>
-</div>`}
+                    {rawHtml}
                   </pre>
                 </div>
               )}
