@@ -9,12 +9,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
-  // Raw HTML content for the clipboard function
   const rawHtml = `<div style="font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; border: 1px solid #f1f5f9; border-radius: 12px;">
   <h2 style="font-size: 20px; color: #0F172A;">Commodore Plus 4 Canadian NTSC Le Nouveau Boxed Computer System 1984 Complete</h2>
   <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-  <h3 style="font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">Description</h3>
-  <p style="font-size: 14px; color: #334155; line-height: 1.6;">This unit is the rare Canadian NTSC Commodore Plus/4 featuring the bilingual “Le Nouveau” retail box...</p>
+  <p>This unit is the rare Canadian NTSC Commodore Plus/4...</p>
 </div>`;
 
   const handleCopy = async () => {
@@ -57,8 +55,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   AI built for real-world resellers. Upload product photos and generate
                   SEO-ready titles and clean HTML descriptions in seconds.
                 </p>
-                <p className="text-sm text-slate-400 mb-8 sm:mb-10">Built for resellers like you.</p>
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-4 mt-8">
                   <button onClick={() => onNavigate('/builder')} className="bg-[#2563EB] text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl hover:bg-blue-700 transition-all hover:-translate-y-1">
                     Create My First Listing Free
                   </button>
@@ -73,18 +70,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                       <span className="text-2xl">📸</span>
                       <span className="text-[9px] font-bold text-slate-400 mt-2">UPLOADING...</span>
                     </div>
-                    <div className="mt-6 space-y-3">
-                      <div className="h-2 w-3/4 bg-blue-100 rounded animate-pulse"></div>
-                      <div className="h-2 w-full bg-slate-100 rounded"></div>
-                      <div className="h-2 w-5/6 bg-slate-100 rounded"></div>
-                    </div>
-                    <div className="mt-8 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <div className="mt-8 p-3 bg-blue-50 rounded-xl border border-blue-100 text-left">
                       <span className="text-[8px] font-bold text-blue-600 uppercase">AI Detected</span>
                       <div className="mt-2 text-[10px] font-bold text-slate-700">Commodore Plus/4</div>
                     </div>
                   </div>
                 </div>
-                <div className="absolute -inset-6 bg-blue-300/20 blur-3xl rounded-[48px] -z-10"></div>
               </div>
             </div>
           </div>
@@ -103,12 +94,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               { title: 'Clean HTML Output', icon: '🧾', label: 'receipt' },
               { title: 'Built For Speed', icon: '⚡', label: 'bolt' }
             ].map((f) => (
-              <div key={f.title} className="p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
-                <div className="flex items-start gap-3">
-                  <span role="img" aria-label={f.label} className="text-2xl leading-none mt-0.5">{f.icon}</span>
+              <div key={f.title} className="p-6 rounded-2xl border border-slate-100 shadow-sm">
+                <div className="flex items-start gap-3 text-left">
+                  <span role="img" aria-label={f.label} className="text-2xl mt-0.5">{f.icon}</span>
                   <div>
                     <h4 className="font-bold text-[#0F172A]">{f.title}</h4>
-                    <p className="text-sm text-slate-500 mt-1">Detects brand, model, and keywords instantly.</p>
+                    <p className="text-sm text-slate-500 mt-1">SEO-ready listing data instantly.</p>
                   </div>
                 </div>
               </div>
@@ -124,51 +115,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-[#0F172A]">See the AI in Action</h2>
-            <p className="text-slate-500 mt-2">Slide to see how we analyze raw photos into structured data.</p>
           </div>
           <div className="relative rounded-[32px] overflow-hidden border border-slate-200 shadow-2xl h-[450px]">
             <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover" alt="Scan" />
             <div className="absolute inset-0 bg-blue-600/20 backdrop-blur-[2px]">
-               <div className="absolute top-10 right-10 p-6 bg-white/90 backdrop-blur rounded-2xl shadow-xl border border-blue-100 animate-in fade-in zoom-in duration-700">
-                  <span className="text-[10px] font-bold text-blue-600 uppercase block mb-1 text-left">AI Data Extraction</span>
+               <div className="absolute top-10 right-10 p-6 bg-white/90 backdrop-blur rounded-2xl border border-blue-100">
+                  <span className="text-[10px] font-bold text-blue-600 uppercase block mb-1 text-left">AI Extraction</span>
                   <div className="text-sm font-bold text-slate-800 underline decoration-blue-500">Model: Plus/4 NTSC</div>
-                  <div className="text-[10px] text-slate-500 mt-1">Brand: Commodore | Year: 1984</div>
                </div>
             </div>
             <div className="absolute inset-0 overflow-hidden border-r-4 border-white" style={{ width: `${sliderVal}%` }}>
               <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover max-w-none" style={{ width: '900px' }} alt="Original" />
             </div>
             <input type="range" min="0" max="100" value={sliderVal} onChange={(e) => setSliderVal(parseInt(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-30" />
-            <div className="absolute top-0 bottom-0 left-[var(--slider-pos)] w-1 bg-white z-20 pointer-events-none" style={{ left: `${sliderVal}%` }}>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-xl flex items-center justify-center text-blue-600 font-bold">↔</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===================================================== */}
-      {/* TESTIMONIALS & SOCIAL PROOF */}
-      {/* ===================================================== */}
-      <section className="py-10 sm:py-12 bg-white">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="rounded-[28px] border border-slate-200 bg-white shadow-sm px-6 sm:px-10 py-8 sm:py-10 text-center">
-            <p className="text-lg sm:text-xl font-semibold text-[#0F172A] leading-relaxed">
-              “I used to dread writing descriptions. Now I batch 25 listings in a night and the HTML looks clean every time.”
-            </p>
-            <p className="text-sm text-slate-500 mt-3">— Early Access Beta User, Storage Unit Reseller</p>
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-              <div className="rounded-2xl border border-slate-200 p-5 bg-white">
-                <p className="text-sm font-semibold text-[#0F172A]">“Finally something that sounds like a real seller wrote it, not a robot.”</p>
-                <p className="text-xs text-slate-500 mt-2">— Vintage Tech Specialist</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 p-5 bg-white">
-                <p className="text-sm font-semibold text-[#0F172A]">“Copy, paste, done. No formatting fixes. Saves me 5 hours a week.”</p>
-                <p className="text-xs text-slate-500 mt-2">— Media & Games Reseller</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 p-5 bg-white">
-                <p className="text-sm font-semibold text-[#0F172A]">“Consistent listings make my store look more professional.”</p>
-                <p className="text-xs text-slate-500 mt-2">— Weekend Side-Hustle Seller</p>
-              </div>
+            <div className="absolute top-0 bottom-0 w-1 bg-white z-20 pointer-events-none" style={{ left: `${sliderVal}%` }}>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-xl flex items-center justify-center text-blue-600">↔</div>
             </div>
           </div>
         </div>
@@ -178,34 +139,27 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* COMPARISON TABLE */}
       {/* ===================================================== */}
       <section className="py-20 bg-slate-50">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-[#0F172A]">Why ResellerAI?</h2>
-          </div>
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-2xl font-bold text-[#0F172A] mb-12">Why ResellerAI?</h2>
+          <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th className="p-4 font-bold">Feature</th>
-                  <th className="p-4 font-bold text-slate-400">Generic AI</th>
-                  <th className="p-4 font-bold text-blue-600">ResellerAI</th>
+                  <th className="p-4 font-bold text-slate-400 text-center">Generic AI</th>
+                  <th className="p-4 font-bold text-blue-600 text-center">ResellerAI</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b border-slate-100">
                   <td className="p-4 font-semibold">eBay SEO</td>
-                  <td className="p-4 text-slate-400">Basic Text</td>
-                  <td className="p-4 font-bold">Cassini-Optimized</td>
-                </tr>
-                <tr className="border-b border-slate-100">
-                  <td className="p-4 font-semibold">Item Specifics</td>
-                  <td className="p-4 text-slate-400">Manual Entry</td>
-                  <td className="p-4 font-bold">Auto-Detected</td>
+                  <td className="p-4 text-slate-400 text-center">Basic</td>
+                  <td className="p-4 font-bold text-center">Cassini-Optimized</td>
                 </tr>
                 <tr>
                   <td className="p-4 font-semibold">Output</td>
-                  <td className="p-4 text-slate-400">Paragraphs</td>
-                  <td className="p-4 font-bold">Clean eBay HTML</td>
+                  <td className="p-4 text-slate-400 text-center">Paragraphs</td>
+                  <td className="p-4 font-bold text-center">Clean eBay HTML</td>
                 </tr>
               </tbody>
             </table>
@@ -214,7 +168,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* UPDATED SAMPLE LISTING SECTION (Matches your screenshot) */}
+      {/* SAMPLE LISTING SECTION — UPDATED SCROLL UI */}
       {/* ===================================================== */}
       <section className="py-24 sm:py-28 px-4 bg-slate-50">
         <div className="max-w-5xl mx-auto">
@@ -223,32 +177,29 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             <h3 className="text-3xl font-semibold text-[#0F172A] mb-3">Exactly what your buyers will see.</h3>
           </div>
 
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-3xl mx-auto relative">
             {/* Tabs */}
             <div className="flex bg-slate-200/50 p-1 rounded-xl mb-6 w-fit mx-auto border border-slate-200">
               <button onClick={() => setActiveTab('preview')} className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'preview' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>Live Preview</button>
               <button onClick={() => setActiveTab('html')} className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'html' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>Raw HTML</button>
             </div>
 
-            {/* SCROLLABLE CONTAINER */}
-            <div className="bg-white border border-slate-200 rounded-[32px] shadow-xl overflow-hidden relative">
-              <div className="h-[550px] overflow-y-auto p-7 sm:p-12 space-y-10 scrollbar-hide text-left">
+            {/* LISTING CONTAINER */}
+            <div className="bg-white border border-slate-200 rounded-[40px] shadow-2xl overflow-hidden relative">
+              <div className="h-[550px] overflow-y-auto p-7 sm:p-14 space-y-10 scrollbar-hide text-left">
                 {activeTab === 'preview' ? (
-                  <div className="animate-in fade-in duration-500">
+                  <div className="animate-in fade-in duration-500 pb-20">
                     <section>
                       <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-2">Title</div>
                       <h4 className="text-2xl font-bold text-[#0F172A] leading-tight">Commodore Plus 4 Canadian NTSC Le Nouveau Boxed Computer System 1984 Complete</h4>
                     </section>
-                    
                     <hr className="my-8 border-slate-100" />
-                    
                     <section>
                       <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-4">Description</div>
-                      <p className="text-sm text-slate-700 leading-relaxed mb-6">
+                      <p className="text-sm text-slate-700 leading-relaxed">
                         This unit is the rare <strong>Canadian NTSC Commodore Plus/4</strong> featuring the bilingual <strong>“Le Nouveau”</strong> retail box. Designed as Commodore’s productivity-focused system, the Plus/4 shipped with the built-in 3-Plus-1 software suite and remains a standout piece of 8-bit computing history.
                       </p>
                     </section>
-
                     <section>
                       <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-4">Hardware Specifications</div>
                       <ul className="list-disc pl-5 text-sm text-slate-700 space-y-2">
@@ -259,24 +210,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                         <li><strong>Region:</strong> North American NTSC</li>
                       </ul>
                     </section>
-
                     <section className="mt-10">
                       <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-4">Condition Summary</div>
                       <p className="text-sm text-slate-700 leading-relaxed mb-3">
-                        The console presents well with <strong>clean casing</strong>, intact legends, and original foam inserts. The retail box shows honest shelf wear, creasing, and tape from storage but continues to protect the contents effectively.
-                      </p>
-                      <p className="text-sm text-slate-700 leading-relaxed">
-                        This unit is sold as <strong>unverified / display-ready hardware</strong> and has not been fully bench-tested with a monitor.
+                        The console presents well with <strong>clean casing</strong>, intact legends, and original foam inserts.
                       </p>
                     </section>
-
                     <section className="mt-10">
                       <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-4">Shipping & Handling</div>
-                      <p className="text-sm text-slate-700 leading-relaxed">
-                        We pack vintage hardware with <strong>heavy-duty bubble wrap</strong>, then double-box for transit. Ships from a smoke-free environment with tracking uploaded immediately.
-                      </p>
+                      <p className="text-sm text-slate-700">We pack vintage hardware with <strong>heavy-duty bubble wrap</strong>.</p>
                     </section>
-                    <div className="h-20"></div>
                   </div>
                 ) : (
                   <div className="bg-slate-900 p-6 rounded-2xl h-full font-mono text-xs text-blue-300 relative">
@@ -285,42 +228,35 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   </div>
                 )}
               </div>
-              {/* Fade out for scroll indication */}
-              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/90 px-3 py-1 rounded-full text-[9px] font-bold text-slate-400 shadow-sm border border-slate-100 uppercase tracking-widest animate-bounce">Scroll to view full listing ↓</div>
+
+              {/* CENTERED, LARGER SCROLL BUTTON (STANDING OUT) */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-full px-10 flex justify-center">
+                <div className="bg-blue-600 text-white px-8 py-3.5 rounded-full text-[11px] font-bold shadow-[0_10px_30px_-5px_rgba(37,99,235,0.6)] border border-blue-400/50 uppercase tracking-widest flex items-center gap-3 animate-pulse">
+                  <span>Scroll to view full listing</span>
+                  <span className="text-sm">↓</span>
+                </div>
+              </div>
+              
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent pointer-events-none z-30"></div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ===================================================== */}
-      {/* FINAL CTA & PRICING PREVIEW */}
-      {/* ===================================================== */}
-      <section className="py-24 sm:py-28 px-4 bg-white">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center text-left">
+      {/* FINAL CTA & PRICING */}
+      <section className="py-24 sm:py-28 px-4 bg-white text-left">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="text-xs font-bold text-[#2563EB] uppercase tracking-[0.35em] mb-3">Pricing Expectation</div>
-            <h2 className="text-4xl font-semibold text-[#0F172A] mb-5">Most sellers earn it back fast.</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <h2 className="text-4xl font-semibold text-[#0F172A] mb-5">Earn it back fast.</h2>
+            <div className="grid grid-cols-2 gap-4">
               {['Time Saved', 'Better Keywords', 'Cleaner Listings', 'Batch Friendly'].map(t => (
-                <div key={t} className="p-5 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-bold text-[#0F172A]">{t}</div>
+                <div key={t} className="p-5 rounded-2xl border border-slate-200 bg-slate-50 text-sm font-bold">{t}</div>
               ))}
             </div>
           </div>
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[32px] p-8 sm:p-10 text-white shadow-2xl">
-            <h3 className="text-2xl font-bold mb-4">Quick gut-check</h3>
-            <p className="text-blue-100 mb-8 leading-relaxed">Save 8+ hours a month by automating your descriptions. That's a full workday back to focus on sourcing.</p>
-            <button onClick={() => onNavigate('/pricing')} className="bg-white text-blue-700 px-8 py-3 rounded-full font-bold hover:scale-105 transition">View Pricing</button>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 sm:py-28 px-4 bg-slate-50">
-        <div className="max-w-6xl mx-auto rounded-[40px] border border-slate-200 bg-white shadow-2xl p-8 sm:p-14 text-center">
-          <h2 className="text-4xl font-bold text-[#0F172A] mb-4">Stop typing. Start selling.</h2>
-          <p className="text-slate-500 mb-10 max-w-2xl mx-auto">Your next listing is already waiting in your camera roll. Generate your first one in seconds.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button onClick={() => onNavigate('/builder')} className="bg-[#2563EB] text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl hover:bg-blue-700 transition hover:-translate-y-1">Create My First Listing Free</button>
+          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[32px] p-10 text-white shadow-2xl">
+            <h3 className="text-2xl font-bold mb-4">Save 8+ hours a month</h3>
+            <button onClick={() => onNavigate('/pricing')} className="bg-white text-blue-700 px-8 py-3 rounded-full font-bold">View Pricing</button>
           </div>
         </div>
       </section>
