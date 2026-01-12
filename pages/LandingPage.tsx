@@ -9,17 +9,24 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [activeTab, setActiveTab] = useState<'preview' | 'html'>('preview');
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
 
-  // The HTML content to be copied
-  const rawHtml = `<div style="font-family: sans-serif; padding: 20px; color: #333;">
-  <h1 style="color: #0F172A; font-size: 24px;">Commodore Plus 4 Canadian...</h1>
-  <div style="background: #F8FAFC; padding: 15px; border-radius: 8px; margin: 20px 0;">
-    <h3 style="margin-top: 0; font-size: 14px;">HARDWARE SPECIFICATIONS</h3>
-    <ul style="list-style: none; padding: 0;">
-      <li style="margin-bottom: 5px;"><strong>Model:</strong> Plus/4 Canadian</li>
-      <li><strong>Year:</strong> 1984</li>
-    </ul>
+  // Realistic high-value HTML for the "Copy" function
+  const rawHtml = `<div style="font-family: Arial, sans-serif; max-width: 800px; margin: auto; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+  <div style="background: #2563EB; color: white; padding: 20px; text-align: center;">
+    <h1 style="margin: 0; font-size: 24px;">Commodore Plus 4 Canadian NTSC Boxed System</h1>
   </div>
-  <p>Rare "Le Nouveau" variant in collector condition...</p>
+  <div style="padding: 30px;">
+    <h3 style="color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">Product Overview</h3>
+    <p>Rare "Le Nouveau" bilingual variant. Collector grade hardware.</p>
+    <h3 style="color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">Specifications</h3>
+    <ul style="column-count: 2;">
+      <li>Brand: Commodore</li>
+      <li>Model: Plus/4</li>
+      <li>CPU: MOS 7501</li>
+      <li>RAM: 64KB</li>
+    </ul>
+    <h3 style="color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">Condition Details</h3>
+    <p>Console casing is 100% original with no UV yellowing. Box shows minor shelf wear.</p>
+  </div>
 </div>`;
 
   const handleCopy = async () => {
@@ -222,14 +229,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* INTERACTIVE SAMPLE LISTING SECTION */}
+      {/* INTERACTIVE SCROLLABLE SAMPLE LISTING SECTION */}
       {/* ===================================================== */}
       <section className="py-24 sm:py-28 px-4 bg-slate-50">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-xs font-bold text-[#2563EB] uppercase tracking-[0.35em] mb-3">Sample Listing Output</h2>
-            <h3 className="text-3xl font-semibold text-[#0F172A] mb-3">Exactly what your buyers will see.</h3>
-            <p className="text-slate-500 max-w-2xl mx-auto">Toggle between the formatted preview and the raw code to see the quality of our generated HTML.</p>
+            <h3 className="text-3xl font-semibold text-[#0F172A] mb-3">High-impact listings. Zero effort.</h3>
+            <p className="text-slate-500 max-w-2xl mx-auto">Scroll through the preview below to see how our AI creates deep, SEO-optimized descriptions that convert browsers into buyers.</p>
           </div>
 
           <div className="max-w-3xl mx-auto">
@@ -249,49 +256,96 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               </button>
             </div>
 
-            {/* LISTING CONTAINER */}
-            <div className="bg-white border border-slate-200 rounded-[40px] shadow-2xl overflow-hidden min-h-[500px]">
-              {activeTab === 'preview' ? (
-                <div className="p-8 sm:p-14 space-y-10 animate-in fade-in zoom-in-95 duration-300">
-                  <section>
-                    <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-2">Optimized Title</div>
-                    <h4 className="text-2xl font-bold text-[#0F172A] leading-snug">Commodore Plus 4 Canadian NTSC Le Nouveau Boxed Computer System 1984 Complete</h4>
-                  </section>
-                  <hr className="border-slate-100" />
-                  <section>
-                    <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-4">Item Specifics</div>
-                    <div className="grid grid-cols-2 gap-y-3 gap-x-8 text-sm">
-                      <div className="flex justify-between border-b pb-1"><span className="text-slate-500">Brand</span><span className="font-bold">Commodore</span></div>
-                      <div className="flex justify-between border-b pb-1"><span className="text-slate-500">Model</span><span className="font-bold">Plus/4</span></div>
-                      <div className="flex justify-between border-b pb-1"><span className="text-slate-500">Region</span><span className="font-bold">NTSC</span></div>
-                      <div className="flex justify-between border-b pb-1"><span className="text-slate-500">Year</span><span className="font-bold">1984</span></div>
-                    </div>
-                  </section>
-                  <section>
-                    <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">Description</div>
-                    <p className="text-sm text-slate-700 leading-relaxed">Rare Canadian variant featuring the bilingual <strong>"Le Nouveau"</strong> retail box. Productivity-focused system with 3-Plus-1 suite built-in.</p>
-                  </section>
-                  <section>
-                    <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">Shipping</div>
-                    <p className="text-sm text-slate-700">Packed with <strong>heavy-duty bubble wrap</strong> and double-boxed. Smoke-free storage.</p>
-                  </section>
-                </div>
-              ) : (
-                <div className="bg-[#1E293B] p-8 sm:p-12 font-mono text-xs sm:text-sm text-indigo-200 overflow-x-auto h-full animate-in slide-in-from-right-4 duration-300">
-                  <div className="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-                    <span className="text-slate-400 text-[10px] uppercase font-bold tracking-widest">Clean HTML Output</span>
-                    <button 
-                      onClick={handleCopy}
-                      className="text-white bg-blue-600 px-4 py-1.5 rounded-lg text-xs font-sans font-bold hover:bg-blue-500 transition min-w-[100px]"
-                    >
-                      {copyStatus}
-                    </button>
+            {/* LISTING CONTAINER WITH INTERNAL SCROLL */}
+            <div className="relative bg-white border border-slate-200 rounded-[40px] shadow-2xl overflow-hidden">
+              <div className="h-[550px] overflow-y-auto scrollbar-hide p-8 sm:p-14">
+                
+                {activeTab === 'preview' ? (
+                  <div className="space-y-10 animate-in fade-in duration-300">
+                    {/* Header/Title */}
+                    <section>
+                      <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-2">Optimized SEO Title</div>
+                      <h4 className="text-2xl font-bold text-[#0F172A] leading-snug">Commodore Plus 4 Canadian NTSC Le Nouveau Boxed Computer System 1984 Complete</h4>
+                    </section>
+                    
+                    <hr className="border-slate-100" />
+                    
+                    {/* Key Specs Grid */}
+                    <section>
+                      <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-4">Item Specifics</div>
+                      <div className="grid grid-cols-2 gap-y-4 gap-x-12 text-sm">
+                        <div className="flex justify-between border-b border-slate-50 pb-2"><span className="text-slate-500">Brand</span><span className="font-bold">Commodore</span></div>
+                        <div className="flex justify-between border-b border-slate-50 pb-2"><span className="text-slate-500">Model</span><span className="font-bold">Plus/4</span></div>
+                        <div className="flex justify-between border-b border-slate-50 pb-2"><span className="text-slate-500">Region</span><span className="font-bold">NTSC (NA)</span></div>
+                        <div className="flex justify-between border-b border-slate-50 pb-2"><span className="text-slate-500">Year</span><span className="font-bold">1984</span></div>
+                        <div className="flex justify-between border-b border-slate-50 pb-2"><span className="text-slate-500">CPU</span><span className="font-bold">MOS 7501</span></div>
+                        <div className="flex justify-between border-b border-slate-50 pb-2"><span className="text-slate-500">Storage</span><span className="font-bold">64KB RAM</span></div>
+                      </div>
+                    </section>
+
+                    {/* Rich Description */}
+                    <section>
+                      <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">Product Description</div>
+                      <p className="text-sm text-slate-700 leading-relaxed mb-4">
+                        This is a stunning example of the <strong>rare Canadian variant</strong> of the Commodore Plus/4. Featuring the bilingual 
+                        "Le Nouveau" retail packaging, this set is a must-have for North American 8-bit collectors.
+                      </p>
+                      <ul className="list-disc pl-5 text-sm text-slate-600 space-y-2">
+                        <li>Original high-clarity case with minimal surface wear.</li>
+                        <li>Fully intact serial number badge and port legends.</li>
+                        <li>Bilingual retail box includes original foam inserts.</li>
+                      </ul>
+                    </section>
+
+                    {/* Condition Detailed */}
+                    <section className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                      <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">Condition Report</div>
+                      <p className="text-sm text-slate-700 font-medium">Excellent Vintage Condition</p>
+                      <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                        The unit has been visual-inspected for capacitor leakage and port oxidation. The keyboard is responsive 
+                        with no sticking keys. The box shows minor corner softening consistent with 40 years of storage.
+                      </p>
+                    </section>
+
+                    {/* Shipping Logic */}
+                    <section>
+                      <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-3">Logistics & Trust</div>
+                      <div className="flex items-center gap-4 text-sm text-slate-600">
+                        <div className="flex-1 p-4 bg-blue-50/50 rounded-xl border border-blue-100 italic">
+                          "Packed with heavy-duty bubble wrap and double-boxed to ensure safe arrival."
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Spacer for bottom fade */}
+                    <div className="h-10"></div>
                   </div>
-                  <pre className="leading-relaxed whitespace-pre-wrap">
-                    {rawHtml}
-                  </pre>
-                </div>
-              )}
+                ) : (
+                  <div className="font-mono text-xs sm:text-sm text-indigo-200 animate-in slide-in-from-right-4 duration-300">
+                    <div className="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+                      <span className="text-slate-400 text-[10px] uppercase font-bold tracking-widest text-[#1E293B]">Professional HTML Output</span>
+                      <button 
+                        onClick={handleCopy}
+                        className="text-white bg-blue-600 px-4 py-1.5 rounded-lg text-xs font-sans font-bold hover:bg-blue-500 transition min-w-[100px]"
+                      >
+                        {copyStatus}
+                      </button>
+                    </div>
+                    <pre className="text-slate-800 leading-relaxed whitespace-pre-wrap bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                      {rawHtml}
+                    </pre>
+                  </div>
+                )}
+              </div>
+              
+              {/* Bottom Fade Effect to indicate more content */}
+              <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+              
+              {/* Floating "Scroll to Explore" Hint */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-white border border-slate-200 rounded-full shadow-lg text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <span>Scroll to see more</span>
+                <span className="animate-bounce">↓</span>
+              </div>
             </div>
           </div>
         </div>
