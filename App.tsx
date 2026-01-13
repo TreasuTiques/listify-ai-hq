@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -11,6 +10,9 @@ import BrandGuide from './pages/BrandGuide';
 import VisionPage from './pages/VisionPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
+
+// ✅ NEW: Chat Widget
+import ChatWidget from './components/ChatWidget';
 
 const App: React.FC = () => {
   const [currentPath, setCurrentPath] = useState<string>(window.location.hash || '/');
@@ -56,10 +58,15 @@ const App: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar onNavigate={navigate} />
+
       <main className="flex-grow">
         {renderContent()}
       </main>
+
       <Footer onNavigate={navigate} />
+
+      {/* ✅ Chat agent lives globally across all pages */}
+      <ChatWidget />
     </div>
   );
 };
