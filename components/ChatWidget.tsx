@@ -26,18 +26,16 @@ type ResellerMemory = {
   pricingTouches?: number;
 };
 
-/* ---------------- SUGGESTIONS ---------------- */
+/* ---------------- NAVIGATION ---------------- */
 
-const suggestionsByPage: Record<Page, { label: string; message: string }[]> = {
-  homepage: [
-    { label: "What does this do?", message: "What does this actually do?" },
-    { label: "Is this for resellers?", message: "Is this built for resellers like me?" },
-    { label: "How is it different?", message: "How is this different from writing it myself?" },
-    { label: "Best first test?", message: "What’s the best way to test this on a real item?" },
-  ],
-  builder: [],
-  pricing: [],
-};
+function navigateTo(dest: "builder" | "pricing") {
+  if (dest === "builder") {
+    window.location.href = "https://www.listifyaihq.com/#/builder";
+  }
+  if (dest === "pricing") {
+    window.location.href = "https://www.listifyaihq.com/#/pricing";
+  }
+}
 
 /* ---------------- HELPERS ---------------- */
 
@@ -51,12 +49,19 @@ function inferPage(pathname: string): Page {
 function detectIntent(message: string): ChatIntent {
   const t = message.toLowerCase();
 
-  if (t.includes("price") || t.includes("pricing") || t.includes("worth") || t.includes("cost"))
+  if (
+    t.includes("price") ||
+    t.includes("pricing") ||
+    t.includes("worth") ||
+    t.includes("cost")
+  )
     return "PRICING_CONCERN";
+
   if (t.includes("what does")) return "WHAT_IT_DOES";
   if (t.includes("for resellers") || t.includes("like me")) return "IS_FOR_ME";
   if (t.includes("different")) return "HOW_DIFFERENT";
-  if (t.includes("best") || t.includes("test")) return "BEST_FIRST_TEST";
+  if (t.includes("best") || t.includes("test") || t.includes("try one"))
+    return "BEST_FIRST_TEST";
 
   return "JUST_BROWSING";
 }
@@ -103,7 +108,8 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
-      content: "Yo — I’m your reseller buddy. Want to test this with a real item you’re listing today?",
+      content:
+        "Yo — I’m your reseller buddy. Want to test this with a real item you’re listing today?",
     },
   ]);
 
@@ -116,7 +122,10 @@ export default function ChatWidget() {
 
   useEffect(() => {
     if (!open) return;
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+    listRef.current?.scrollTo({
+      top: listRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages, open]);
 
   function send(text: string) {
@@ -134,6 +143,7 @@ export default function ChatWidget() {
 
     if (t.includes("batch") || t.includes("storage")) {
       nextMemory.listingVolume = "MEDIUM";
+      nextMemory.sellerType = "PART_TIME";
     }
 
     setMemory(nextMemory);
@@ -151,7 +161,7 @@ export default function ChatWidget() {
     }, 300);
   }
 
-  const showPricingActions = memory.pricingTouches! >= 2;
+  const showPricingActions = (memory.pricingTouches ?? 0) >= 2;
 
   return (
     <div className="fixed bottom-4 right-4 z-[60]">
@@ -171,12 +181,17 @@ export default function ChatWidget() {
             <button onClick={() => setOpen(false)}>✕</button>
           </div>
 
-          <div ref={listRef} className="flex-1 overflow-auto px-4 py-4 space-y-3">
+          <div
+            ref={listRef}
+            className="flex-1 overflow-auto px-4 py-4 space-y-3"
+          >
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : ""}`}>
                 <div
                   className={`rounded-2xl px-4 py-2 text-sm max-w-[85%] ${
-                    m.role === "user" ? "bg-[#2563EB] text-white" : "bg-slate-100"
+                    m.role === "user"
+                      ? "bg-[#2563EB] text-white"
+                      : "bg-slate-100"
                   }`}
                 >
                   {m.content}
@@ -187,13 +202,13 @@ export default function ChatWidget() {
             {showPricingActions && (
               <div className="flex gap-2">
                 <button
-                  onClick={() => (window.location.href = "/builder")}
+                  onClick={() => navigateTo("builder")}
                   className="flex-1 border rounded-xl px-3 py-2 text-sm font-bold"
                 >
                   Try one item now
                 </button>
                 <button
-                  onClick={() => (window.location.href = "/pricing")}
+                  onClick={() => navigateTo("pricing")}
                   className="flex-1 bg-[#2563EB] text-white rounded-xl px-3 py-2 text-sm font-bold"
                 >
                   See pricing
