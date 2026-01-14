@@ -53,31 +53,60 @@ function detectIntent(message: string): ChatIntent {
   return "JUST_BROWSING";
 }
 
+/* ---------------- SILENT CONVERSION REPLIES ---------------- */
+
 function getReply(intent: ChatIntent, page: Page): string {
   switch (intent) {
     case "WHAT_IT_DOES":
-      return "Quick version: you drop photos in, I kick out a clean title + HTML you can paste straight into eBay. No fluff, no fixing formatting. Want to try it on one item you already photographed?";
+      return (
+        "Quick breakdown: you drop photos in, I generate a clean title and HTML you can paste straight into eBay.\n\n" +
+        "Most sellers test it on one item they already photographed and compare the results."
+      );
 
     case "IS_FOR_ME":
-      return "If you list from thrift, storage units, estate sales, or death piles — yeah, this is for you. It’s built for speed and batching, not perfect studio listings.";
+      return (
+        "If you list thrift, storage units, estate sales, or random finds — yeah, this was built for you.\n\n" +
+        "It’s about speed and batching, not perfect studio listings."
+      );
 
     case "HOW_DIFFERENT":
-      return "Most tools write words. This builds listings the way resellers actually post them: structured, readable, and fast to paste. It’s about saving time, not sounding fancy.";
+      return (
+        "Most tools just write paragraphs.\n\n" +
+        "This builds listings the way resellers actually post them: structured sections, readable, and fast to paste."
+      );
 
     case "BEST_FIRST_TEST":
-      return "Best test? Grab one item you already listed. Upload 4–6 photos here, generate a new listing, and compare. Most people notice the speed immediately.";
+      return (
+        "Best first test: grab one item you already have photos for.\n\n" +
+        "Upload 4–6 photos, generate a listing, and compare it to your current one. That’s usually the ‘ohh okay’ moment."
+      );
 
     case "PRICING_CONCERN":
-      return "Totally fair question. Most sellers make it worth it just by listing faster. Quick gut check — how many items do you usually list in a week?";
+      return (
+        "Totally fair to ask.\n\n" +
+        "Most sellers decide after testing one real item and seeing how much time it saves.\n\n" +
+        "Out of curiosity — about how many items do you list in a typical week?"
+      );
 
     default:
       if (page === "builder") {
-        return "You’re in the right spot. Upload photos, don’t overthink it, and let’s see what comes out. Want a quick photo checklist?";
+        return (
+          "You’re in the right spot.\n\n" +
+          "Don’t overthink it — clear photos in, let the tool do the heavy lifting."
+        );
       }
+
       if (page === "pricing") {
-        return "Before picking a plan, it helps to know your listing pace. Are you listing a few items a week or batching bigger hauls?";
+        return (
+          "No rush here.\n\n" +
+          "A lot of people land on a plan after they see how fast one listing comes together."
+        );
       }
-      return "No rush at all. What kind of items are you usually listing?";
+
+      return (
+        "All good — happy to help.\n\n" +
+        "What kind of items are you usually listing?"
+      );
   }
 }
 
@@ -108,7 +137,7 @@ export default function ChatWidget() {
 
   const suggestions = useMemo(() => suggestionsByPage[page], [page]);
 
-  async function send(text: string) {
+  function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
