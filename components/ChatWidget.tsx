@@ -13,9 +13,16 @@ type ChatIntent =
 type Page = "homepage" | "builder" | "pricing";
 type Msg = { role: "user" | "assistant"; content: string };
 
+type ConversationStage =
+  | "INTRO"
+  | "QUALIFIED"
+  | "READY_TO_TEST"
+  | "PRICING_AWARE";
+
 type ResellerMemory = {
   listingVolume?: "LOW" | "MEDIUM" | "HIGH";
   sellerType?: "CASUAL" | "PART_TIME" | "FULL_TIME";
+  stage?: ConversationStage;
 };
 
 /* ---------------- SUGGESTIONS ---------------- */
@@ -63,9 +70,15 @@ function detectIntent(message: string): ChatIntent {
   return "JUST_BROWSING";
 }
 
-/* ---------------- REPLIES ---------------- */
+/* ---------------- REPLIES (STAGE-AWARE) ---------------- */
 
 function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
+  const stage = memory.stage ?? "INTRO";
+
+  if (stage === "QUALIFIED" && intent === "JUST_BROWSING") {
+    return "Got it. Since you’re already listing regularly, the fastest win is testing one real item. Want to try that now or check pricing?";
+  }
+
   switch (intent) {
     case "WHAT_IT_DOES":
       return "Photos in → clean title + HTML out. Paste straight into eBay. Most sellers test it on one item they already photographed.";
@@ -81,22 +94,22 @@ function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): strin
 
     case "PRICING_CONCERN":
       if (memory.listingVolume === "LOW") {
-        return "If you’re listing weekends or casually, most people just test one item first and see if it saves time.";
+        return "If you’re listing weekends or casually, most people test one item first and see if it saves time.";
       }
       if (memory.listingVolume === "MEDIUM") {
         return "For batch sellers, speed usually pays for itself pretty quick. Listing faster is the real win.";
       }
       if (memory.listingVolume === "HIGH") {
-        return "At high volume, time saved per listing adds up fast. That’s where most full-timers feel it.";
+        return "At high volume, time saved per listing adds up fast. That’s where full-timers really feel it.";
       }
-      return "Pricing really clicks after you test one real item. Want to try that first or see plans?";
+      return "Most people decide after testing one real item. Want to try that first or see plans?";
 
     default:
       if (page === "builder") {
         return "You’re in the right spot. Clear photos in, don’t overthink it, let the tool do the heavy lifting.";
       }
       if (page === "pricing") {
-        return "Before picking a plan, it helps to know your pace. Are you listing a few items or batching hauls?";
+        return "Since you already know your pace, pricing is just about how much time you want back.";
       }
       return "All good. What kind of items are you usually listing?";
   }
@@ -108,7 +121,7 @@ export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState<Page>("homepage");
   const [loading, setLoading] = useState(false);
-  const [memory, setMemory] = useState<ResellerMemory>({});
+  const [memory, setMemory] = useState<ResellerMemory>({ stage: "INTRO" });
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
@@ -133,21 +146,29 @@ export default function ChatWidget() {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
-    // build next memory synchronously
-    const nextMemory: ResellerMemory = { ...memory };
     const t = trimmed.toLowerCase();
+    const nextMemory: ResellerMemory = { ...memory };
 
     if (t.includes("weekend") || t.includes("casual")) {
       nextMemory.sellerType = "CASUAL";
       nextMemory.listingVolume = "LOW";
+      nextMemory.stage = "QUALIFIED";
     }
+
     if (t.includes("batch") || t.includes("storage") || t.includes("estate")) {
       nextMemory.sellerType = "PART_TIME";
       nextMemory.listingVolume = "MEDIUM";
+      nextMemory.stage = "QUALIFIED";
     }
+
     if (t.includes("full time") || t.includes("daily") || t.includes("hundreds")) {
       nextMemory.sellerType = "FULL_TIME";
       nextMemory.listingVolume = "HIGH";
+      nextMemory.stage = "QUALIFIED";
+    }
+
+    if (detectIntent(trimmed) === "PRICING_CONCERN") {
+      nextMemory.stage = "PRICING_AWARE";
     }
 
     setMemory(nextMemory);
