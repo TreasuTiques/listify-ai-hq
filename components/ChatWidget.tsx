@@ -23,7 +23,7 @@ type ResellerMemory = {
   listingVolume?: "LOW" | "MEDIUM" | "HIGH";
   sellerType?: "CASUAL" | "PART_TIME" | "FULL_TIME";
   stage?: ConversationStage;
-  pricingTouches?: number; // 👈 NEW (Step 3.3)
+  pricingTouches?: number;
 };
 
 /* ---------------- SUGGESTIONS ---------------- */
@@ -71,29 +71,22 @@ function detectIntent(message: string): ChatIntent {
   return "JUST_BROWSING";
 }
 
-/* ---------------- REPLIES (ESCALATION-AWARE) ---------------- */
+/* ---------------- REPLIES (3.4 ESCALATION) ---------------- */
 
 function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
-  const pricingTouches = memory.pricingTouches ?? 0;
+  const touches = memory.pricingTouches ?? 0;
 
   if (intent === "PRICING_CONCERN") {
-    if (pricingTouches >= 2) {
+    if (touches === 1) {
+      return "Most people decide after testing one real item. Want to try that first or see plans?";
+    }
+
+    if (touches === 2) {
       return "Got it — sounds like pricing matters to you. Want me to show you the plans or help you test one item first?";
     }
 
-    if (memory.listingVolume === "LOW") {
-      return "If you’re listing weekends or casually, most people test one item first and see if it saves time.";
-    }
-
-    if (memory.listingVolume === "MEDIUM") {
-      return "For batch sellers, speed usually pays for itself pretty quick. Listing faster is the real win.";
-    }
-
-    if (memory.listingVolume === "HIGH") {
-      return "At high volume, time saved per listing adds up fast. That’s where full-timers really feel it.";
-    }
-
-    return "Most people decide after testing one real item. Want to try that first or see plans?";
+    // 🔥 3rd+ pricing touch → stop repeating, push action
+    return "Totally fair. At this point the fastest answer is either seeing the plans or testing one item. What do you want to do?";
   }
 
   switch (intent) {
@@ -160,7 +153,7 @@ export default function ChatWidget() {
     const t = trimmed.toLowerCase();
     const nextMemory: ResellerMemory = { ...memory };
 
-    // 🔹 Seller profiling
+    // Seller profiling
     if (t.includes("weekend") || t.includes("casual")) {
       nextMemory.sellerType = "CASUAL";
       nextMemory.listingVolume = "LOW";
@@ -176,7 +169,7 @@ export default function ChatWidget() {
       nextMemory.listingVolume = "HIGH";
     }
 
-    // 🔹 Pricing escalation (Step 3.3)
+    // Pricing escalation counter
     if (intent === "PRICING_CONCERN") {
       nextMemory.pricingTouches = (nextMemory.pricingTouches ?? 0) + 1;
       nextMemory.stage = "PRICING_AWARE";
