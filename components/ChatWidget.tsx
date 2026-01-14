@@ -35,18 +35,8 @@ const suggestionsByPage: Record<Page, { label: string; message: string }[]> = {
     { label: "How is it different?", message: "How is this different from writing it myself?" },
     { label: "Best first test?", message: "What’s the best way to test this on a real item?" },
   ],
-  builder: [
-    { label: "Photo tips", message: "What makes a good photo for best results?" },
-    { label: "Paste into eBay?", message: "Can I paste the output directly into eBay?" },
-    { label: "Titles help", message: "How do you build good eBay titles?" },
-    { label: "Batch workflow", message: "What’s the fastest workflow to list 20 items?" },
-  ],
-  pricing: [
-    { label: "Which plan fits me?", message: "Which plan fits my listing volume?" },
-    { label: "Worth it part-time?", message: "Is this worth it if I only list weekends?" },
-    { label: "What do I get?", message: "What exactly changes between plans?" },
-    { label: "Cancel anytime?", message: "Can I cancel anytime?" },
-  ],
+  builder: [],
+  pricing: [],
 };
 
 /* ---------------- HELPERS ---------------- */
@@ -71,46 +61,30 @@ function detectIntent(message: string): ChatIntent {
   return "JUST_BROWSING";
 }
 
-/* ---------------- REPLIES (3.4 ESCALATION) ---------------- */
+/* ---------------- REPLIES ---------------- */
 
-function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
-  const touches = memory.pricingTouches ?? 0;
-
-  if (intent === "PRICING_CONCERN") {
-    if (touches === 1) {
-      return "Most people decide after testing one real item. Want to try that first or see plans?";
-    }
-
-    if (touches === 2) {
-      return "Got it — sounds like pricing matters to you. Want me to show you the plans or help you test one item first?";
-    }
-
-    // 🔥 3rd+ pricing touch → stop repeating, push action
-    return "Totally fair. At this point the fastest answer is either seeing the plans or testing one item. What do you want to do?";
+function getReply(intent: ChatIntent, memory: ResellerMemory): string {
+  if (intent === "PRICING_CONCERN" && (memory.pricingTouches ?? 0) >= 2) {
+    return "Got it — sounds like pricing matters to you. Want me to show you the plans or help you test one item first?";
   }
 
   switch (intent) {
     case "WHAT_IT_DOES":
-      return "Photos in → clean title + HTML out. Paste straight into eBay. Most sellers test it on one item they already photographed.";
+      return "Photos in → clean title + HTML out. Paste straight into eBay.";
 
     case "IS_FOR_ME":
-      return "If you list thrift, storage units, estate sales, or random finds — yeah, this was built for you. Speed and batching over perfection.";
+      return "If you list thrift, storage units, or estate sales — yeah, this was built for you.";
 
     case "HOW_DIFFERENT":
-      return "This doesn’t just write words. It builds listings the way resellers actually post them: structured, readable, fast to paste.";
+      return "This builds listings the way resellers actually post them. Structured and fast.";
 
     case "BEST_FIRST_TEST":
-      return "Best test: grab one item you already have photos for. Upload 4–6 photos, generate a listing, and compare side-by-side.";
+      return "Best test: upload 4–6 photos from an item you already have.";
+
+    case "PRICING_CONCERN":
+      return "Most people decide after testing one real item. Want to try that or see plans?";
 
     default:
-      if (page === "builder") {
-        return "You’re in the right spot. Clear photos in, don’t overthink it, let the tool do the heavy lifting.";
-      }
-
-      if (page === "pricing") {
-        return "Since you already know your pace, pricing is just about how much time you want back.";
-      }
-
       return "All good. What kind of items are you usually listing?";
   }
 }
@@ -125,12 +99,14 @@ export default function ChatWidget() {
     stage: "INTRO",
     pricingTouches: 0,
   });
+
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
       content: "Yo — I’m your reseller buddy. Want to test this with a real item you’re listing today?",
     },
   ]);
+
   const [input, setInput] = useState("");
   const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -143,41 +119,26 @@ export default function ChatWidget() {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, open]);
 
-  const suggestions = useMemo(() => suggestionsByPage[page], [page]);
-
   function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
     const intent = detectIntent(trimmed);
     const t = trimmed.toLowerCase();
-    const nextMemory: ResellerMemory = { ...memory };
+    const nextMemory = { ...memory };
 
-    // Seller profiling
-    if (t.includes("weekend") || t.includes("casual")) {
-      nextMemory.sellerType = "CASUAL";
-      nextMemory.listingVolume = "LOW";
-    }
-
-    if (t.includes("batch") || t.includes("storage") || t.includes("estate")) {
-      nextMemory.sellerType = "PART_TIME";
-      nextMemory.listingVolume = "MEDIUM";
-    }
-
-    if (t.includes("full time") || t.includes("daily") || t.includes("hundreds")) {
-      nextMemory.sellerType = "FULL_TIME";
-      nextMemory.listingVolume = "HIGH";
-    }
-
-    // Pricing escalation counter
     if (intent === "PRICING_CONCERN") {
       nextMemory.pricingTouches = (nextMemory.pricingTouches ?? 0) + 1;
       nextMemory.stage = "PRICING_AWARE";
     }
 
+    if (t.includes("batch") || t.includes("storage")) {
+      nextMemory.listingVolume = "MEDIUM";
+    }
+
     setMemory(nextMemory);
 
-    const reply = getReply(intent, page, nextMemory);
+    const reply = getReply(intent, nextMemory);
 
     const nextMsgs = [...messages, { role: "user", content: trimmed }];
     setMessages(nextMsgs);
@@ -187,42 +148,27 @@ export default function ChatWidget() {
     setTimeout(() => {
       setMessages([...nextMsgs, { role: "assistant", content: reply }]);
       setLoading(false);
-    }, 350);
+    }, 300);
   }
+
+  const showPricingActions = memory.pricingTouches! >= 2;
 
   return (
     <div className="fixed bottom-4 right-4 z-[60]">
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="rounded-full bg-[#2563EB] text-white px-5 py-3 shadow-xl font-bold hover:bg-blue-700 transition"
+          className="rounded-full bg-[#2563EB] text-white px-5 py-3 shadow-xl font-bold"
         >
           Chat
         </button>
       )}
 
       {open && (
-        <div className="w-[92vw] sm:w-[420px] h-[70vh] sm:h-[560px] bg-white border border-slate-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
-          <div className="px-4 py-3 border-b flex justify-between items-center">
-            <div>
-              <div className="font-bold">Reseller Buddy</div>
-              <div className="text-xs text-slate-500">Page: {page}</div>
-            </div>
+        <div className="w-[420px] h-[560px] bg-white border rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+          <div className="px-4 py-3 border-b flex justify-between">
+            <div className="font-bold">Reseller Buddy</div>
             <button onClick={() => setOpen(false)}>✕</button>
-          </div>
-
-          <div className="px-4 py-3 bg-slate-50 border-b">
-            <div className="flex gap-2 flex-wrap">
-              {suggestions.map((s) => (
-                <button
-                  key={s.label}
-                  onClick={() => send(s.message)}
-                  className="text-xs px-3 py-1.5 rounded-full border bg-white"
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
           </div>
 
           <div ref={listRef} className="flex-1 overflow-auto px-4 py-4 space-y-3">
@@ -237,6 +183,24 @@ export default function ChatWidget() {
                 </div>
               </div>
             ))}
+
+            {showPricingActions && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => (window.location.href = "/builder")}
+                  className="flex-1 border rounded-xl px-3 py-2 text-sm font-bold"
+                >
+                  Try one item now
+                </button>
+                <button
+                  onClick={() => (window.location.href = "/pricing")}
+                  className="flex-1 bg-[#2563EB] text-white rounded-xl px-3 py-2 text-sm font-bold"
+                >
+                  See pricing
+                </button>
+              </div>
+            )}
+
             {loading && <div className="text-sm text-slate-400">Typing…</div>}
           </div>
 
@@ -253,10 +217,7 @@ export default function ChatWidget() {
               placeholder="Ask me anything…"
               className="flex-1 border rounded-xl px-3 py-2 text-sm"
             />
-            <button
-              disabled={loading}
-              className="bg-[#2563EB] text-white px-4 py-2 rounded-xl font-bold"
-            >
+            <button className="bg-[#2563EB] text-white px-4 py-2 rounded-xl font-bold">
               Send
             </button>
           </form>
