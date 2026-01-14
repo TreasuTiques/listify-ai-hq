@@ -11,17 +11,7 @@ type ChatIntent =
   | "JUST_BROWSING";
 
 type Page = "homepage" | "builder" | "pricing";
-
-type CTAOption = {
-  label: string;
-  action: "TRY_TEST" | "VIEW_PRICING";
-};
-
-type Msg = {
-  role: "user" | "assistant";
-  content: string;
-  ctas?: CTAOption[];
-};
+type Msg = { role: "user" | "assistant"; content: string };
 
 type ConversationStage =
   | "INTRO"
@@ -33,6 +23,7 @@ type ResellerMemory = {
   listingVolume?: "LOW" | "MEDIUM" | "HIGH";
   sellerType?: "CASUAL" | "PART_TIME" | "FULL_TIME";
   stage?: ConversationStage;
+  pricingTouches?: number; // 👈 NEW (Step 3.3)
 };
 
 /* ---------------- SUGGESTIONS ---------------- */
@@ -80,26 +71,31 @@ function detectIntent(message: string): ChatIntent {
   return "JUST_BROWSING";
 }
 
-/* ---------------- CTA LOGIC ---------------- */
-
-function getCTAs(intent: ChatIntent, memory: ResellerMemory): CTAOption[] {
-  if (intent === "PRICING_CONCERN" || memory.stage === "QUALIFIED") {
-    return [
-      { label: "Try one item now", action: "TRY_TEST" },
-      { label: "See pricing", action: "VIEW_PRICING" },
-    ];
-  }
-
-  if (intent === "BEST_FIRST_TEST") {
-    return [{ label: "Try one item now", action: "TRY_TEST" }];
-  }
-
-  return [];
-}
-
-/* ---------------- REPLIES ---------------- */
+/* ---------------- REPLIES (ESCALATION-AWARE) ---------------- */
 
 function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
+  const pricingTouches = memory.pricingTouches ?? 0;
+
+  if (intent === "PRICING_CONCERN") {
+    if (pricingTouches >= 2) {
+      return "Got it — sounds like pricing matters to you. Want me to show you the plans or help you test one item first?";
+    }
+
+    if (memory.listingVolume === "LOW") {
+      return "If you’re listing weekends or casually, most people test one item first and see if it saves time.";
+    }
+
+    if (memory.listingVolume === "MEDIUM") {
+      return "For batch sellers, speed usually pays for itself pretty quick. Listing faster is the real win.";
+    }
+
+    if (memory.listingVolume === "HIGH") {
+      return "At high volume, time saved per listing adds up fast. That’s where full-timers really feel it.";
+    }
+
+    return "Most people decide after testing one real item. Want to try that first or see plans?";
+  }
+
   switch (intent) {
     case "WHAT_IT_DOES":
       return "Photos in → clean title + HTML out. Paste straight into eBay. Most sellers test it on one item they already photographed.";
@@ -113,25 +109,15 @@ function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): strin
     case "BEST_FIRST_TEST":
       return "Best test: grab one item you already have photos for. Upload 4–6 photos, generate a listing, and compare side-by-side.";
 
-    case "PRICING_CONCERN":
-      if (memory.listingVolume === "LOW") {
-        return "If you’re listing weekends or casually, most people test one item first and see if it saves time.";
-      }
-      if (memory.listingVolume === "MEDIUM") {
-        return "For batch sellers, speed usually pays for itself pretty quick. Listing faster is the real win.";
-      }
-      if (memory.listingVolume === "HIGH") {
-        return "At high volume, time saved per listing adds up fast. That’s where full-timers really feel it.";
-      }
-      return "Most people decide after testing one real item. Want to try that first or see plans?";
-
     default:
       if (page === "builder") {
         return "You’re in the right spot. Clear photos in, don’t overthink it, let the tool do the heavy lifting.";
       }
+
       if (page === "pricing") {
         return "Since you already know your pace, pricing is just about how much time you want back.";
       }
+
       return "All good. What kind of items are you usually listing?";
   }
 }
@@ -142,7 +128,10 @@ export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState<Page>("homepage");
   const [loading, setLoading] = useState(false);
-  const [memory, setMemory] = useState<ResellerMemory>({ stage: "INTRO" });
+  const [memory, setMemory] = useState<ResellerMemory>({
+    stage: "INTRO",
+    pricingTouches: 0,
+  });
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
@@ -167,36 +156,35 @@ export default function ChatWidget() {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
+    const intent = detectIntent(trimmed);
     const t = trimmed.toLowerCase();
     const nextMemory: ResellerMemory = { ...memory };
 
+    // 🔹 Seller profiling
     if (t.includes("weekend") || t.includes("casual")) {
       nextMemory.sellerType = "CASUAL";
       nextMemory.listingVolume = "LOW";
-      nextMemory.stage = "QUALIFIED";
     }
 
     if (t.includes("batch") || t.includes("storage") || t.includes("estate")) {
       nextMemory.sellerType = "PART_TIME";
       nextMemory.listingVolume = "MEDIUM";
-      nextMemory.stage = "QUALIFIED";
     }
 
     if (t.includes("full time") || t.includes("daily") || t.includes("hundreds")) {
       nextMemory.sellerType = "FULL_TIME";
       nextMemory.listingVolume = "HIGH";
-      nextMemory.stage = "QUALIFIED";
     }
 
-    if (detectIntent(trimmed) === "PRICING_CONCERN") {
+    // 🔹 Pricing escalation (Step 3.3)
+    if (intent === "PRICING_CONCERN") {
+      nextMemory.pricingTouches = (nextMemory.pricingTouches ?? 0) + 1;
       nextMemory.stage = "PRICING_AWARE";
     }
 
     setMemory(nextMemory);
 
-    const intent = detectIntent(trimmed);
     const reply = getReply(intent, page, nextMemory);
-    const ctas = getCTAs(intent, nextMemory);
 
     const nextMsgs = [...messages, { role: "user", content: trimmed }];
     setMessages(nextMsgs);
@@ -204,10 +192,7 @@ export default function ChatWidget() {
     setLoading(true);
 
     setTimeout(() => {
-      setMessages([
-        ...nextMsgs,
-        { role: "assistant", content: reply, ctas },
-      ]);
+      setMessages([...nextMsgs, { role: "assistant", content: reply }]);
       setLoading(false);
     }, 350);
   }
@@ -249,41 +234,16 @@ export default function ChatWidget() {
 
           <div ref={listRef} className="flex-1 overflow-auto px-4 py-4 space-y-3">
             {messages.map((m, i) => (
-              <div key={i}>
-                <div className={`flex ${m.role === "user" ? "justify-end" : ""}`}>
-                  <div
-                    className={`rounded-2xl px-4 py-2 text-sm max-w-[85%] ${
-                      m.role === "user"
-                        ? "bg-[#2563EB] text-white"
-                        : "bg-slate-100"
-                    }`}
-                  >
-                    {m.content}
-                  </div>
+              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : ""}`}>
+                <div
+                  className={`rounded-2xl px-4 py-2 text-sm max-w-[85%] ${
+                    m.role === "user" ? "bg-[#2563EB] text-white" : "bg-slate-100"
+                  }`}
+                >
+                  {m.content}
                 </div>
-
-                {m.role === "assistant" && m.ctas && m.ctas.length > 0 && (
-                  <div className="flex gap-2 mt-2">
-                    {m.ctas.map((cta) => (
-                      <button
-                        key={cta.action}
-                        onClick={() =>
-                          send(
-                            cta.action === "TRY_TEST"
-                              ? "I want to try one item"
-                              : "Show me pricing"
-                          )
-                        }
-                        className="text-xs px-3 py-1.5 rounded-full border bg-white hover:bg-slate-100"
-                      >
-                        {cta.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             ))}
-
             {loading && <div className="text-sm text-slate-400">Typing…</div>}
           </div>
 
