@@ -1,3 +1,4 @@
+import { chatSuggestions } from '../services/chat/suggestions';
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 type Page = "homepage" | "builder" | "pricing";
