@@ -11,7 +11,17 @@ type ChatIntent =
   | "JUST_BROWSING";
 
 type Page = "homepage" | "builder" | "pricing";
-type Msg = { role: "user" | "assistant"; content: string };
+
+type CTAOption = {
+  label: string;
+  action: "TRY_TEST" | "VIEW_PRICING";
+};
+
+type Msg = {
+  role: "user" | "assistant";
+  content: string;
+  ctas?: CTAOption[];
+};
 
 type ConversationStage =
   | "INTRO"
@@ -70,15 +80,26 @@ function detectIntent(message: string): ChatIntent {
   return "JUST_BROWSING";
 }
 
-/* ---------------- REPLIES (STAGE-AWARE) ---------------- */
+/* ---------------- CTA LOGIC ---------------- */
 
-function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
-  const stage = memory.stage ?? "INTRO";
-
-  if (stage === "QUALIFIED" && intent === "JUST_BROWSING") {
-    return "Got it. Since you’re already listing regularly, the fastest win is testing one real item. Want to try that now or check pricing?";
+function getCTAs(intent: ChatIntent, memory: ResellerMemory): CTAOption[] {
+  if (intent === "PRICING_CONCERN" || memory.stage === "QUALIFIED") {
+    return [
+      { label: "Try one item now", action: "TRY_TEST" },
+      { label: "See pricing", action: "VIEW_PRICING" },
+    ];
   }
 
+  if (intent === "BEST_FIRST_TEST") {
+    return [{ label: "Try one item now", action: "TRY_TEST" }];
+  }
+
+  return [];
+}
+
+/* ---------------- REPLIES ---------------- */
+
+function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
   switch (intent) {
     case "WHAT_IT_DOES":
       return "Photos in → clean title + HTML out. Paste straight into eBay. Most sellers test it on one item they already photographed.";
@@ -175,6 +196,7 @@ export default function ChatWidget() {
 
     const intent = detectIntent(trimmed);
     const reply = getReply(intent, page, nextMemory);
+    const ctas = getCTAs(intent, nextMemory);
 
     const nextMsgs = [...messages, { role: "user", content: trimmed }];
     setMessages(nextMsgs);
@@ -182,7 +204,10 @@ export default function ChatWidget() {
     setLoading(true);
 
     setTimeout(() => {
-      setMessages([...nextMsgs, { role: "assistant", content: reply }]);
+      setMessages([
+        ...nextMsgs,
+        { role: "assistant", content: reply, ctas },
+      ]);
       setLoading(false);
     }, 350);
   }
@@ -224,16 +249,41 @@ export default function ChatWidget() {
 
           <div ref={listRef} className="flex-1 overflow-auto px-4 py-4 space-y-3">
             {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : ""}`}>
-                <div
-                  className={`rounded-2xl px-4 py-2 text-sm max-w-[85%] ${
-                    m.role === "user" ? "bg-[#2563EB] text-white" : "bg-slate-100"
-                  }`}
-                >
-                  {m.content}
+              <div key={i}>
+                <div className={`flex ${m.role === "user" ? "justify-end" : ""}`}>
+                  <div
+                    className={`rounded-2xl px-4 py-2 text-sm max-w-[85%] ${
+                      m.role === "user"
+                        ? "bg-[#2563EB] text-white"
+                        : "bg-slate-100"
+                    }`}
+                  >
+                    {m.content}
+                  </div>
                 </div>
+
+                {m.role === "assistant" && m.ctas && m.ctas.length > 0 && (
+                  <div className="flex gap-2 mt-2">
+                    {m.ctas.map((cta) => (
+                      <button
+                        key={cta.action}
+                        onClick={() =>
+                          send(
+                            cta.action === "TRY_TEST"
+                              ? "I want to try one item"
+                              : "Show me pricing"
+                          )
+                        }
+                        className="text-xs px-3 py-1.5 rounded-full border bg-white hover:bg-slate-100"
+                      >
+                        {cta.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
+
             {loading && <div className="text-sm text-slate-400">Typing…</div>}
           </div>
 
