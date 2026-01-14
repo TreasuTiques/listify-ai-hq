@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
+/* ---------------- TYPES ---------------- */
+
 type ChatIntent =
   | "WHAT_IT_DOES"
   | "IS_FOR_ME"
@@ -10,6 +12,13 @@ type ChatIntent =
 
 type Page = "homepage" | "builder" | "pricing";
 type Msg = { role: "user" | "assistant"; content: string };
+
+type ResellerMemory = {
+  listingVolume?: "LOW" | "MEDIUM" | "HIGH";
+  sellerType?: "CASUAL" | "PART_TIME" | "FULL_TIME";
+};
+
+/* ---------------- SUGGESTIONS ---------------- */
 
 const suggestionsByPage: Record<Page, { label: string; message: string }[]> = {
   homepage: [
@@ -32,14 +41,14 @@ const suggestionsByPage: Record<Page, { label: string; message: string }[]> = {
   ],
 };
 
+/* ---------------- HELPERS ---------------- */
+
 function inferPage(pathname: string): Page {
   const p = pathname.toLowerCase();
   if (p.includes("builder")) return "builder";
   if (p.includes("pricing")) return "pricing";
   return "homepage";
 }
-
-/* ---------------- INTENT LOGIC ---------------- */
 
 function detectIntent(message: string): ChatIntent {
   const t = message.toLowerCase();
@@ -53,9 +62,9 @@ function detectIntent(message: string): ChatIntent {
   return "JUST_BROWSING";
 }
 
-/* ---------------- SILENT CONVERSION REPLIES ---------------- */
+/* ---------------- REPLIES (NOW MEMORY-AWARE) ---------------- */
 
-function getReply(intent: ChatIntent, page: Page): string {
+function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
   switch (intent) {
     case "WHAT_IT_DOES":
       return (
@@ -78,35 +87,39 @@ function getReply(intent: ChatIntent, page: Page): string {
     case "BEST_FIRST_TEST":
       return (
         "Best first test: grab one item you already have photos for.\n\n" +
-        "Upload 4–6 photos, generate a listing, and compare it to your current one. That’s usually the ‘ohh okay’ moment."
+        "Upload 4–6 photos, generate a listing, and compare it to your current one."
       );
 
     case "PRICING_CONCERN":
+      if (memory.listingVolume === "LOW") {
+        return (
+          "Totally fair.\n\n" +
+          "If you’re listing casually or weekends only, most people just test it on one item first and see if it saves time."
+        );
+      }
+
+      if (memory.listingVolume === "HIGH") {
+        return (
+          "At higher volume, speed is usually the win.\n\n" +
+          "Most full-time sellers feel it once they batch a few listings back-to-back."
+        );
+      }
+
       return (
-        "Totally fair to ask.\n\n" +
-        "Most sellers decide after testing one real item and seeing how much time it saves.\n\n" +
-        "Out of curiosity — about how many items do you list in a typical week?"
+        "Good question.\n\n" +
+        "Most sellers decide after testing one real item and seeing how much time it saves."
       );
 
     default:
       if (page === "builder") {
-        return (
-          "You’re in the right spot.\n\n" +
-          "Don’t overthink it — clear photos in, let the tool do the heavy lifting."
-        );
+        return "You’re in the right spot. Upload photos, don’t overthink it, and see what comes out.";
       }
 
       if (page === "pricing") {
-        return (
-          "No rush here.\n\n" +
-          "A lot of people land on a plan after they see how fast one listing comes together."
-        );
+        return "Before picking a plan, it helps to know your listing pace. Are you listing a few items or batching hauls?";
       }
 
-      return (
-        "All good — happy to help.\n\n" +
-        "What kind of items are you usually listing?"
-      );
+      return "All good. What kind of items are you usually listing?";
   }
 }
 
@@ -116,6 +129,7 @@ export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState<Page>("homepage");
   const [loading, setLoading] = useState(false);
+  const [memory, setMemory] = useState<ResellerMemory>({});
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
@@ -141,16 +155,39 @@ export default function ChatWidget() {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
-    const intent = detectIntent(trimmed);
-    const reply = getReply(intent, page);
+    // 🔹 Update reseller memory (silent)
+    setMemory((prev) => {
+      const t = trimmed.toLowerCase();
+      const next = { ...prev };
 
-    const next = [...messages, { role: "user", content: trimmed }];
-    setMessages(next);
+      if (t.includes("weekend") || t.includes("casual")) {
+        next.sellerType = "CASUAL";
+        next.listingVolume = "LOW";
+      }
+
+      if (t.includes("batch") || t.includes("storage") || t.includes("estate")) {
+        next.sellerType = "PART_TIME";
+        next.listingVolume = "MEDIUM";
+      }
+
+      if (t.includes("daily") || t.includes("full time") || t.includes("hundreds")) {
+        next.sellerType = "FULL_TIME";
+        next.listingVolume = "HIGH";
+      }
+
+      return next;
+    });
+
+    const intent = detectIntent(trimmed);
+    const reply = getReply(intent, page, memory);
+
+    const nextMsgs = [...messages, { role: "user", content: trimmed }];
+    setMessages(nextMsgs);
     setInput("");
     setLoading(true);
 
     setTimeout(() => {
-      setMessages([...next, { role: "assistant", content: reply }]);
+      setMessages([...nextMsgs, { role: "assistant", content: reply }]);
       setLoading(false);
     }, 350);
   }
