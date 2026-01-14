@@ -1,5 +1,12 @@
 import { chatSuggestions } from '../services/chat/suggestions';
 import React, { useEffect, useMemo, useRef, useState } from "react";
+type ChatIntent =
+  | 'WHAT_IT_DOES'
+  | 'IS_FOR_ME'
+  | 'HOW_DIFFERENT'
+  | 'BEST_FIRST_TEST'
+  | 'PRICING_CONCERN'
+  | 'JUST_BROWSING';
 
 type Page = "homepage" | "builder" | "pricing";
 type Msg = { role: "user" | "assistant"; content: string };
