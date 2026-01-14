@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 /* ---------------- TYPES ---------------- */
 
@@ -24,6 +24,7 @@ type ResellerMemory = {
   sellerType?: "CASUAL" | "PART_TIME" | "FULL_TIME";
   stage?: ConversationStage;
   pricingTouches?: number;
+  hasSeenPricingCTA?: boolean; // 👈 3.5C
 };
 
 /* ---------------- NAVIGATION ---------------- */
@@ -35,6 +36,36 @@ function navigateTo(dest: "builder" | "pricing") {
   if (dest === "pricing") {
     window.location.href = "https://www.listifyaihq.com/#/pricing";
   }
+}
+
+/* ---------------- ADAPTIVE CTA (3.5B) ---------------- */
+
+function getAdaptiveCTA(memory: ResellerMemory) {
+  if (memory.sellerType === "CASUAL") {
+    return {
+      primary: "Try one item (no commitment)",
+      secondary: "See simple pricing",
+    };
+  }
+
+  if (memory.sellerType === "PART_TIME") {
+    return {
+      primary: "Test a real item now",
+      secondary: "See batch pricing",
+    };
+  }
+
+  if (memory.sellerType === "FULL_TIME") {
+    return {
+      primary: "Run a real listing test",
+      secondary: "View pro pricing",
+    };
+  }
+
+  return {
+    primary: "Try one item now",
+    secondary: "See pricing",
+  };
 }
 
 /* ---------------- HELPERS ---------------- */
@@ -66,11 +97,19 @@ function detectIntent(message: string): ChatIntent {
   return "JUST_BROWSING";
 }
 
-/* ---------------- REPLIES ---------------- */
+/* ---------------- REPLIES (3.5C SAFE) ---------------- */
 
 function getReply(intent: ChatIntent, memory: ResellerMemory): string {
-  if (intent === "PRICING_CONCERN" && (memory.pricingTouches ?? 0) >= 2) {
-    return "Got it — sounds like pricing matters to you. Want me to show you the plans or help you test one item first?";
+  if (intent === "PRICING_CONCERN") {
+    if (memory.hasSeenPricingCTA) {
+      return "You’ve already got the options. Want help testing an item or tightening your workflow?";
+    }
+
+    if ((memory.pricingTouches ?? 0) >= 2) {
+      return "Got it — sounds like pricing matters to you. Want me to show you the plans or help you test one item first?";
+    }
+
+    return "Most people decide after testing one real item. Want to try that or see plans?";
   }
 
   switch (intent) {
@@ -85,9 +124,6 @@ function getReply(intent: ChatIntent, memory: ResellerMemory): string {
 
     case "BEST_FIRST_TEST":
       return "Best test: upload 4–6 photos from an item you already have.";
-
-    case "PRICING_CONCERN":
-      return "Most people decide after testing one real item. Want to try that or see plans?";
 
     default:
       return "All good. What kind of items are you usually listing?";
@@ -134,16 +170,32 @@ export default function ChatWidget() {
 
     const intent = detectIntent(trimmed);
     const t = trimmed.toLowerCase();
-    const nextMemory = { ...memory };
+    const nextMemory: ResellerMemory = { ...memory };
 
+    // Seller profiling
+    if (t.includes("weekend") || t.includes("casual")) {
+      nextMemory.sellerType = "CASUAL";
+      nextMemory.listingVolume = "LOW";
+    }
+
+    if (t.includes("batch") || t.includes("storage") || t.includes("estate")) {
+      nextMemory.sellerType = "PART_TIME";
+      nextMemory.listingVolume = "MEDIUM";
+    }
+
+    if (t.includes("full time") || t.includes("daily")) {
+      nextMemory.sellerType = "FULL_TIME";
+      nextMemory.listingVolume = "HIGH";
+    }
+
+    // Pricing escalation
     if (intent === "PRICING_CONCERN") {
       nextMemory.pricingTouches = (nextMemory.pricingTouches ?? 0) + 1;
       nextMemory.stage = "PRICING_AWARE";
-    }
 
-    if (t.includes("batch") || t.includes("storage")) {
-      nextMemory.listingVolume = "MEDIUM";
-      nextMemory.sellerType = "PART_TIME";
+      if ((nextMemory.pricingTouches ?? 0) >= 2) {
+        nextMemory.hasSeenPricingCTA = true;
+      }
     }
 
     setMemory(nextMemory);
@@ -161,7 +213,8 @@ export default function ChatWidget() {
     }, 300);
   }
 
-  const showPricingActions = (memory.pricingTouches ?? 0) >= 2;
+  const showPricingActions = memory.hasSeenPricingCTA;
+  const cta = getAdaptiveCTA(memory);
 
   return (
     <div className="fixed bottom-4 right-4 z-[60]">
@@ -186,7 +239,10 @@ export default function ChatWidget() {
             className="flex-1 overflow-auto px-4 py-4 space-y-3"
           >
             {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : ""}`}>
+              <div
+                key={i}
+                className={`flex ${m.role === "user" ? "justify-end" : ""}`}
+              >
                 <div
                   className={`rounded-2xl px-4 py-2 text-sm max-w-[85%] ${
                     m.role === "user"
@@ -205,13 +261,13 @@ export default function ChatWidget() {
                   onClick={() => navigateTo("builder")}
                   className="flex-1 border rounded-xl px-3 py-2 text-sm font-bold"
                 >
-                  Try one item now
+                  {cta.primary}
                 </button>
                 <button
                   onClick={() => navigateTo("pricing")}
                   className="flex-1 bg-[#2563EB] text-white rounded-xl px-3 py-2 text-sm font-bold"
                 >
-                  See pricing
+                  {cta.secondary}
                 </button>
               </div>
             )}
