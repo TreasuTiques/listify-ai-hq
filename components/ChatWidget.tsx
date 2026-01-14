@@ -53,72 +53,51 @@ function inferPage(pathname: string): Page {
 function detectIntent(message: string): ChatIntent {
   const t = message.toLowerCase();
 
+  if (t.includes("price") || t.includes("pricing") || t.includes("worth") || t.includes("cost"))
+    return "PRICING_CONCERN";
   if (t.includes("what does")) return "WHAT_IT_DOES";
   if (t.includes("for resellers") || t.includes("like me")) return "IS_FOR_ME";
   if (t.includes("different")) return "HOW_DIFFERENT";
   if (t.includes("best") || t.includes("test")) return "BEST_FIRST_TEST";
-  if (t.includes("price") || t.includes("worth") || t.includes("cost")) return "PRICING_CONCERN";
 
   return "JUST_BROWSING";
 }
 
-/* ---------------- REPLIES (NOW MEMORY-AWARE) ---------------- */
+/* ---------------- REPLIES ---------------- */
 
 function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
   switch (intent) {
     case "WHAT_IT_DOES":
-      return (
-        "Quick breakdown: you drop photos in, I generate a clean title and HTML you can paste straight into eBay.\n\n" +
-        "Most sellers test it on one item they already photographed and compare the results."
-      );
+      return "Photos in → clean title + HTML out. Paste straight into eBay. Most sellers test it on one item they already photographed.";
 
     case "IS_FOR_ME":
-      return (
-        "If you list thrift, storage units, estate sales, or random finds — yeah, this was built for you.\n\n" +
-        "It’s about speed and batching, not perfect studio listings."
-      );
+      return "If you list thrift, storage units, estate sales, or random finds — yeah, this was built for you. Speed and batching over perfection.";
 
     case "HOW_DIFFERENT":
-      return (
-        "Most tools just write paragraphs.\n\n" +
-        "This builds listings the way resellers actually post them: structured sections, readable, and fast to paste."
-      );
+      return "This doesn’t just write words. It builds listings the way resellers actually post them: structured, readable, fast to paste.";
 
     case "BEST_FIRST_TEST":
-      return (
-        "Best first test: grab one item you already have photos for.\n\n" +
-        "Upload 4–6 photos, generate a listing, and compare it to your current one."
-      );
+      return "Best test: grab one item you already have photos for. Upload 4–6 photos, generate a listing, and compare side-by-side.";
 
     case "PRICING_CONCERN":
       if (memory.listingVolume === "LOW") {
-        return (
-          "Totally fair.\n\n" +
-          "If you’re listing casually or weekends only, most people just test it on one item first and see if it saves time."
-        );
+        return "If you’re listing weekends or casually, most people just test one item first and see if it saves time.";
       }
-
+      if (memory.listingVolume === "MEDIUM") {
+        return "For batch sellers, speed usually pays for itself pretty quick. Listing faster is the real win.";
+      }
       if (memory.listingVolume === "HIGH") {
-        return (
-          "At higher volume, speed is usually the win.\n\n" +
-          "Most full-time sellers feel it once they batch a few listings back-to-back."
-        );
+        return "At high volume, time saved per listing adds up fast. That’s where most full-timers feel it.";
       }
-
-      return (
-        "Good question.\n\n" +
-        "Most sellers decide after testing one real item and seeing how much time it saves."
-      );
+      return "Pricing really clicks after you test one real item. Want to try that first or see plans?";
 
     default:
       if (page === "builder") {
-        return "You’re in the right spot. Upload photos, don’t overthink it, and see what comes out.";
+        return "You’re in the right spot. Clear photos in, don’t overthink it, let the tool do the heavy lifting.";
       }
-
       if (page === "pricing") {
-        return "Before picking a plan, it helps to know your listing pace. Are you listing a few items or batching hauls?";
+        return "Before picking a plan, it helps to know your pace. Are you listing a few items or batching hauls?";
       }
-
       return "All good. What kind of items are you usually listing?";
   }
 }
@@ -133,8 +112,7 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
-      content:
-        "Yo — I’m your reseller buddy. Want to test this with a real item you’re listing today?",
+      content: "Yo — I’m your reseller buddy. Want to test this with a real item you’re listing today?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -155,31 +133,27 @@ export default function ChatWidget() {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
-    // 🔹 Update reseller memory (silent)
-    setMemory((prev) => {
-      const t = trimmed.toLowerCase();
-      const next = { ...prev };
+    // build next memory synchronously
+    const nextMemory: ResellerMemory = { ...memory };
+    const t = trimmed.toLowerCase();
 
-      if (t.includes("weekend") || t.includes("casual")) {
-        next.sellerType = "CASUAL";
-        next.listingVolume = "LOW";
-      }
+    if (t.includes("weekend") || t.includes("casual")) {
+      nextMemory.sellerType = "CASUAL";
+      nextMemory.listingVolume = "LOW";
+    }
+    if (t.includes("batch") || t.includes("storage") || t.includes("estate")) {
+      nextMemory.sellerType = "PART_TIME";
+      nextMemory.listingVolume = "MEDIUM";
+    }
+    if (t.includes("full time") || t.includes("daily") || t.includes("hundreds")) {
+      nextMemory.sellerType = "FULL_TIME";
+      nextMemory.listingVolume = "HIGH";
+    }
 
-      if (t.includes("batch") || t.includes("storage") || t.includes("estate")) {
-        next.sellerType = "PART_TIME";
-        next.listingVolume = "MEDIUM";
-      }
-
-      if (t.includes("daily") || t.includes("full time") || t.includes("hundreds")) {
-        next.sellerType = "FULL_TIME";
-        next.listingVolume = "HIGH";
-      }
-
-      return next;
-    });
+    setMemory(nextMemory);
 
     const intent = detectIntent(trimmed);
-    const reply = getReply(intent, page, memory);
+    const reply = getReply(intent, page, nextMemory);
 
     const nextMsgs = [...messages, { role: "user", content: trimmed }];
     setMessages(nextMsgs);
@@ -232,9 +206,7 @@ export default function ChatWidget() {
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : ""}`}>
                 <div
                   className={`rounded-2xl px-4 py-2 text-sm max-w-[85%] ${
-                    m.role === "user"
-                      ? "bg-[#2563EB] text-white"
-                      : "bg-slate-100"
+                    m.role === "user" ? "bg-[#2563EB] text-white" : "bg-slate-100"
                   }`}
                 >
                   {m.content}
