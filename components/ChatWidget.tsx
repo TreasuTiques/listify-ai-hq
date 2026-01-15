@@ -31,13 +31,16 @@ type ResellerMemory = {
   // 6.x
   email?: string;
   hasAskedForEmail?: boolean;
+
+  // 🔑 LOOP FIX
+  hasAskedItemType?: boolean;
 };
 
 /* ---------------- CONSTANTS ---------------- */
 
 const STORAGE_KEY = "listify_chat_memory_v1";
 
-/* ---------------- ANALYTICS (6.2) ---------------- */
+/* ---------------- ANALYTICS ---------------- */
 
 function track(event: string, props: Record<string, any> = {}) {
   if ((window as any).analytics?.track) {
@@ -142,16 +145,12 @@ function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): strin
     return "Most people decide after testing one real item. Want to try that or see pricing?";
   }
 
-  switch (intent) {
-    case "WHAT_IT_DOES":
-      return "Photos in → clean title + HTML out. Paste straight into eBay.";
-    case "HOW_DIFFERENT":
-      return "This builds listings the way resellers actually post them — structured and fast.";
-    case "BEST_FIRST_TEST":
-      return "Grab one item you already have photos for and upload 4–6 pics.";
-    default:
-      return "All good. What kind of items are you usually listing?";
+  // 🔑 HUMAN FALLBACK (NO MORE LOOPING)
+  if (!memory.hasAskedItemType) {
+    return "All good. What kind of items are you usually listing?";
   }
+
+  return "Got it. Want to test one real item or see how this works on a batch?";
 }
 
 /* ---------------- COMPONENT ---------------- */
@@ -191,6 +190,11 @@ export default function ChatWidget() {
     const intent = detectIntent(text);
     const t = text.toLowerCase();
     const nextMemory = { ...memory };
+
+    // 🔑 mark item-type question as asked ONCE
+    if (!nextMemory.hasAskedItemType) {
+      nextMemory.hasAskedItemType = true;
+    }
 
     if (t.includes("@") && t.includes(".")) {
       nextMemory.email = text.trim();
