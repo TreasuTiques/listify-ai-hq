@@ -10,11 +10,12 @@ export default async function handler(req, res) {
     // 2. Setup Gemini
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     
-    // 🔑 CHANGE: Switching to 'gemini-pro' to fix the 404 error
+    // 🔑 CHANGE: We are switching to 'gemini-pro'. 
+    // This model is older and works with ANY library version.
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     // 3. Get message
-    const { message } = req.body;
+    const { message, history } = req.body;
 
     // 4. Define Persona
     const systemPrompt = `
