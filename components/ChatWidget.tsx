@@ -18,11 +18,15 @@ type ResellerMemory = {
   pricingTouches?: number;
   hasSeenPricingCTA?: boolean;
 
-  // 4.x conversion memory
-  hasSeenAhaMoment?: boolean;        // 4.1
-  hasSeenConfidenceBoost?: boolean;  // 4.2
-  hasSeenSocialProof?: boolean;      // 4.3
-  hasSeenRevenueMath?: boolean;      // 4.4
+  // 4.x conversion moments
+  hasSeenAhaMoment?: boolean;
+  hasSeenConfidenceBoost?: boolean;
+  hasSeenSocialProof?: boolean;
+  hasSeenRevenueMath?: boolean;
+
+  // 4.5 / 4.6
+  hasAskedFollowUp?: boolean;
+  preferredWorkflow?: string;
 };
 
 /* ---------------- NAVIGATION ---------------- */
@@ -89,16 +93,30 @@ function getRevenueMath(memory: ResellerMemory) {
   return "Even casually, those minutes add up to a few extra listings each week.";
 }
 
+/* ---------------- 4.5 FOLLOW-UP QUESTION ---------------- */
+
+function getFollowUpQuestion(memory: ResellerMemory) {
+  if (memory.hasAskedFollowUp) return null;
+
+  if (memory.sellerType === "FULL_TIME")
+    return "Quick question — are you trying to speed up titles, descriptions, or both?";
+
+  if (memory.sellerType === "PART_TIME")
+    return "When you batch, are you usually listing similar items or mixed lots?";
+
+  return "Do you usually list one item at a time or a few at once?";
+}
+
 /* ---------------- REPLIES ---------------- */
 
 function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
   if (page === "builder") {
-    return "You’re in the builder — upload 4–6 clear photos and I’ll generate the listing.";
+    return "You’re in the builder — upload 4–6 clear photos of one item and I’ll generate the listing.";
   }
 
   if (intent === "PRICING_CONCERN") {
     if (memory.hasSeenPricingCTA)
-      return "You’ve already got the options below. Want help testing an item or optimizing your flow?";
+      return "You’ve already got the options below. Want help testing an item or tightening your workflow?";
 
     if ((memory.pricingTouches ?? 0) >= 2)
       return "Sounds like pricing matters. Want to test one item or see the plans?";
@@ -133,7 +151,19 @@ export default function ChatWidget() {
   const listRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    setPage(inferPage());
+    const p = inferPage();
+    setPage(p);
+
+    // 5.0 Builder handoff
+    if (p === "builder" && messages.length === 0) {
+      setMessages([
+        {
+          role: "assistant",
+          content:
+            "Upload 4–6 photos of one item from your last batch. I’ll handle the title and description for you.",
+        },
+      ]);
+    }
   }, []);
 
   useEffect(() => {
@@ -147,8 +177,14 @@ export default function ChatWidget() {
     const t = text.toLowerCase();
     const nextMemory = { ...memory };
 
+    // Seller profiling
     if (t.includes("storage") || t.includes("batch")) nextMemory.sellerType = "PART_TIME";
     if (t.includes("full time") || t.includes("daily")) nextMemory.sellerType = "FULL_TIME";
+
+    // Save workflow (4.6)
+    if (!nextMemory.preferredWorkflow && nextMemory.hasAskedFollowUp) {
+      nextMemory.preferredWorkflow = text;
+    }
 
     if (intent === "PRICING_CONCERN") {
       nextMemory.pricingTouches = (nextMemory.pricingTouches ?? 0) + 1;
@@ -161,12 +197,14 @@ export default function ChatWidget() {
       getConfidenceBoost(nextMemory),
       getSocialProof(nextMemory),
       getRevenueMath(nextMemory),
+      getFollowUpQuestion(nextMemory),
     ].filter(Boolean) as string[];
 
     if (replies.includes(getAhaMoment(nextMemory)!)) nextMemory.hasSeenAhaMoment = true;
     if (replies.includes(getConfidenceBoost(nextMemory)!)) nextMemory.hasSeenConfidenceBoost = true;
     if (replies.includes(getSocialProof(nextMemory)!)) nextMemory.hasSeenSocialProof = true;
     if (replies.includes(getRevenueMath(nextMemory)!)) nextMemory.hasSeenRevenueMath = true;
+    if (replies.includes(getFollowUpQuestion(nextMemory)!)) nextMemory.hasAskedFollowUp = true;
 
     setMemory(nextMemory);
 
@@ -214,10 +252,16 @@ export default function ChatWidget() {
 
             {memory.hasSeenPricingCTA && (
               <div className="flex gap-2">
-                <button onClick={() => navigateTo("builder")} className="flex-1 border rounded-xl px-3 py-2 font-bold">
+                <button
+                  onClick={() => navigateTo("builder")}
+                  className="flex-1 border rounded-xl px-3 py-2 font-bold"
+                >
                   Try one item
                 </button>
-                <button onClick={() => navigateTo("pricing")} className="flex-1 bg-blue-600 text-white rounded-xl px-3 py-2 font-bold">
+                <button
+                  onClick={() => navigateTo("pricing")}
+                  className="flex-1 bg-blue-600 text-white rounded-xl px-3 py-2 font-bold"
+                >
                   See pricing
                 </button>
               </div>
