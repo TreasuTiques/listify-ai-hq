@@ -3,13 +3,12 @@ import React, { useEffect, useRef, useState } from "react";
 /* ---------------- TYPES ---------------- */
 
 type ChatIntent =
-  | "GREETING"        // <--- NEW: Recognizes Hi/Hello
-  | "WHAT_IT_DOES"
-  | "IS_FOR_ME"
-  | "HOW_DIFFERENT"
-  | "BEST_FIRST_TEST"
+  | "GREETING"
+  | "WANT_TO_LIST"      // <--- NEW: Knows when user wants to start work
+  | "HOW_IT_WORKS"      // <--- NEW: Explains the process
   | "PRICING_CONCERN"
   | "AGREE_TO_TEST"
+  | "RESELLER_CHAT"     // <--- NEW: Small talk (death piles, sourcing)
   | "JUST_BROWSING";
 
 type Page = "homepage" | "builder" | "pricing";
@@ -20,29 +19,25 @@ type ResellerMemory = {
   pricingTouches?: number;
   hasSeenPricingCTA?: boolean;
   
-  // 4.x conversion moments
   hasSeenAhaMoment?: boolean;
   hasSeenConfidenceBoost?: boolean;
   hasSeenSocialProof?: boolean;
   hasSeenRevenueMath?: boolean;
 
-  // 4.5 / 4.6
   hasAskedFollowUp?: boolean;
   preferredWorkflow?: string;
 
-  // 6.x
   email?: string;
   hasAskedForEmail?: boolean;
 
-  // Logic Flags
   hasAskedItemType?: boolean;
   hasAgreedToTest?: boolean;
 };
 
 /* ---------------- CONSTANTS ---------------- */
 
-// 🔑 CHANGED TO V3: This clears your old "stuck" memory so the buttons disappear on refresh.
-const STORAGE_KEY = "listify_chat_memory_v3"; 
+// V4 to clear out the old loops
+const STORAGE_KEY = "listify_chat_memory_v4"; 
 
 /* ---------------- ANALYTICS ---------------- */
 
@@ -74,75 +69,86 @@ function inferPage(): Page {
   return "homepage";
 }
 
+// 🧠 THE BRAIN: Expanded Vocabulary
 function detectIntent(message: string): ChatIntent {
   const t = message.toLowerCase();
   
-  // 1. Check for Greetings
-  const greetings = ["hi", "hello", "hey", "good morning", "hola", "yo"];
-  // Checks if message IS a greeting or STARTS with a greeting (e.g. "Hi there")
+  // 1. Greetings
+  const greetings = ["hi", "hello", "hey", "good morning", "hola", "yo", "sup"];
   if (greetings.some(g => t === g || t.startsWith(g + " ") || t.startsWith(g + ","))) {
     return "GREETING";
   }
 
-  // 2. Agreeing to test
-  if (t === "yes" || t === "sure" || t === "ok" || t === "yeah" || t.includes("let's do it")) 
+  // 2. Agreed to test
+  if (t === "yes" || t === "sure" || t === "ok" || t === "yeah" || t.includes("let's do it") || t.includes("try it")) 
     return "AGREE_TO_TEST";
 
-  // 3. Other Intents
-  if (t.includes("price") || t.includes("pricing") || t.includes("cost"))
+  // 3. Wants to List (Action)
+  if (t === "listing" || t.includes("create listing") || t.includes("draft") || t.includes("sell item") || t.includes("make a listing"))
+    return "WANT_TO_LIST";
+
+  // 4. How it works (Education)
+  if (t === "how" || t === "how?" || t.includes("how does") || t.includes("explain") || t.includes("work"))
+    return "HOW_IT_WORKS";
+
+  // 5. Pricing (Objection)
+  if (t === "pricing" || t === "price" || t.includes("cost") || t.includes("expensive") || t.includes("how much"))
     return "PRICING_CONCERN";
-  if (t.includes("what does") || t.includes("how does")) return "WHAT_IT_DOES";
-  if (t.includes("different")) return "HOW_DIFFERENT";
-  if (t.includes("test") || t.includes("try")) return "BEST_FIRST_TEST";
+
+  // 6. Reseller Lingo (Bonding)
+  if (t.includes("death pile") || t.includes("source") || t.includes("ebay") || t.includes("poshmark") || t.includes("money"))
+    return "RESELLER_CHAT";
   
   return "JUST_BROWSING";
 }
 
 /* ---------------- MOMENTS & REPLIES ---------------- */
 
-function getAhaMoment(memory: ResellerMemory) {
-  if (memory.hasSeenAhaMoment) return null;
-  if (memory.sellerType === "FULL_TIME") return "At your volume, this realistically saves 10–15 hours every week.";
-  if (memory.sellerType === "PART_TIME") return "Batching listings like this saves around 4–5 hours per batch.";
-  return null; // Don't show generic aha moment too early
-}
-
 function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
-  // A. Builder Page
+  // A. Builder Page Context
   if (page === "builder") {
-    return "You’re in the builder — upload 4–6 clear photos of one item and I’ll generate the listing.";
+    return "You're in the right spot. Just upload photos of that item and I'll handle the writing! 📸";
   }
 
-  // B. Greetings (Natural Interaction)
+  // B. Greetings
   if (intent === "GREETING") {
-    return "Hey there! 👋 I help resellers turn photos into eBay listings in seconds. Are you listing full-time or just clearing out some space?";
+    return "Hey! 👋 I'm here to help you crush your death pile. Want to see how I can write a listing in 10 seconds?";
   }
 
-  // C. Pricing
+  // C. "How?" (Explanation)
+  if (intent === "HOW_IT_WORKS") {
+    return "It's super simple: You upload photos, and I analyze them to write the title, description, and specifics automatically. No typing needed. Want to try one?";
+  }
+
+  // D. "Listing" (Action)
+  if (intent === "WANT_TO_LIST") {
+    return "Let's get that item listed! 🚀 Click the 'Try one item' button below and we'll build it right now.";
+  }
+
+  // E. Pricing / Cost
   if (intent === "PRICING_CONCERN") {
     if (memory.hasSeenPricingCTA)
-      return "You’ve already got the options below. Want help testing an item first?";
+      return "I've got plans for every budget, but honestly? You should see if the tool actually works for you first. Want to test a real item on the house?";
     
-    return "Most people like to see it work before looking at plans. Want to test one real item first?";
+    return "We have flexible plans for part-timers and pros. But talk is cheap—want to test one real item for free to see if it's worth it?";
   }
 
-  // D. Success (User said YES)
+  // F. Reseller Chat (Small Talk)
+  if (intent === "RESELLER_CHAT") {
+    return "I know the grind! Listing is the boring part, sourcing is the fun part. Let me handle the boring stuff so you can source more. Ready to test it?";
+  }
+
+  // G. Success (User said YES)
   if (memory.hasAgreedToTest) {
-    return "Awesome. The best way to see the magic is to try one item. Click the 'Try one item' button below to open the builder.";
+    return "Music to my ears. 🎶 Click 'Try one item' below to launch the builder. Let's turn that item into cash.";
   }
 
-  // E. Logic Fallbacks
-  if (intent === "WHAT_IT_DOES") {
-    return "I analyze your item photos and write the title, description, and item specifics automatically. Want to see it in action?";
-  }
-
-  // F. Default "I don't know" fallback
-  // This handles random questions like "Why isn't this natural?" without looping.
+  // H. Default Fallback
   if (!memory.hasAskedItemType) {
-    return "I'm still learning the ropes! But I'm great at writing listings. What kind of items do you usually sell? (e.g. Clothing, Electronics)";
+    return "I'm still learning, but I'm an expert at eBay SEO. What kind of items do you usually sell? (Shoes, Vintage, Electronics?)";
   }
 
-  return "I can help you build a listing or check pricing. Which would you prefer?";
+  return "I can help you build a listing or check pricing. What's on your mind?";
 }
 
 /* ---------------- COMPONENT ---------------- */
@@ -183,18 +189,15 @@ export default function ChatWidget() {
     const t = text.toLowerCase();
     const nextMemory = { ...memory };
 
-    // 1. Handle Seller Type detection
-    if (t.includes("casual") || t.includes("clearing") || t.includes("space")) nextMemory.sellerType = "CASUAL";
-    if (t.includes("part time") || t.includes("side")) nextMemory.sellerType = "PART_TIME";
-    if (t.includes("full time") || t.includes("daily") || t.includes("store")) nextMemory.sellerType = "FULL_TIME";
+    // 1. Context updates
+    if (t.includes("casual")) nextMemory.sellerType = "CASUAL";
+    if (t.includes("full time")) nextMemory.sellerType = "FULL_TIME";
 
-    // 2. Logic: Mark item type as asked if we are defaulting
     if (!nextMemory.hasAskedItemType && intent !== "GREETING" && intent !== "AGREE_TO_TEST") {
        nextMemory.hasAskedItemType = true;
     }
 
-    // 3. Logic: Only show buttons if they agree or push for price
-    if (intent === "AGREE_TO_TEST" || intent === "BEST_FIRST_TEST") {
+    if (intent === "WANT_TO_LIST" || intent === "AGREE_TO_TEST") {
       nextMemory.hasAgreedToTest = true;
       nextMemory.hasSeenPricingCTA = true; 
     }
@@ -205,28 +208,21 @@ export default function ChatWidget() {
       track("pricing_intent");
     }
 
-    // 4. Compile Replies
+    // 2. Get Reply
     const replyText = getReply(intent, page, nextMemory);
     
-    // Only show "Aha Moment" if it's NOT a greeting (keep greetings clean)
-    const aha = intent !== "GREETING" ? getAhaMoment(nextMemory) : null;
-    
-    if (aha) nextMemory.hasSeenAhaMoment = true;
-
-    const replies = [replyText, aha].filter(Boolean) as string[];
-
+    // 3. Add Message
     setMemory(nextMemory);
     setMessages((prev) => [
       ...prev,
       { role: "user", content: text },
-      ...replies.map((r) => ({ role: "assistant", content: r })),
+      { role: "assistant", content: replyText },
     ]);
 
     setInput("");
   }
 
-  // Helper to decide when to show buttons
-  // Don't show buttons on simple greetings, only when actionable.
+  // 🔑 LOGIC FIX: Don't show buttons if chat is empty (fixes the weird empty screen)
   const showButtons = (memory.hasSeenPricingCTA || memory.hasAgreedToTest) && messages.length > 0;
 
   return (
@@ -242,25 +238,28 @@ export default function ChatWidget() {
 
       {open && (
         <div className="w-[420px] h-[560px] bg-white border rounded-2xl shadow-2xl flex flex-col font-sans">
-          <div className="px-4 py-3 border-b flex justify-between bg-white rounded-t-2xl">
-            <strong>Reseller Buddy</strong>
-            <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+          {/* Header */}
+          <div className="px-4 py-3 border-b flex justify-between bg-blue-600 rounded-t-2xl text-white">
+            <strong>Reseller Buddy 📦</strong>
+            <button onClick={() => setOpen(false)} className="hover:text-gray-200">✕</button>
           </div>
 
+          {/* Messages Area */}
           <div ref={listRef} className="flex-1 overflow-auto px-4 py-3 space-y-3 bg-gray-50">
             {messages.length === 0 && (
-               <div className="text-center text-gray-500 text-sm mt-4">
-                 Say "Hi" to get started!
+               <div className="flex flex-col items-center justify-center h-full text-gray-400 text-sm">
+                 <p>Ask me "How does this work?"</p>
+                 <p className="mt-1">or say "Hi" 👋</p>
                </div>
             )}
             
             {messages.map((m, i) => (
-              <div key={i} className={m.role === "user" ? "text-right" : ""}>
+              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`inline-block px-4 py-2 rounded-2xl text-sm max-w-[85%] ${
+                  className={`px-4 py-2 rounded-2xl text-sm max-w-[85%] shadow-sm ${
                     m.role === "user"
-                      ? "bg-blue-600 text-white"
-                      : "bg-white border text-gray-800 shadow-sm"
+                      ? "bg-blue-600 text-white rounded-br-none"
+                      : "bg-white border text-gray-800 rounded-bl-none"
                   }`}
                 >
                   {m.content}
@@ -268,18 +267,18 @@ export default function ChatWidget() {
               </div>
             ))}
 
-            {/* BUTTONS: Only appear if showButtons is true */}
+            {/* Buttons (Only show when context is ready) */}
             {showButtons && (
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2 mt-4 animate-fade-in">
                 <button 
                   onClick={() => navigateTo("builder")} 
-                  className="flex-1 bg-blue-600 text-white rounded-xl px-3 py-2 font-bold hover:bg-blue-700 transition"
+                  className="flex-1 bg-blue-600 text-white rounded-xl px-3 py-3 font-bold hover:bg-blue-700 transition shadow-md"
                 >
-                  Try one item
+                  Try one item 📸
                 </button>
                 <button 
                   onClick={() => navigateTo("pricing")} 
-                  className="flex-1 border bg-white rounded-xl px-3 py-2 font-bold hover:bg-gray-50 transition"
+                  className="flex-1 bg-white border border-gray-300 text-gray-700 rounded-xl px-3 py-3 font-bold hover:bg-gray-50 transition shadow-sm"
                 >
                   See pricing
                 </button>
@@ -287,6 +286,7 @@ export default function ChatWidget() {
             )}
           </div>
 
+          {/* Input Area */}
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -297,10 +297,10 @@ export default function ChatWidget() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask me anything…"
-              className="flex-1 border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Type your message..."
+              className="flex-1 bg-gray-100 border-0 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
             />
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700 transition">
+            <button className="bg-blue-600 text-white px-5 py-2 rounded-xl font-bold hover:bg-blue-700 transition shadow-md">
               Send
             </button>
           </form>
