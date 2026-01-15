@@ -27,22 +27,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
-      {/* SECTION 1 — PREMIUM 3D HERO UPGRADE (UPDATED) */}
+      {/* SECTION 1 — PREMIUM 3D HERO UPGRADE (BLENDED VERSION) */}
       {/* ===================================================== */}
       <section className="relative pt-12 sm:pt-20 pb-28 sm:pb-36 bg-[#F8FAFC] overflow-hidden">
         
-        {/* --- UPGRADE 1: THE AURORA BACKGROUND --- */}
-        {/* Soft Indigo Blob (Top Left) */}
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-indigo-200/30 blur-[120px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-70 animate-pulse"></div>
-        {/* Soft Cyan Blob (Bottom Right) */}
-        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-cyan-100/40 blur-[120px] rounded-full -mr-20 -mb-20 mix-blend-multiply opacity-70"></div>
+        {/* --- UPGRADE 1: STRONGER AURORA BACKGROUND --- */}
+        {/* We made these darker/stronger to match the image's blue tone */}
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-80 animate-pulse"></div>
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/60 blur-[100px] rounded-full -mr-20 -mb-20 mix-blend-multiply opacity-80"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="relative bg-white/60 backdrop-blur-xl rounded-[48px] border border-white/50 shadow-[0_32px_80px_-20px_rgba(15,23,42,0.15)] p-8 sm:p-12 lg:p-20 overflow-hidden">
+          <div className="relative bg-white/40 backdrop-blur-md rounded-[48px] border border-white/60 shadow-[0_32px_80px_-20px_rgba(15,23,42,0.1)] p-8 sm:p-12 lg:p-20 overflow-hidden">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               
               {/* Left Content */}
-              <div className="text-left relative z-10">
+              <div className="text-left relative z-20">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[#2563EB] text-[11px] font-bold uppercase tracking-widest mb-8">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
                   Trusted by eBay resellers worldwide
@@ -65,7 +64,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   Create My First Listing Free
                 </button>
                 
-                {/* Trust Signals (Optional Addition) */}
+                {/* Trust Signals */}
                 <div className="mt-8 flex items-center gap-4 text-sm text-slate-400 font-medium">
                    <span>Works with:</span>
                    <div className="flex gap-3 grayscale opacity-60">
@@ -74,20 +73,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 </div>
               </div>
 
-              {/* --- UPGRADE 3: THE IMAGE REPLACEMENT --- */}
-              <div className="relative perspective-1000 flex justify-center lg:justify-end">
-                {/* INSTRUCTIONS: 
-                   1. Save your generated "Glass Dashboard" image as 'hero-dashboard.png' 
-                   2. Put it in your /public folder 
+              {/* --- UPGRADE 3: THE BLENDED IMAGE --- */}
+              <div className="relative perspective-1000 flex justify-center lg:justify-end z-10">
+                {/* THE MAGIC TRICK: 
+                   1. scale-[1.35] makes it much bigger.
+                   2. -mr-12 pulls it to the right so it bleeds off slightly (dynamic look).
+                   3. mask-image creates a fade effect so the hard square edges disappear.
                 */}
                 <img 
                   src="/hero-dashboard.png" 
                   alt="Listify AI Dashboard Interface" 
-                  className="w-full max-w-[650px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out"
+                  className="w-full max-w-[800px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out scale-[1.35] lg:-mr-20"
+                  style={{
+                    maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%), linear-gradient(to left, black 80%, transparent 100%)',
+                    WebkitMaskImage: 'radial-gradient(circle at center, black 60%, transparent 100%)' 
+                  }}
                 />
-                
-                {/* Optional: Subtle glow behind the image to make it float */}
-                <div className="absolute inset-0 bg-blue-400/20 blur-[60px] -z-10 rounded-full scale-75"></div>
               </div>
 
             </div>
