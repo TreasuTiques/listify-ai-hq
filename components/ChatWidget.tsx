@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 /* ---------------- TYPES ---------------- */
 
@@ -13,57 +13,25 @@ type ChatIntent =
 type Page = "homepage" | "builder" | "pricing";
 type Msg = { role: "user" | "assistant"; content: string };
 
-type ConversationStage =
-  | "INTRO"
-  | "QUALIFIED"
-  | "READY_TO_TEST"
-  | "PRICING_AWARE";
-
 type ResellerMemory = {
-  listingVolume?: "LOW" | "MEDIUM" | "HIGH";
   sellerType?: "CASUAL" | "PART_TIME" | "FULL_TIME";
-  stage?: ConversationStage;
   pricingTouches?: number;
   hasSeenPricingCTA?: boolean;
-  hasSeenAhaMoment?: boolean; // 👈 4.1
+
+  // 4.x conversion memory
+  hasSeenAhaMoment?: boolean;        // 4.1
+  hasSeenConfidenceBoost?: boolean;  // 4.2
+  hasSeenSocialProof?: boolean;      // 4.3
+  hasSeenRevenueMath?: boolean;      // 4.4
 };
 
 /* ---------------- NAVIGATION ---------------- */
 
 function navigateTo(dest: "builder" | "pricing") {
-  if (dest === "builder") {
-    window.location.href = "https://www.listifyaihq.com/#/builder";
-  }
-  if (dest === "pricing") {
-    window.location.href = "https://www.listifyaihq.com/#/pricing";
-  }
-}
-
-/* ---------------- ADAPTIVE CTA (3.5B) ---------------- */
-
-function getAdaptiveCTA(memory: ResellerMemory) {
-  if (memory.sellerType === "CASUAL") {
-    return {
-      primary: "Try one item (no commitment)",
-      secondary: "See simple pricing",
-    };
-  }
-  if (memory.sellerType === "PART_TIME") {
-    return {
-      primary: "Test a real item now",
-      secondary: "See batch pricing",
-    };
-  }
-  if (memory.sellerType === "FULL_TIME") {
-    return {
-      primary: "Run a real listing test",
-      secondary: "View pro pricing",
-    };
-  }
-  return {
-    primary: "Try one item now",
-    secondary: "See pricing",
-  };
+  window.location.href =
+    dest === "builder"
+      ? "https://www.listifyaihq.com/#/builder"
+      : "https://www.listifyaihq.com/#/pricing";
 }
 
 /* ---------------- HELPERS ---------------- */
@@ -77,49 +45,65 @@ function inferPage(): Page {
 
 function detectIntent(message: string): ChatIntent {
   const t = message.toLowerCase();
-  if (t.includes("price") || t.includes("pricing") || t.includes("cost")) return "PRICING_CONCERN";
+  if (t.includes("price") || t.includes("pricing") || t.includes("cost"))
+    return "PRICING_CONCERN";
   if (t.includes("what does")) return "WHAT_IT_DOES";
-  if (t.includes("like me") || t.includes("for resellers")) return "IS_FOR_ME";
   if (t.includes("different")) return "HOW_DIFFERENT";
   if (t.includes("test") || t.includes("try")) return "BEST_FIRST_TEST";
   return "JUST_BROWSING";
 }
 
-/* ---------------- 4.1 AHA MOMENT ---------------- */
+/* ---------------- 4.x CONVERSION MOMENTS ---------------- */
 
-function getAhaMoment(memory: ResellerMemory): string | null {
+function getAhaMoment(memory: ResellerMemory) {
   if (memory.hasSeenAhaMoment) return null;
 
-  if (memory.sellerType === "CASUAL") {
-    return "Quick win: that one listing probably saved you ~15 minutes compared to writing it yourself.";
-  }
+  if (memory.sellerType === "FULL_TIME")
+    return "At your volume, this realistically saves 10–15 hours every week.";
 
-  if (memory.sellerType === "PART_TIME") {
-    return "Real talk — batching 20 items like this saves you around 4–5 hours.";
-  }
+  if (memory.sellerType === "PART_TIME")
+    return "Batching listings like this saves around 4–5 hours per batch.";
 
-  if (memory.sellerType === "FULL_TIME") {
-    return "At your volume, this realistically saves you 10–15 hours every week.";
-  }
+  return "Even one listing like this saves ~15 minutes versus writing it manually.";
+}
 
-  return "Even on one item, this saves time — the gains compound fast once you batch.";
+function getConfidenceBoost(memory: ResellerMemory) {
+  if (memory.hasSeenConfidenceBoost) return null;
+  return "Quick confidence check: this output is already cleaner than about 80% of eBay listings.";
+}
+
+function getSocialProof(memory: ResellerMemory) {
+  if (memory.hasSeenSocialProof) return null;
+  return "Most resellers start with one item to test it, then batch once they see the output.";
+}
+
+function getRevenueMath(memory: ResellerMemory) {
+  if (memory.hasSeenRevenueMath) return null;
+
+  if (memory.sellerType === "FULL_TIME")
+    return "Saving 10+ hours a week usually means 40–60 more listings per month.";
+
+  if (memory.sellerType === "PART_TIME")
+    return "Those saved hours often turn into 25–40 extra listings a month.";
+
+  return "Even casually, those minutes add up to a few extra listings each week.";
 }
 
 /* ---------------- REPLIES ---------------- */
 
 function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
   if (page === "builder") {
-    return "You’re in the builder — upload 4–6 clear photos (front, back, label, detail, flaw). I’ll handle the rest.";
+    return "You’re in the builder — upload 4–6 clear photos and I’ll generate the listing.";
   }
 
   if (intent === "PRICING_CONCERN") {
-    if (memory.hasSeenPricingCTA) {
-      return "You’ve already got the options below. Want help testing an item or dialing in your workflow?";
-    }
-    if ((memory.pricingTouches ?? 0) >= 2) {
+    if (memory.hasSeenPricingCTA)
+      return "You’ve already got the options below. Want help testing an item or optimizing your flow?";
+
+    if ((memory.pricingTouches ?? 0) >= 2)
       return "Sounds like pricing matters. Want to test one item or see the plans?";
-    }
-    return "Most people decide after testing one real item. Want to try that or see plans?";
+
+    return "Most people decide after testing one real item. Want to try that or see pricing?";
   }
 
   switch (intent) {
@@ -139,45 +123,31 @@ function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): strin
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState<Page>("homepage");
-  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState<Msg[]>([]);
+  const [input, setInput] = useState("");
 
   const [memory, setMemory] = useState<ResellerMemory>({
     pricingTouches: 0,
-    hasSeenPricingCTA: false,
-    hasSeenAhaMoment: false,
   });
 
-  const [messages, setMessages] = useState<Msg[]>([
-    {
-      role: "assistant",
-      content: "Yo — I’m your reseller buddy. Want to test this with a real item you’re listing today?",
-    },
-  ]);
-
-  const [input, setInput] = useState("");
   const listRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const update = () => setPage(inferPage());
-    update();
-    window.addEventListener("hashchange", update);
-    return () => window.removeEventListener("hashchange", update);
+    setPage(inferPage());
   }, []);
 
   useEffect(() => {
-    if (!open) return;
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, open]);
+    listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
+  }, [messages]);
 
   function send(text: string) {
-    if (!text.trim() || loading) return;
+    if (!text.trim()) return;
 
     const intent = detectIntent(text);
     const t = text.toLowerCase();
     const nextMemory = { ...memory };
 
-    if (t.includes("weekend")) nextMemory.sellerType = "CASUAL";
-    if (t.includes("batch") || t.includes("storage")) nextMemory.sellerType = "PART_TIME";
+    if (t.includes("storage") || t.includes("batch")) nextMemory.sellerType = "PART_TIME";
     if (t.includes("full time") || t.includes("daily")) nextMemory.sellerType = "FULL_TIME";
 
     if (intent === "PRICING_CONCERN") {
@@ -185,31 +155,36 @@ export default function ChatWidget() {
       if (nextMemory.pricingTouches >= 2) nextMemory.hasSeenPricingCTA = true;
     }
 
-    const reply = getReply(intent, page, nextMemory);
-    const aha = getAhaMoment(nextMemory);
+    const replies = [
+      getReply(intent, page, nextMemory),
+      getAhaMoment(nextMemory),
+      getConfidenceBoost(nextMemory),
+      getSocialProof(nextMemory),
+      getRevenueMath(nextMemory),
+    ].filter(Boolean) as string[];
+
+    if (replies.includes(getAhaMoment(nextMemory)!)) nextMemory.hasSeenAhaMoment = true;
+    if (replies.includes(getConfidenceBoost(nextMemory)!)) nextMemory.hasSeenConfidenceBoost = true;
+    if (replies.includes(getSocialProof(nextMemory)!)) nextMemory.hasSeenSocialProof = true;
+    if (replies.includes(getRevenueMath(nextMemory)!)) nextMemory.hasSeenRevenueMath = true;
+
+    setMemory(nextMemory);
 
     setMessages((prev) => [
       ...prev,
       { role: "user", content: text },
-      { role: "assistant", content: reply },
-      ...(aha ? [{ role: "assistant", content: aha }] : []),
+      ...replies.map((r) => ({ role: "assistant", content: r })),
     ]);
 
-    if (aha) nextMemory.hasSeenAhaMoment = true;
-
-    setMemory(nextMemory);
     setInput("");
   }
-
-  const cta = getAdaptiveCTA(memory);
-  const showPricingActions = memory.hasSeenPricingCTA && page !== "builder";
 
   return (
     <div className="fixed bottom-4 right-4 z-[60]">
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="rounded-full bg-[#2563EB] text-white px-5 py-3 shadow-xl font-bold"
+          className="bg-blue-600 text-white px-5 py-3 rounded-full font-bold"
         >
           Chat
         </button>
@@ -218,16 +193,18 @@ export default function ChatWidget() {
       {open && (
         <div className="w-[420px] h-[560px] bg-white border rounded-2xl shadow-2xl flex flex-col">
           <div className="px-4 py-3 border-b flex justify-between">
-            <div className="font-bold">Reseller Buddy</div>
+            <strong>Reseller Buddy</strong>
             <button onClick={() => setOpen(false)}>✕</button>
           </div>
 
-          <div ref={listRef} className="flex-1 overflow-auto px-4 py-4 space-y-3">
+          <div ref={listRef} className="flex-1 overflow-auto px-4 py-3 space-y-3">
             {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === "user" ? "justify-end" : ""}`}>
+              <div key={i} className={m.role === "user" ? "text-right" : ""}>
                 <div
-                  className={`rounded-2xl px-4 py-2 text-sm max-w-[85%] ${
-                    m.role === "user" ? "bg-[#2563EB] text-white" : "bg-slate-100"
+                  className={`inline-block px-4 py-2 rounded-2xl text-sm max-w-[85%] ${
+                    m.role === "user"
+                      ? "bg-blue-600 text-white"
+                      : "bg-slate-100"
                   }`}
                 >
                   {m.content}
@@ -235,13 +212,13 @@ export default function ChatWidget() {
               </div>
             ))}
 
-            {showPricingActions && (
+            {memory.hasSeenPricingCTA && (
               <div className="flex gap-2">
-                <button onClick={() => navigateTo("builder")} className="flex-1 border rounded-xl px-3 py-2 text-sm font-bold">
-                  {cta.primary}
+                <button onClick={() => navigateTo("builder")} className="flex-1 border rounded-xl px-3 py-2 font-bold">
+                  Try one item
                 </button>
-                <button onClick={() => navigateTo("pricing")} className="flex-1 bg-[#2563EB] text-white rounded-xl px-3 py-2 text-sm font-bold">
-                  {cta.secondary}
+                <button onClick={() => navigateTo("pricing")} className="flex-1 bg-blue-600 text-white rounded-xl px-3 py-2 font-bold">
+                  See pricing
                 </button>
               </div>
             )}
@@ -258,9 +235,9 @@ export default function ChatWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask me anything…"
-              className="flex-1 border rounded-xl px-3 py-2 text-sm"
+              className="flex-1 border rounded-xl px-3 py-2"
             />
-            <button className="bg-[#2563EB] text-white px-4 py-2 rounded-xl font-bold">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold">
               Send
             </button>
           </form>
