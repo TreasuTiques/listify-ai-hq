@@ -8,6 +8,7 @@ type ChatIntent =
   | "HOW_DIFFERENT"
   | "BEST_FIRST_TEST"
   | "PRICING_CONCERN"
+  | "AGREE_TO_TEST" // <--- ADDED THIS
   | "JUST_BROWSING";
 
 type Page = "homepage" | "builder" | "pricing";
@@ -32,13 +33,14 @@ type ResellerMemory = {
   email?: string;
   hasAskedForEmail?: boolean;
 
-  // 🔑 LOOP FIX
+  // 🔑 LOGIC FIXES
   hasAskedItemType?: boolean;
+  hasAgreedToTest?: boolean; // <--- ADDED THIS
 };
 
 /* ---------------- CONSTANTS ---------------- */
 
-const STORAGE_KEY = "listify_chat_memory_v1";
+const STORAGE_KEY = "listify_chat_memory_v2"; // Bumped version to reset bad loops
 
 /* ---------------- ANALYTICS ---------------- */
 
@@ -72,11 +74,17 @@ function inferPage(): Page {
 
 function detectIntent(message: string): ChatIntent {
   const t = message.toLowerCase();
+  
+  // 🔑 FIX: Catch "Yes" answers so we don't loop
+  if (t === "yes" || t === "sure" || t === "ok" || t === "yeah" || t.includes("let's do it")) 
+    return "AGREE_TO_TEST";
+
   if (t.includes("price") || t.includes("pricing") || t.includes("cost"))
     return "PRICING_CONCERN";
   if (t.includes("what does")) return "WHAT_IT_DOES";
   if (t.includes("different")) return "HOW_DIFFERENT";
   if (t.includes("test") || t.includes("try")) return "BEST_FIRST_TEST";
+  
   return "JUST_BROWSING";
 }
 
@@ -131,10 +139,12 @@ function getEmailAsk(memory: ResellerMemory) {
 /* ---------------- REPLIES ---------------- */
 
 function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
+  // 1. If they are already in the builder
   if (page === "builder") {
     return "You’re in the builder — upload 4–6 clear photos of one item and I’ll generate the listing.";
   }
 
+  // 2. Pricing concerns
   if (intent === "PRICING_CONCERN") {
     if (memory.hasSeenPricingCTA)
       return "You’ve already got the options below. Want help testing an item or tightening your workflow?";
@@ -145,12 +155,19 @@ function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): strin
     return "Most people decide after testing one real item. Want to try that or see pricing?";
   }
 
-  // 🔑 HUMAN FALLBACK (NO MORE LOOPING)
-  if (!memory.hasAskedItemType) {
-    return "All good. What kind of items are you usually listing?";
+  // 🔑 3. SUCCESS STATE: User said "Yes" (AGREE_TO_TEST)
+  // This breaks the loop. If they agreed, we stop asking if they want to test.
+  if (memory.hasAgreedToTest) {
+    return "Awesome. The best way to see the magic is to try one item. Click the 'Try one item' button below to open the builder.";
   }
 
-  return "Got it. Want to test one real item or see how this works on a batch?";
+  // 4. Default fallback: If we haven't asked about items yet
+  if (!memory.hasAskedItemType) {
+    return "Got it. What kind of items are you usually listing? (e.g. Shoes, Electronics, Vintage)";
+  }
+
+  // 5. Final fallback: If we HAVE asked about items, but they haven't said YES yet.
+  return "Cool. Want to test one real item to see how it works?";
 }
 
 /* ---------------- COMPONENT ---------------- */
@@ -191,9 +208,19 @@ export default function ChatWidget() {
     const t = text.toLowerCase();
     const nextMemory = { ...memory };
 
-    // 🔑 mark item-type question as asked ONCE
-    if (!nextMemory.hasAskedItemType) {
-      nextMemory.hasAskedItemType = true;
+    // 🔑 LOGIC FIX: Don't mark 'hasAskedItemType' true on every single message.
+    // Only mark it if we are actually about to ask it, or if the user answered it.
+    // For now, let's trust the flow:
+    if (!nextMemory.hasAskedItemType && intent !== "AGREE_TO_TEST") {
+       // If they aren't agreeing, we assume this message is them chatting, 
+       // so next time we might want to ask about item types.
+       nextMemory.hasAskedItemType = true;
+    }
+
+    // 🔑 LOGIC FIX: Track if they said YES
+    if (intent === "AGREE_TO_TEST" || intent === "BEST_FIRST_TEST") {
+      nextMemory.hasAgreedToTest = true;
+      nextMemory.hasSeenPricingCTA = true; // Show the buttons too
     }
 
     if (t.includes("@") && t.includes(".")) {
@@ -242,27 +269,27 @@ export default function ChatWidget() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="bg-blue-600 text-white px-5 py-3 rounded-full font-bold"
+          className="bg-blue-600 text-white px-5 py-3 rounded-full font-bold shadow-lg hover:bg-blue-700 transition"
         >
           Chat
         </button>
       )}
 
       {open && (
-        <div className="w-[420px] h-[560px] bg-white border rounded-2xl shadow-2xl flex flex-col">
-          <div className="px-4 py-3 border-b flex justify-between">
+        <div className="w-[420px] h-[560px] bg-white border rounded-2xl shadow-2xl flex flex-col font-sans">
+          <div className="px-4 py-3 border-b flex justify-between bg-white rounded-t-2xl">
             <strong>Reseller Buddy</strong>
-            <button onClick={() => setOpen(false)}>✕</button>
+            <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-gray-700">✕</button>
           </div>
 
-          <div ref={listRef} className="flex-1 overflow-auto px-4 py-3 space-y-3">
+          <div ref={listRef} className="flex-1 overflow-auto px-4 py-3 space-y-3 bg-gray-50">
             {messages.map((m, i) => (
               <div key={i} className={m.role === "user" ? "text-right" : ""}>
                 <div
                   className={`inline-block px-4 py-2 rounded-2xl text-sm max-w-[85%] ${
                     m.role === "user"
                       ? "bg-blue-600 text-white"
-                      : "bg-slate-100"
+                      : "bg-white border text-gray-800 shadow-sm"
                   }`}
                 >
                   {m.content}
@@ -270,12 +297,19 @@ export default function ChatWidget() {
               </div>
             ))}
 
-            {memory.hasSeenPricingCTA && (
-              <div className="flex gap-2">
-                <button onClick={() => navigateTo("builder")} className="flex-1 border rounded-xl px-3 py-2 font-bold">
+            {/* Show buttons if they have agreed to test OR seen pricing */}
+            {(memory.hasSeenPricingCTA || memory.hasAgreedToTest) && (
+              <div className="flex gap-2 mt-2">
+                <button 
+                  onClick={() => navigateTo("builder")} 
+                  className="flex-1 bg-blue-600 text-white rounded-xl px-3 py-2 font-bold hover:bg-blue-700 transition"
+                >
                   Try one item
                 </button>
-                <button onClick={() => navigateTo("pricing")} className="flex-1 bg-blue-600 text-white rounded-xl px-3 py-2 font-bold">
+                <button 
+                  onClick={() => navigateTo("pricing")} 
+                  className="flex-1 border bg-white rounded-xl px-3 py-2 font-bold hover:bg-gray-50 transition"
+                >
                   See pricing
                 </button>
               </div>
@@ -287,15 +321,15 @@ export default function ChatWidget() {
               e.preventDefault();
               send(input);
             }}
-            className="p-3 border-t flex gap-2"
+            className="p-3 border-t bg-white rounded-b-2xl flex gap-2"
           >
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask me anything…"
-              className="flex-1 border rounded-xl px-3 py-2"
+              className="flex-1 border rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold">
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700 transition">
               Send
             </button>
           </form>
