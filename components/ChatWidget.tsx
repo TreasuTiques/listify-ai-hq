@@ -3,12 +3,13 @@ import React, { useEffect, useRef, useState } from "react";
 /* ---------------- TYPES ---------------- */
 
 type ChatIntent =
+  | "GREETING"        // <--- NEW: Recognizes Hi/Hello
   | "WHAT_IT_DOES"
   | "IS_FOR_ME"
   | "HOW_DIFFERENT"
   | "BEST_FIRST_TEST"
   | "PRICING_CONCERN"
-  | "AGREE_TO_TEST" // <--- ADDED THIS
+  | "AGREE_TO_TEST"
   | "JUST_BROWSING";
 
 type Page = "homepage" | "builder" | "pricing";
@@ -18,7 +19,7 @@ type ResellerMemory = {
   sellerType?: "CASUAL" | "PART_TIME" | "FULL_TIME";
   pricingTouches?: number;
   hasSeenPricingCTA?: boolean;
-
+  
   // 4.x conversion moments
   hasSeenAhaMoment?: boolean;
   hasSeenConfidenceBoost?: boolean;
@@ -33,14 +34,15 @@ type ResellerMemory = {
   email?: string;
   hasAskedForEmail?: boolean;
 
-  // 🔑 LOGIC FIXES
+  // Logic Flags
   hasAskedItemType?: boolean;
-  hasAgreedToTest?: boolean; // <--- ADDED THIS
+  hasAgreedToTest?: boolean;
 };
 
 /* ---------------- CONSTANTS ---------------- */
 
-const STORAGE_KEY = "listify_chat_memory_v2"; // Bumped version to reset bad loops
+// 🔑 CHANGED TO V3: This clears your old "stuck" memory so the buttons disappear on refresh.
+const STORAGE_KEY = "listify_chat_memory_v3"; 
 
 /* ---------------- ANALYTICS ---------------- */
 
@@ -75,99 +77,72 @@ function inferPage(): Page {
 function detectIntent(message: string): ChatIntent {
   const t = message.toLowerCase();
   
-  // 🔑 FIX: Catch "Yes" answers so we don't loop
+  // 1. Check for Greetings
+  const greetings = ["hi", "hello", "hey", "good morning", "hola", "yo"];
+  // Checks if message IS a greeting or STARTS with a greeting (e.g. "Hi there")
+  if (greetings.some(g => t === g || t.startsWith(g + " ") || t.startsWith(g + ","))) {
+    return "GREETING";
+  }
+
+  // 2. Agreeing to test
   if (t === "yes" || t === "sure" || t === "ok" || t === "yeah" || t.includes("let's do it")) 
     return "AGREE_TO_TEST";
 
+  // 3. Other Intents
   if (t.includes("price") || t.includes("pricing") || t.includes("cost"))
     return "PRICING_CONCERN";
-  if (t.includes("what does")) return "WHAT_IT_DOES";
+  if (t.includes("what does") || t.includes("how does")) return "WHAT_IT_DOES";
   if (t.includes("different")) return "HOW_DIFFERENT";
   if (t.includes("test") || t.includes("try")) return "BEST_FIRST_TEST";
   
   return "JUST_BROWSING";
 }
 
-/* ---------------- 4.x CONVERSION MOMENTS ---------------- */
+/* ---------------- MOMENTS & REPLIES ---------------- */
 
 function getAhaMoment(memory: ResellerMemory) {
   if (memory.hasSeenAhaMoment) return null;
-
-  if (memory.sellerType === "FULL_TIME")
-    return "At your volume, this realistically saves 10–15 hours every week.";
-
-  if (memory.sellerType === "PART_TIME")
-    return "Batching listings like this saves around 4–5 hours per batch.";
-
-  return "Even one listing like this saves ~15 minutes versus writing it manually.";
+  if (memory.sellerType === "FULL_TIME") return "At your volume, this realistically saves 10–15 hours every week.";
+  if (memory.sellerType === "PART_TIME") return "Batching listings like this saves around 4–5 hours per batch.";
+  return null; // Don't show generic aha moment too early
 }
-
-function getConfidenceBoost(memory: ResellerMemory) {
-  if (memory.hasSeenConfidenceBoost) return null;
-  return "Quick confidence check: this output is already cleaner than about 80% of eBay listings.";
-}
-
-function getSocialProof(memory: ResellerMemory) {
-  if (memory.hasSeenSocialProof) return null;
-  return "Most resellers start with one item to test it, then batch once they see the output.";
-}
-
-function getRevenueMath(memory: ResellerMemory) {
-  if (memory.hasSeenRevenueMath) return null;
-
-  if (memory.sellerType === "FULL_TIME")
-    return "Saving 10+ hours a week usually means 40–60 more listings per month.";
-
-  if (memory.sellerType === "PART_TIME")
-    return "Those saved hours often turn into 25–40 extra listings a month.";
-
-  return "Even casually, those minutes add up to a few extra listings each week.";
-}
-
-/* ---------------- 6.0 EMAIL ASK ---------------- */
-
-function getEmailAsk(memory: ResellerMemory) {
-  if (memory.hasAskedForEmail || memory.email) return null;
-
-  if (memory.hasSeenRevenueMath) {
-    return "Want me to send you a quick checklist to speed this up even more? Drop your email — no spam, just reseller tips.";
-  }
-
-  return null;
-}
-
-/* ---------------- REPLIES ---------------- */
 
 function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
-  // 1. If they are already in the builder
+  // A. Builder Page
   if (page === "builder") {
     return "You’re in the builder — upload 4–6 clear photos of one item and I’ll generate the listing.";
   }
 
-  // 2. Pricing concerns
-  if (intent === "PRICING_CONCERN") {
-    if (memory.hasSeenPricingCTA)
-      return "You’ve already got the options below. Want help testing an item or tightening your workflow?";
-
-    if ((memory.pricingTouches ?? 0) >= 2)
-      return "Sounds like pricing matters. Want to test one item or see the plans?";
-
-    return "Most people decide after testing one real item. Want to try that or see pricing?";
+  // B. Greetings (Natural Interaction)
+  if (intent === "GREETING") {
+    return "Hey there! 👋 I help resellers turn photos into eBay listings in seconds. Are you listing full-time or just clearing out some space?";
   }
 
-  // 🔑 3. SUCCESS STATE: User said "Yes" (AGREE_TO_TEST)
-  // This breaks the loop. If they agreed, we stop asking if they want to test.
+  // C. Pricing
+  if (intent === "PRICING_CONCERN") {
+    if (memory.hasSeenPricingCTA)
+      return "You’ve already got the options below. Want help testing an item first?";
+    
+    return "Most people like to see it work before looking at plans. Want to test one real item first?";
+  }
+
+  // D. Success (User said YES)
   if (memory.hasAgreedToTest) {
     return "Awesome. The best way to see the magic is to try one item. Click the 'Try one item' button below to open the builder.";
   }
 
-  // 4. Default fallback: If we haven't asked about items yet
-  if (!memory.hasAskedItemType) {
-    return "Got it. What kind of items are you usually listing? (e.g. Shoes, Electronics, Vintage)";
+  // E. Logic Fallbacks
+  if (intent === "WHAT_IT_DOES") {
+    return "I analyze your item photos and write the title, description, and item specifics automatically. Want to see it in action?";
   }
 
-  // 5. Final fallback: If we HAVE asked about items, but they haven't said YES yet.
-  return "Cool. Want to test one real item to see how it works?";
+  // F. Default "I don't know" fallback
+  // This handles random questions like "Why isn't this natural?" without looping.
+  if (!memory.hasAskedItemType) {
+    return "I'm still learning the ropes! But I'm great at writing listings. What kind of items do you usually sell? (e.g. Clothing, Electronics)";
+  }
+
+  return "I can help you build a listing or check pricing. Which would you prefer?";
 }
 
 /* ---------------- COMPONENT ---------------- */
@@ -208,29 +183,21 @@ export default function ChatWidget() {
     const t = text.toLowerCase();
     const nextMemory = { ...memory };
 
-    // 🔑 LOGIC FIX: Don't mark 'hasAskedItemType' true on every single message.
-    // Only mark it if we are actually about to ask it, or if the user answered it.
-    // For now, let's trust the flow:
-    if (!nextMemory.hasAskedItemType && intent !== "AGREE_TO_TEST") {
-       // If they aren't agreeing, we assume this message is them chatting, 
-       // so next time we might want to ask about item types.
+    // 1. Handle Seller Type detection
+    if (t.includes("casual") || t.includes("clearing") || t.includes("space")) nextMemory.sellerType = "CASUAL";
+    if (t.includes("part time") || t.includes("side")) nextMemory.sellerType = "PART_TIME";
+    if (t.includes("full time") || t.includes("daily") || t.includes("store")) nextMemory.sellerType = "FULL_TIME";
+
+    // 2. Logic: Mark item type as asked if we are defaulting
+    if (!nextMemory.hasAskedItemType && intent !== "GREETING" && intent !== "AGREE_TO_TEST") {
        nextMemory.hasAskedItemType = true;
     }
 
-    // 🔑 LOGIC FIX: Track if they said YES
+    // 3. Logic: Only show buttons if they agree or push for price
     if (intent === "AGREE_TO_TEST" || intent === "BEST_FIRST_TEST") {
       nextMemory.hasAgreedToTest = true;
-      nextMemory.hasSeenPricingCTA = true; // Show the buttons too
+      nextMemory.hasSeenPricingCTA = true; 
     }
-
-    if (t.includes("@") && t.includes(".")) {
-      nextMemory.email = text.trim();
-      nextMemory.hasAskedForEmail = true;
-      track("email_captured", { email: nextMemory.email });
-    }
-
-    if (t.includes("storage") || t.includes("batch")) nextMemory.sellerType = "PART_TIME";
-    if (t.includes("full time") || t.includes("daily")) nextMemory.sellerType = "FULL_TIME";
 
     if (intent === "PRICING_CONCERN") {
       nextMemory.pricingTouches = (nextMemory.pricingTouches ?? 0) + 1;
@@ -238,23 +205,17 @@ export default function ChatWidget() {
       track("pricing_intent");
     }
 
-    const replies = [
-      getReply(intent, page, nextMemory),
-      getAhaMoment(nextMemory),
-      getConfidenceBoost(nextMemory),
-      getSocialProof(nextMemory),
-      getRevenueMath(nextMemory),
-      getEmailAsk(nextMemory),
-    ].filter(Boolean) as string[];
+    // 4. Compile Replies
+    const replyText = getReply(intent, page, nextMemory);
+    
+    // Only show "Aha Moment" if it's NOT a greeting (keep greetings clean)
+    const aha = intent !== "GREETING" ? getAhaMoment(nextMemory) : null;
+    
+    if (aha) nextMemory.hasSeenAhaMoment = true;
 
-    if (replies.includes(getAhaMoment(nextMemory)!)) nextMemory.hasSeenAhaMoment = true;
-    if (replies.includes(getConfidenceBoost(nextMemory)!)) nextMemory.hasSeenConfidenceBoost = true;
-    if (replies.includes(getSocialProof(nextMemory)!)) nextMemory.hasSeenSocialProof = true;
-    if (replies.includes(getRevenueMath(nextMemory)!)) nextMemory.hasSeenRevenueMath = true;
-    if (replies.includes(getEmailAsk(nextMemory)!)) nextMemory.hasAskedForEmail = true;
+    const replies = [replyText, aha].filter(Boolean) as string[];
 
     setMemory(nextMemory);
-
     setMessages((prev) => [
       ...prev,
       { role: "user", content: text },
@@ -263,6 +224,10 @@ export default function ChatWidget() {
 
     setInput("");
   }
+
+  // Helper to decide when to show buttons
+  // Don't show buttons on simple greetings, only when actionable.
+  const showButtons = (memory.hasSeenPricingCTA || memory.hasAgreedToTest) && messages.length > 0;
 
   return (
     <div className="fixed bottom-4 right-4 z-[60]">
@@ -283,6 +248,12 @@ export default function ChatWidget() {
           </div>
 
           <div ref={listRef} className="flex-1 overflow-auto px-4 py-3 space-y-3 bg-gray-50">
+            {messages.length === 0 && (
+               <div className="text-center text-gray-500 text-sm mt-4">
+                 Say "Hi" to get started!
+               </div>
+            )}
+            
             {messages.map((m, i) => (
               <div key={i} className={m.role === "user" ? "text-right" : ""}>
                 <div
@@ -297,8 +268,8 @@ export default function ChatWidget() {
               </div>
             ))}
 
-            {/* Show buttons if they have agreed to test OR seen pricing */}
-            {(memory.hasSeenPricingCTA || memory.hasAgreedToTest) && (
+            {/* BUTTONS: Only appear if showButtons is true */}
+            {showButtons && (
               <div className="flex gap-2 mt-2">
                 <button 
                   onClick={() => navigateTo("builder")} 
