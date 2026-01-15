@@ -27,11 +27,31 @@ type ResellerMemory = {
   // 4.5 / 4.6
   hasAskedFollowUp?: boolean;
   preferredWorkflow?: string;
+
+  // 6.x
+  email?: string;
+  hasAskedForEmail?: boolean;
 };
+
+/* ---------------- CONSTANTS ---------------- */
+
+const STORAGE_KEY = "listify_chat_memory_v1";
+
+/* ---------------- ANALYTICS (6.2) ---------------- */
+
+function track(event: string, props: Record<string, any> = {}) {
+  if ((window as any).analytics?.track) {
+    (window as any).analytics.track(event, props);
+  } else {
+    console.log("[track]", event, props);
+  }
+}
 
 /* ---------------- NAVIGATION ---------------- */
 
 function navigateTo(dest: "builder" | "pricing") {
+  track("navigate", { dest });
+
   window.location.href =
     dest === "builder"
       ? "https://www.listifyaihq.com/#/builder"
@@ -93,18 +113,16 @@ function getRevenueMath(memory: ResellerMemory) {
   return "Even casually, those minutes add up to a few extra listings each week.";
 }
 
-/* ---------------- 4.5 FOLLOW-UP QUESTION ---------------- */
+/* ---------------- 6.0 EMAIL ASK ---------------- */
 
-function getFollowUpQuestion(memory: ResellerMemory) {
-  if (memory.hasAskedFollowUp) return null;
+function getEmailAsk(memory: ResellerMemory) {
+  if (memory.hasAskedForEmail || memory.email) return null;
 
-  if (memory.sellerType === "FULL_TIME")
-    return "Quick question — are you trying to speed up titles, descriptions, or both?";
+  if (memory.hasSeenRevenueMath) {
+    return "Want me to send you a quick checklist to speed this up even more? Drop your email — no spam, just reseller tips.";
+  }
 
-  if (memory.sellerType === "PART_TIME")
-    return "When you batch, are you usually listing similar items or mixed lots?";
-
-  return "Do you usually list one item at a time or a few at once?";
+  return null;
 }
 
 /* ---------------- REPLIES ---------------- */
@@ -144,27 +162,24 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
 
-  const [memory, setMemory] = useState<ResellerMemory>({
-    pricingTouches: 0,
+  const [memory, setMemory] = useState<ResellerMemory>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : { pricingTouches: 0 };
   });
 
   const listRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const p = inferPage();
-    setPage(p);
-
-    // 5.0 Builder handoff
-    if (p === "builder" && messages.length === 0) {
-      setMessages([
-        {
-          role: "assistant",
-          content:
-            "Upload 4–6 photos of one item from your last batch. I’ll handle the title and description for you.",
-        },
-      ]);
-    }
+    setPage(inferPage());
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(memory));
+  }, [memory]);
+
+  useEffect(() => {
+    if (open) track("chat_opened");
+  }, [open]);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
@@ -177,18 +192,19 @@ export default function ChatWidget() {
     const t = text.toLowerCase();
     const nextMemory = { ...memory };
 
-    // Seller profiling
+    if (t.includes("@") && t.includes(".")) {
+      nextMemory.email = text.trim();
+      nextMemory.hasAskedForEmail = true;
+      track("email_captured", { email: nextMemory.email });
+    }
+
     if (t.includes("storage") || t.includes("batch")) nextMemory.sellerType = "PART_TIME";
     if (t.includes("full time") || t.includes("daily")) nextMemory.sellerType = "FULL_TIME";
-
-    // Save workflow (4.6)
-    if (!nextMemory.preferredWorkflow && nextMemory.hasAskedFollowUp) {
-      nextMemory.preferredWorkflow = text;
-    }
 
     if (intent === "PRICING_CONCERN") {
       nextMemory.pricingTouches = (nextMemory.pricingTouches ?? 0) + 1;
       if (nextMemory.pricingTouches >= 2) nextMemory.hasSeenPricingCTA = true;
+      track("pricing_intent");
     }
 
     const replies = [
@@ -197,14 +213,14 @@ export default function ChatWidget() {
       getConfidenceBoost(nextMemory),
       getSocialProof(nextMemory),
       getRevenueMath(nextMemory),
-      getFollowUpQuestion(nextMemory),
+      getEmailAsk(nextMemory),
     ].filter(Boolean) as string[];
 
     if (replies.includes(getAhaMoment(nextMemory)!)) nextMemory.hasSeenAhaMoment = true;
     if (replies.includes(getConfidenceBoost(nextMemory)!)) nextMemory.hasSeenConfidenceBoost = true;
     if (replies.includes(getSocialProof(nextMemory)!)) nextMemory.hasSeenSocialProof = true;
     if (replies.includes(getRevenueMath(nextMemory)!)) nextMemory.hasSeenRevenueMath = true;
-    if (replies.includes(getFollowUpQuestion(nextMemory)!)) nextMemory.hasAskedFollowUp = true;
+    if (replies.includes(getEmailAsk(nextMemory)!)) nextMemory.hasAskedForEmail = true;
 
     setMemory(nextMemory);
 
@@ -252,16 +268,10 @@ export default function ChatWidget() {
 
             {memory.hasSeenPricingCTA && (
               <div className="flex gap-2">
-                <button
-                  onClick={() => navigateTo("builder")}
-                  className="flex-1 border rounded-xl px-3 py-2 font-bold"
-                >
+                <button onClick={() => navigateTo("builder")} className="flex-1 border rounded-xl px-3 py-2 font-bold">
                   Try one item
                 </button>
-                <button
-                  onClick={() => navigateTo("pricing")}
-                  className="flex-1 bg-blue-600 text-white rounded-xl px-3 py-2 font-bold"
-                >
+                <button onClick={() => navigateTo("pricing")} className="flex-1 bg-blue-600 text-white rounded-xl px-3 py-2 font-bold">
                   See pricing
                 </button>
               </div>
