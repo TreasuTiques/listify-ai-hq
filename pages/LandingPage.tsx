@@ -27,26 +27,33 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
-      {/* SECTION 1 — PREMIUM 3D HERO UPGRADE */}
+      {/* SECTION 1 — PREMIUM 3D HERO UPGRADE (UPDATED) */}
       {/* ===================================================== */}
       <section className="relative pt-12 sm:pt-20 pb-28 sm:pb-36 bg-[#F8FAFC] overflow-hidden">
-        {/* Decorative background depth */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/40 blur-[120px] rounded-full -mr-48 -mt-24"></div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative bg-white rounded-[48px] border border-slate-200/60 shadow-[0_32px_80px_-20px_rgba(15,23,42,0.08)] p-8 sm:p-12 lg:p-20">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        {/* --- UPGRADE 1: THE AURORA BACKGROUND --- */}
+        {/* Soft Indigo Blob (Top Left) */}
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-indigo-200/30 blur-[120px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-70 animate-pulse"></div>
+        {/* Soft Cyan Blob (Bottom Right) */}
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-cyan-100/40 blur-[120px] rounded-full -mr-20 -mb-20 mix-blend-multiply opacity-70"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="relative bg-white/60 backdrop-blur-xl rounded-[48px] border border-white/50 shadow-[0_32px_80px_-20px_rgba(15,23,42,0.15)] p-8 sm:p-12 lg:p-20 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               
               {/* Left Content */}
-              <div className="text-left">
+              <div className="text-left relative z-10">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[#2563EB] text-[11px] font-bold uppercase tracking-widest mb-8">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
                   Trusted by eBay resellers worldwide
                 </div>
+                
+                {/* --- UPGRADE 2: TYPOGRAPHY & GRADIENT TEXT --- */}
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#0F172A] tracking-tight leading-[1.1] mb-8">
                   Create High-Converting eBay Listings from Photos —{' '}
-                  <span className="text-blue-600">Instantly</span>
+                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Instantly</span>
                 </h1>
+                
                 <p className="text-lg sm:text-xl text-slate-500 max-w-lg leading-relaxed mb-10">
                   AI built for real-world resellers. Upload product photos and generate
                   SEO-ready titles and clean HTML descriptions in seconds.
@@ -57,50 +64,30 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 >
                   Create My First Listing Free
                 </button>
+                
+                {/* Trust Signals (Optional Addition) */}
+                <div className="mt-8 flex items-center gap-4 text-sm text-slate-400 font-medium">
+                   <span>Works with:</span>
+                   <div className="flex gap-3 grayscale opacity-60">
+                      <span>eBay</span> • <span>Poshmark</span> • <span>Mercari</span>
+                   </div>
+                </div>
               </div>
 
-              {/* Right Mockup — THE PREMIUM UPGRADE */}
-              <div className="relative perspective-1000">
-                {/* 3D iPhone Frame Mockup */}
-                <div className="relative w-[300px] h-[600px] mx-auto bg-slate-900 rounded-[3.5rem] p-3 shadow-[20px_40px_80px_-15px_rgba(15,23,42,0.25)] border-[1px] border-slate-700/50">
-                  {/* Notch */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-900 rounded-b-3xl z-20"></div>
-                  
-                  {/* Screen Content */}
-                  <div className="w-full h-full bg-white rounded-[2.8rem] overflow-hidden relative flex flex-col p-5 pt-10">
-                    <div className="w-full h-40 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center relative overflow-hidden">
-                       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/60"></div>
-                       <span className="text-3xl mb-2">📸</span>
-                       <span className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Uploading...</span>
-                    </div>
-
-                    {/* AI Process Animation Placeholder */}
-                    <div className="mt-8 space-y-4">
-                       <div className="h-2 w-1/2 bg-blue-600/10 rounded-full animate-pulse"></div>
-                       <div className="h-2 w-full bg-slate-100 rounded-full"></div>
-                       <div className="h-2 w-5/6 bg-slate-100 rounded-full"></div>
-                    </div>
-
-                    {/* Floating Result Card */}
-                    <div className="mt-auto mb-4 p-4 bg-white rounded-2xl border border-blue-100 shadow-[0_10px_30px_-5px_rgba(37,99,235,0.15)] transform translate-y-[-10px] animate-bounce-slow">
-                       <span className="text-[8px] font-bold text-blue-600 uppercase tracking-widest">AI Detected</span>
-                       <h4 className="text-[12px] font-bold text-slate-800 mt-1">Commodore Plus/4</h4>
-                       <div className="mt-3 flex gap-1">
-                          <div className="h-1 w-4 bg-blue-600 rounded-full"></div>
-                          <div className="h-1 w-4 bg-blue-200 rounded-full"></div>
-                          <div className="h-1 w-4 bg-blue-200 rounded-full"></div>
-                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Decorative floating elements around the phone */}
-                <div className="absolute top-1/4 -right-12 p-4 bg-white rounded-2xl shadow-xl border border-slate-100 animate-float">
-                  <span className="text-xl">🏷️</span>
-                </div>
-                <div className="absolute bottom-1/4 -left-12 p-4 bg-white rounded-2xl shadow-xl border border-slate-100 animate-float-delayed">
-                  <span className="text-xl">📈</span>
-                </div>
+              {/* --- UPGRADE 3: THE IMAGE REPLACEMENT --- */}
+              <div className="relative perspective-1000 flex justify-center lg:justify-end">
+                {/* INSTRUCTIONS: 
+                   1. Save your generated "Glass Dashboard" image as 'hero-dashboard.png' 
+                   2. Put it in your /public folder 
+                */}
+                <img 
+                  src="/hero-dashboard.png" 
+                  alt="Listify AI Dashboard Interface" 
+                  className="w-full max-w-[650px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out"
+                />
+                
+                {/* Optional: Subtle glow behind the image to make it float */}
+                <div className="absolute inset-0 bg-blue-400/20 blur-[60px] -z-10 rounded-full scale-75"></div>
               </div>
 
             </div>
@@ -120,7 +107,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               { title: 'Clean HTML Output', icon: '🧾', label: 'receipt', text: 'Copy and paste into eBay with zero cleanup.' },
               { title: 'Built For Speed', icon: '⚡', label: 'bolt', text: 'List faster so you can source and ship more.' }
             ].map((f) => (
-              <div key={f.title} className="p-6 rounded-2xl border border-slate-100 shadow-sm">
+              <div key={f.title} className="p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-blue-100 transition-colors">
                 <div className="flex items-start gap-3">
                   <span role="img" aria-label={f.label} className="text-2xl mt-0.5">{f.icon}</span>
                   <div>
@@ -194,7 +181,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* RESTORED: SAMPLE LISTING WITH UPDATED SCROLL BUTTON */}
+      {/* RESTORED: SAMPLE LISTING */}
       {/* ===================================================== */}
       <section className="py-24 sm:py-28 px-4 bg-slate-50">
         <div className="max-w-5xl mx-auto text-center">
@@ -257,7 +244,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-4xl sm:text-5xl font-bold text-[#0F172A] mb-4">Pricing for every stage.</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left mt-16">
-            {/* Cards (Keeping Tier Content same as image) */}
+            {/* Free */}
             <div className="p-8 rounded-[32px] border border-slate-100 bg-slate-50/50 flex flex-col">
               <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Free</h3>
               <div className="text-4xl font-bold mb-8">$0 <span className="text-base font-medium text-slate-400">/mo</span></div>
@@ -333,7 +320,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
       
-      {/* Tailwind Config for Custom Animations (Add this to your tailwind.config.js or globals.css) */}
+      {/* Tailwind Config for Custom Animations */}
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0); }
@@ -344,8 +331,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           50% { transform: translateY(0px); }
         }
         .animate-float { animation: float 5s ease-in-out infinite; }
-        .animate-float-delayed { animation: float 5s ease-in-out 2s infinite; }
-        .animate-bounce-slow { animation: bounce-slow 4s ease-in-out infinite; }
         .perspective-1000 { perspective: 1000px; }
       `}</style>
 
