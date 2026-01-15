@@ -4,11 +4,13 @@ import React, { useEffect, useRef, useState } from "react";
 
 type ChatIntent =
   | "GREETING"
-  | "WANT_TO_LIST"      // <--- NEW: Knows when user wants to start work
-  | "HOW_IT_WORKS"      // <--- NEW: Explains the process
+  | "WANT_TO_LIST"
+  | "HOW_IT_WORKS"
   | "PRICING_CONCERN"
   | "AGREE_TO_TEST"
-  | "RESELLER_CHAT"     // <--- NEW: Small talk (death piles, sourcing)
+  | "RESELLER_CHAT"
+  | "NEED_SUPPORT"      // <--- NEW: Catches "Need help"
+  | "COMPLIMENT"        // <--- NEW: Catches "Nice", "Cool"
   | "JUST_BROWSING";
 
 type Page = "homepage" | "builder" | "pricing";
@@ -36,8 +38,8 @@ type ResellerMemory = {
 
 /* ---------------- CONSTANTS ---------------- */
 
-// V4 to clear out the old loops
-const STORAGE_KEY = "listify_chat_memory_v4"; 
+// V5: Resetting memory to fix the "Music to my ears" loop
+const STORAGE_KEY = "listify_chat_memory_v5"; 
 
 /* ---------------- ANALYTICS ---------------- */
 
@@ -69,42 +71,72 @@ function inferPage(): Page {
   return "homepage";
 }
 
-// 🧠 THE BRAIN: Expanded Vocabulary
 function detectIntent(message: string): ChatIntent {
   const t = message.toLowerCase();
   
-  // 1. Greetings
+  // 1. Support / Help (PRIORITY)
+  if (t.includes("help") || t.includes("support") || t.includes("issue") || t.includes("broken") || t.includes("contact") || t.includes("human"))
+    return "NEED_SUPPORT";
+
+  // 2. Greetings
   const greetings = ["hi", "hello", "hey", "good morning", "hola", "yo", "sup"];
   if (greetings.some(g => t === g || t.startsWith(g + " ") || t.startsWith(g + ","))) {
     return "GREETING";
   }
 
-  // 2. Agreed to test
+  // 3. Compliments (New)
+  if (t === "nice" || t === "cool" || t === "awesome" || t === "sweet" || t === "wow")
+    return "COMPLIMENT";
+
+  // 4. Agreeing to test
   if (t === "yes" || t === "sure" || t === "ok" || t === "yeah" || t.includes("let's do it") || t.includes("try it")) 
     return "AGREE_TO_TEST";
 
-  // 3. Wants to List (Action)
+  // 5. Wants to List
   if (t === "listing" || t.includes("create listing") || t.includes("draft") || t.includes("sell item") || t.includes("make a listing"))
     return "WANT_TO_LIST";
 
-  // 4. How it works (Education)
+  // 6. How it works
   if (t === "how" || t === "how?" || t.includes("how does") || t.includes("explain") || t.includes("work"))
     return "HOW_IT_WORKS";
 
-  // 5. Pricing (Objection)
+  // 7. Pricing
   if (t === "pricing" || t === "price" || t.includes("cost") || t.includes("expensive") || t.includes("how much"))
     return "PRICING_CONCERN";
 
-  // 6. Reseller Lingo (Bonding)
+  // 8. Reseller Lingo
   if (t.includes("death pile") || t.includes("source") || t.includes("ebay") || t.includes("poshmark") || t.includes("money"))
     return "RESELLER_CHAT";
   
   return "JUST_BROWSING";
 }
 
-/* ---------------- MOMENTS & REPLIES ---------------- */
+/* ---------------- REPLIES ---------------- */
 
 function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): string {
+  // 🚨 1. PRIORITY CHECKS (These override the "Success" loop)
+  
+  // Support Request
+  if (intent === "NEED_SUPPORT") {
+    return "I'm an automated buddy, but I can help you list items or explain pricing. If you need technical support, you can email our team at support@listifyaihq.com.";
+  }
+
+  // Compliments
+  if (intent === "COMPLIMENT") {
+    return "Glad you like it! Ready to give it a spin? 🌪️";
+  }
+
+  // Specific Questions (How/Price/List)
+  // We answer these even if they already said 'Yes' before.
+  if (intent === "HOW_IT_WORKS") {
+    return "It's simple: You upload photos, I write the listing. Takes about 10 seconds. Want to see?";
+  }
+  if (intent === "PRICING_CONCERN") {
+    return "We have free trials and flexible plans. Honestly, the best way to judge the value is to see the output first. Want to test one item?";
+  }
+
+  // --------------------------------------------------
+
   // A. Builder Page Context
   if (page === "builder") {
     return "You're in the right spot. Just upload photos of that item and I'll handle the writing! 📸";
@@ -115,22 +147,9 @@ function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): strin
     return "Hey! 👋 I'm here to help you crush your death pile. Want to see how I can write a listing in 10 seconds?";
   }
 
-  // C. "How?" (Explanation)
-  if (intent === "HOW_IT_WORKS") {
-    return "It's super simple: You upload photos, and I analyze them to write the title, description, and specifics automatically. No typing needed. Want to try one?";
-  }
-
   // D. "Listing" (Action)
   if (intent === "WANT_TO_LIST") {
     return "Let's get that item listed! 🚀 Click the 'Try one item' button below and we'll build it right now.";
-  }
-
-  // E. Pricing / Cost
-  if (intent === "PRICING_CONCERN") {
-    if (memory.hasSeenPricingCTA)
-      return "I've got plans for every budget, but honestly? You should see if the tool actually works for you first. Want to test a real item on the house?";
-    
-    return "We have flexible plans for part-timers and pros. But talk is cheap—want to test one real item for free to see if it's worth it?";
   }
 
   // F. Reseller Chat (Small Talk)
@@ -138,8 +157,9 @@ function getReply(intent: ChatIntent, page: Page, memory: ResellerMemory): strin
     return "I know the grind! Listing is the boring part, sourcing is the fun part. Let me handle the boring stuff so you can source more. Ready to test it?";
   }
 
-  // G. Success (User said YES)
-  if (memory.hasAgreedToTest) {
+  // G. Success (User said YES previously or just now)
+  // Only show this if they just agreed, or if they are "Just Browsing" after agreeing.
+  if (intent === "AGREE_TO_TEST" || (memory.hasAgreedToTest && intent === "JUST_BROWSING")) {
     return "Music to my ears. 🎶 Click 'Try one item' below to launch the builder. Let's turn that item into cash.";
   }
 
@@ -222,7 +242,6 @@ export default function ChatWidget() {
     setInput("");
   }
 
-  // 🔑 LOGIC FIX: Don't show buttons if chat is empty (fixes the weird empty screen)
   const showButtons = (memory.hasSeenPricingCTA || memory.hasAgreedToTest) && messages.length > 0;
 
   return (
@@ -267,7 +286,7 @@ export default function ChatWidget() {
               </div>
             ))}
 
-            {/* Buttons (Only show when context is ready) */}
+            {/* Buttons */}
             {showButtons && (
               <div className="flex gap-2 mt-4 animate-fade-in">
                 <button 
