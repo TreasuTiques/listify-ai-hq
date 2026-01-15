@@ -27,12 +27,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
-      {/* SECTION 1 — PREMIUM 3D HERO UPGRADE (BLENDED VERSION) */}
+      {/* SECTION 1 — PREMIUM 3D HERO UPGRADE (CENTERED & FADED) */}
       {/* ===================================================== */}
       <section className="relative pt-12 sm:pt-20 pb-28 sm:pb-36 bg-[#F8FAFC] overflow-hidden">
         
-        {/* --- UPGRADE 1: STRONGER AURORA BACKGROUND --- */}
-        {/* We made these darker/stronger to match the image's blue tone */}
+        {/* Aurora Background */}
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-80 animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/60 blur-[100px] rounded-full -mr-20 -mb-20 mix-blend-multiply opacity-80"></div>
         
@@ -47,7 +46,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   Trusted by eBay resellers worldwide
                 </div>
                 
-                {/* --- UPGRADE 2: TYPOGRAPHY & GRADIENT TEXT --- */}
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#0F172A] tracking-tight leading-[1.1] mb-8">
                   Create High-Converting eBay Listings from Photos —{' '}
                   <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Instantly</span>
@@ -64,7 +62,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   Create My First Listing Free
                 </button>
                 
-                {/* Trust Signals */}
                 <div className="mt-8 flex items-center gap-4 text-sm text-slate-400 font-medium">
                    <span>Works with:</span>
                    <div className="flex gap-3 grayscale opacity-60">
@@ -73,20 +70,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 </div>
               </div>
 
-              {/* --- UPGRADE 3: THE BLENDED IMAGE --- */}
-              <div className="relative perspective-1000 flex justify-center lg:justify-end z-10">
-                {/* THE MAGIC TRICK: 
-                   1. scale-[1.35] makes it much bigger.
-                   2. -mr-12 pulls it to the right so it bleeds off slightly (dynamic look).
-                   3. mask-image creates a fade effect so the hard square edges disappear.
+              {/* --- UPGRADE 3: CENTERED & UNIFORM FADE IMAGE --- */}
+              <div className="relative perspective-1000 flex justify-center items-center z-10 h-full">
+                {/* - justify-center items-center: Centers it perfectly in the grid column.
+                   - scale-[1.3]: Kept it large for impact.
+                   - maskImage: Changed to a radial ellipse that fades ALL edges uniformly.
                 */}
                 <img 
                   src="/hero-dashboard.png" 
                   alt="Listify AI Dashboard Interface" 
-                  className="w-full max-w-[800px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out scale-[1.35] lg:-mr-20"
+                  className="w-full max-w-[800px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out scale-[1.3]"
                   style={{
-                    maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%), linear-gradient(to left, black 80%, transparent 100%)',
-                    WebkitMaskImage: 'radial-gradient(circle at center, black 60%, transparent 100%)' 
+                    WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 100%)',
+                    maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 100%)'
                   }}
                 />
               </div>
