@@ -27,7 +27,7 @@ export default function ChatWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isLoading]);
@@ -39,20 +39,20 @@ export default function ChatWidget() {
   async function send(text: string) {
     if (!text.trim()) return;
 
-    // 1. Add User Message
+    // 1. Add User Message immediately
     const userMsg: Msg = { role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
 
     try {
-      // 2. Call the "Brain" (The new api/chat.js file you created)
+      // 2. Call your new API Brain
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message: text,
-          history: messages.slice(-6) // Send context
+          history: messages.slice(-6) // Send recent context
         }),
       });
 
