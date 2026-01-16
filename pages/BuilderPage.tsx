@@ -1,13 +1,19 @@
-
 import React, { useState, useRef } from 'react';
 import { ListingFormValues, ListingStyle, GeneratedListing } from '../types';
 import { generateStandardListing, generatePremiumListing } from '../services/mockGenerator';
+
+// Platform types for the switcher
+type Platform = 'ebay' | 'poshmark' | 'mercari' | 'depop' | 'shopify' | 'etsy';
 
 const BuilderPage: React.FC = () => {
   const [images, setImages] = useState<File[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [output, setOutput] = useState<GeneratedListing | null>(null);
+  
+  // NEW: Platform State
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform>('ebay');
+
   const [form, setForm] = useState<ListingFormValues>({
     title: '',
     brand: '',
@@ -52,6 +58,7 @@ const BuilderPage: React.FC = () => {
     e.preventDefault();
     setIsGenerating(true);
     
+    // Simulate AI Processing
     setTimeout(() => {
       const result = form.listingStyle === ListingStyle.STANDARD 
         ? generateStandardListing(form) 
@@ -60,6 +67,7 @@ const BuilderPage: React.FC = () => {
       setOutput(result);
       setIsGenerating(false);
       
+      // Scroll to bottom to see result
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }, 1500);
   };
@@ -69,264 +77,259 @@ const BuilderPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <header className="mb-16 text-center">
-          <h1 className="text-4xl font-semibold text-[#0F172A] tracking-tight">Create your Listing</h1>
-          <p className="text-slate-500 mt-3 text-lg">Detailed input leads to higher conversion. Let's get started.</p>
-        </header>
+    <div className="min-h-screen bg-[#F8FAFC] pb-20">
+      
+      {/* HEADER BAR */}
+      <div className="bg-white border-b border-slate-200 sticky top-16 z-30 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <h1 className="text-lg font-bold text-[#0F172A] flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            Listing Command Center
+          </h1>
+          <div className="text-sm text-slate-500 font-medium">
+            {images.length} Photos Uploaded • Target: <span className="text-[#2563EB] capitalize">{selectedPlatform}</span>
+          </div>
+        </div>
+      </div>
 
-        <form onSubmit={handleGenerate} className="space-y-12">
-          {/* Step 1: Photos */}
-          <section className="bg-white p-10 rounded-[32px] shadow-sm border border-slate-200/60">
-            <div className="flex items-center gap-3 mb-8">
-              <span className="w-8 h-8 rounded-full bg-[#0F172A] text-white flex items-center justify-center text-sm font-bold">1</span>
-              <h2 className="text-xl font-semibold text-[#0F172A]">Upload Product Photos</h2>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <form onSubmit={handleGenerate} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* LEFT COLUMN: MEDIA (Sticky) */}
+          <div className="lg:col-span-5 lg:sticky lg:top-36 space-y-6">
             
-            <div className="flex flex-col md:flex-row gap-10">
-              <div 
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`flex-shrink-0 w-full md:w-60 h-60 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative group overflow-hidden ${
-                  isDragging 
-                    ? 'border-[#2563EB] bg-blue-50/50' 
-                    : 'border-slate-200 bg-slate-50 hover:bg-white hover:border-[#2563EB]'
-                }`}
-              >
-                <input 
-                  type="file" 
-                  multiple 
-                  ref={fileInputRef} 
-                  className="hidden" 
-                  onChange={handleImageChange}
-                  accept="image/*"
-                />
-                
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-colors ${isDragging ? 'bg-[#2563EB] text-white' : 'bg-white text-slate-400 group-hover:text-[#2563EB] shadow-sm'}`}>
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"></path>
-                  </svg>
-                </div>
-                <div className="text-center">
-                  <span className="block text-[13px] font-bold text-[#0F172A] uppercase tracking-widest mb-1">Upload Images</span>
-                  <span className="block text-xs text-slate-400">or drag and drop here</span>
-                </div>
+            {/* Photo Uploader Card */}
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h2 className="font-bold text-[#0F172A] text-sm uppercase tracking-wide">Source Media</h2>
+                <span className="text-xs font-bold text-[#2563EB] bg-blue-50 px-2 py-1 rounded">AI Vision Ready</span>
               </div>
               
-              <div className="flex-1">
-                {images.length > 0 ? (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
+              <div className="p-6">
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`aspect-[4/3] border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative group overflow-hidden ${
+                    isDragging 
+                      ? 'border-[#2563EB] bg-blue-50/50' 
+                      : 'border-slate-200 bg-slate-50 hover:bg-white hover:border-[#2563EB]'
+                  }`}
+                >
+                  <input 
+                    type="file" 
+                    multiple 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    onChange={handleImageChange}
+                    accept="image/*"
+                  />
+                  
+                  {images.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-2 w-full h-full p-2 overflow-y-auto">
                       {images.map((img, i) => (
-                        <div key={i} className="relative group aspect-square bg-slate-100 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-                           <div className="absolute inset-0 flex items-center justify-center text-[10px] text-slate-300 font-bold uppercase truncate px-2">
-                             {img.name}
-                           </div>
-                           <button 
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setImages(prev => prev.filter((_, index) => index !== i));
-                            }}
-                            className="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                          </button>
+                        <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200">
+                          <div className="absolute inset-0 bg-slate-800 flex items-center justify-center">
+                             <span className="text-xs text-white font-bold">{img.name.slice(0, 3)}..</span>
+                          </div>
                         </div>
                       ))}
+                      {/* Add Button */}
+                      <div className="border border-dashed border-slate-300 rounded-lg flex items-center justify-center hover:bg-slate-50">
+                         <span className="text-2xl text-slate-400">+</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-[#2563EB] bg-blue-50 px-4 py-2 rounded-xl inline-flex">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg>
-                      <span className="font-semibold">AI Detection Active</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-full flex flex-col justify-center py-4">
-                    <p className="text-slate-400 font-medium">Ready for your photos...</p>
-                    <p className="text-xs text-slate-400 mt-2 max-w-xs leading-relaxed">Better photos lead to more accurate AI generation. Include labels, serial numbers, and any wear.</p>
-                  </div>
-                )}
+                  ) : (
+                    <>
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors ${isDragging ? 'bg-[#2563EB] text-white' : 'bg-white text-slate-400 shadow-sm'}`}>
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                      </div>
+                      <p className="text-sm font-bold text-slate-600">Drop Photos Here</p>
+                      <p className="text-xs text-slate-400 mt-1">Supports JPG, PNG, HEIC</p>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
-          </section>
 
-          {/* Step 2: Form */}
-          <section className="bg-white p-10 rounded-[32px] shadow-sm border border-slate-200/60">
-            <div className="flex items-center gap-3 mb-10">
-              <span className="w-8 h-8 rounded-full bg-[#0F172A] text-white flex items-center justify-center text-sm font-bold">2</span>
-              <h2 className="text-xl font-semibold text-[#0F172A]">Listing Details</h2>
+            {/* AI Analysis Status (Mock) */}
+            <div className="bg-[#1E293B] rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
+               <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">AI Analysis</h3>
+               <div className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full ${images.length > 0 ? 'bg-green-400 animate-pulse' : 'bg-slate-600'}`}></div>
+                  <span className="text-sm font-medium">{images.length > 0 ? 'Scanning visual features...' : 'Waiting for media...'}</span>
+               </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="col-span-full">
-                <label className="block text-[13px] font-bold text-slate-500 mb-2 uppercase tracking-widest">Item Title / Name</label>
-                <input 
-                  type="text"
-                  required
-                  placeholder="e.g. Vintage Hot Wheels Redline Lot"
-                  className="w-full px-5 py-4 bg-[#F8FAFC] border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all font-medium"
-                  value={form.title}
-                  onChange={e => setForm({...form, title: e.target.value})}
-                />
-              </div>
-              
-              <div>
-                <label className="block text-[13px] font-bold text-slate-500 mb-2 uppercase tracking-widest">Brand / Model</label>
-                <input 
-                  type="text"
-                  required
-                  placeholder="Sony, Nike, LEGO, etc."
-                  className="w-full px-5 py-4 bg-[#F8FAFC] border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all font-medium"
-                  value={form.brand}
-                  onChange={e => setForm({...form, brand: e.target.value})}
-                />
-              </div>
-
-              <div>
-                <label className="block text-[13px] font-bold text-slate-500 mb-2 uppercase tracking-widest">Condition</label>
-                <select 
-                  className="w-full px-5 py-4 bg-[#F8FAFC] border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all font-medium appearance-none cursor-pointer"
-                  value={form.condition}
-                  onChange={e => setForm({...form, condition: e.target.value})}
-                >
-                  <option>New</option>
-                  <option>Like New</option>
-                  <option>Very Good</option>
-                  <option>Good</option>
-                  <option>Acceptable</option>
-                  <option>For Parts / Not Working</option>
-                </select>
-              </div>
-
-              <div className="col-span-full">
-                <label className="block text-[13px] font-bold text-slate-500 mb-2 uppercase tracking-widest">Condition Notes</label>
-                <textarea 
-                  rows={4}
-                  placeholder="Mention wear, missing parts, or any specific quirks..."
-                  className="w-full px-5 py-4 bg-[#F8FAFC] border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all font-medium resize-none"
-                  value={form.conditionNotes}
-                  onChange={e => setForm({...form, conditionNotes: e.target.value})}
-                />
-              </div>
-
-              <div className="col-span-full">
-                <label className="block text-[13px] font-bold text-slate-500 mb-2 uppercase tracking-widest">Special Features</label>
-                <textarea 
-                  rows={2}
-                  placeholder="Limited edition, rare variants, provenance..."
-                  className="w-full px-5 py-4 bg-[#F8FAFC] border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] transition-all font-medium resize-none"
-                  value={form.specialFeatures}
-                  onChange={e => setForm({...form, specialFeatures: e.target.value})}
-                />
-              </div>
-            </div>
-          </section>
-
-          {/* Listing Style Toggle */}
-          <div className="bg-white p-2 rounded-full shadow-sm border border-slate-200/60 max-w-xl mx-auto flex">
-            <button
-              type="button"
-              onClick={() => setForm({...form, listingStyle: ListingStyle.STANDARD})}
-              className={`flex-1 px-8 py-4 rounded-full text-sm font-bold transition-all duration-300 ${form.listingStyle === ListingStyle.STANDARD ? 'bg-[#0F172A] text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              Standard Listing
-            </button>
-            <button
-              type="button"
-              onClick={() => setForm({...form, listingStyle: ListingStyle.PREMIUM})}
-              className={`flex-1 px-8 py-4 rounded-full text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 ${form.listingStyle === ListingStyle.PREMIUM ? 'bg-[#2563EB] text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              {form.listingStyle === ListingStyle.PREMIUM && <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>}
-              Premium Collector
-            </button>
           </div>
 
-          <div className="text-center">
+
+          {/* RIGHT COLUMN: CONTROLS (Form) */}
+          <div className="lg:col-span-7 space-y-8">
+            
+            {/* PLATFORM SELECTOR TABS */}
+            <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap gap-1">
+               {['ebay', 'poshmark', 'mercari', 'depop', 'shopify', 'etsy'].map((p) => (
+                 <button
+                   key={p}
+                   type="button"
+                   onClick={() => setSelectedPlatform(p as Platform)}
+                   className={`flex-1 min-w-[80px] py-2.5 rounded-xl text-xs font-bold uppercase tracking-wide transition-all ${
+                     selectedPlatform === p 
+                       ? 'bg-[#0F172A] text-white shadow-md transform scale-105' 
+                       : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+                   }`}
+                 >
+                   {p}
+                 </button>
+               ))}
+            </div>
+
+            <div className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-200/60 relative">
+               {/* Watermark for active platform */}
+               <div className="absolute top-8 right-8 text-6xl font-black text-slate-100 uppercase pointer-events-none select-none opacity-50">
+                  {selectedPlatform}
+               </div>
+
+               <div className="space-y-6 relative z-10">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Listing Title</label>
+                    <div className="relative">
+                      <input 
+                        type="text"
+                        placeholder="AI will generate this..."
+                        className="w-full pl-5 pr-20 py-4 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] font-medium text-[#0F172A]"
+                        value={form.title}
+                        onChange={e => setForm({...form, title: e.target.value})}
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                        {form.title.length} / 80
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-5">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Brand</label>
+                      <input 
+                        type="text"
+                        placeholder="Nike, Sony..."
+                        className="w-full px-5 py-3.5 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                        value={form.brand}
+                        onChange={e => setForm({...form, brand: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Condition</label>
+                      <select 
+                        className="w-full px-5 py-3.5 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] appearance-none"
+                        value={form.condition}
+                        onChange={e => setForm({...form, condition: e.target.value})}
+                      >
+                        <option>New with Tags</option>
+                        <option>Pre-Owned (Excellent)</option>
+                        <option>Pre-Owned (Good)</option>
+                        <option>For Parts</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Condition Notes</label>
+                    <textarea 
+                      rows={3}
+                      placeholder="e.g. Small scratch on lens, box has shelf wear..."
+                      className="w-full px-5 py-3.5 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] resize-none"
+                      value={form.conditionNotes}
+                      onChange={e => setForm({...form, conditionNotes: e.target.value})}
+                    />
+                  </div>
+
+                  {/* Toggle: Standard vs Premium */}
+                  <div className="pt-4 border-t border-slate-100">
+                    <label className="flex items-center justify-between cursor-pointer group">
+                       <div>
+                          <div className="text-sm font-bold text-[#0F172A]">Enable Premium Storytelling?</div>
+                          <div className="text-xs text-slate-500">Uses GPT-4o for richer descriptions.</div>
+                       </div>
+                       <div 
+                         onClick={() => setForm({...form, listingStyle: form.listingStyle === ListingStyle.STANDARD ? ListingStyle.PREMIUM : ListingStyle.STANDARD})}
+                         className={`w-14 h-8 rounded-full flex items-center px-1 transition-colors duration-300 ${form.listingStyle === ListingStyle.PREMIUM ? 'bg-[#2563EB]' : 'bg-slate-200'}`}
+                       >
+                          <div className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${form.listingStyle === ListingStyle.PREMIUM ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                       </div>
+                    </label>
+                  </div>
+               </div>
+            </div>
+
+            {/* GENERATE BUTTON */}
             <button 
               type="submit"
               disabled={isGenerating}
-              className={`bg-[#2563EB] text-white px-16 py-5 rounded-full text-lg font-bold shadow-xl hover:bg-blue-700 transition-all hover:scale-[1.02] active:scale-100 disabled:opacity-50 disabled:cursor-not-allowed`}
+              className="w-full bg-[#2563EB] text-white py-5 rounded-2xl text-lg font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 hover:shadow-2xl transition-all transform active:scale-[0.99] disabled:opacity-70 disabled:cursor-wait"
             >
-              {isGenerating ? (
-                <div className="flex items-center gap-3">
-                  <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                  Writing your listing...
-                </div>
-              ) : 'Generate Optimized Listing'}
+              {isGenerating ? 'Analyzing visual data...' : `Generate ${selectedPlatform === 'ebay' ? 'eBay' : selectedPlatform === 'shopify' ? 'Shopify' : 'Marketplace'} Listing`}
             </button>
           </div>
         </form>
 
-        {/* Output Panel */}
+        {/* OUTPUT SECTION */}
         {output && (
-          <div className="mt-20 space-y-10 animate-in fade-in slide-in-from-bottom-10 duration-700 fill-mode-forwards">
-            <div className="bg-white rounded-[40px] shadow-[0_40px_80px_-20px_rgba(15,23,42,0.15)] border border-slate-200 overflow-hidden">
-              <div className="bg-[#0F172A] px-10 py-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div>
-                  <h2 className="text-2xl font-semibold text-white">Listing Output</h2>
-                  <p className="text-slate-400 mt-1">Ready for copy & paste.</p>
-                </div>
-                <div className="flex gap-4">
-                  <button onClick={() => setOutput(null)} className="px-5 py-2.5 rounded-full bg-slate-800 text-slate-300 text-sm font-bold hover:bg-slate-700 transition-colors">Start Over</button>
-                  <button className="px-5 py-2.5 rounded-full bg-[#2563EB] text-white text-sm font-bold hover:bg-blue-700 transition-colors">Export to eBay</button>
-                </div>
-              </div>
-              
-              <div className="p-10 space-y-12">
-                {/* Titles */}
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Title Variants</h3>
-                    <span className="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500">OPTIMIZED FOR SEO</span>
-                  </div>
-                  <div className="space-y-4">
-                    {output.titles.map((t, i) => (
-                      <div key={i} className="flex group items-center justify-between bg-[#F8FAFC] border border-slate-200/60 p-5 rounded-2xl hover:border-[#2563EB] transition-all">
-                        <span className="font-semibold text-[#0F172A] pr-4">{t}</span>
-                        <button 
-                          onClick={() => { copyToClipboard(t); alert('Title copied!'); }}
-                          className="flex-shrink-0 text-[#2563EB] font-bold text-xs uppercase opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1.5"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                          Copy
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+          <div className="mt-16 animate-in fade-in slide-in-from-bottom-10 duration-700">
+            <div className="flex items-center gap-4 mb-6">
+               <div className="h-px bg-slate-200 flex-1"></div>
+               <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Results Ready</span>
+               <div className="h-px bg-slate-200 flex-1"></div>
+            </div>
 
-                {/* Preview */}
-                <div>
-                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Visual Preview</h3>
-                  <div className="p-8 border border-slate-200 rounded-3xl bg-white shadow-inner max-h-[600px] overflow-y-auto">
-                    <div className="prose prose-slate max-w-none" dangerouslySetInnerHTML={{ __html: output.htmlDescription }} />
+            <div className="bg-white rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden">
+               {/* Output Header */}
+               <div className="bg-[#0F172A] p-6 sm:p-8 flex justify-between items-center">
+                  <div>
+                     <h3 className="text-xl font-bold text-white">Ready to Publish</h3>
+                     <p className="text-slate-400 text-sm">Optimized for <span className="text-blue-400 capitalize font-bold">{selectedPlatform}</span></p>
                   </div>
-                </div>
+                  <div className="flex gap-3">
+                     <button className="bg-white/10 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-white/20 transition">Copy All</button>
+                     <button className="bg-[#2563EB] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-600 transition shadow-lg">Push Live</button>
+                  </div>
+               </div>
 
-                {/* Code Block */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">HTML Code</h3>
-                    <button 
-                      onClick={() => { copyToClipboard(output.htmlDescription); alert('HTML copied!'); }}
-                      className="text-[#2563EB] text-xs font-bold flex items-center gap-1.5"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                      Copy Snippet
-                    </button>
+               <div className="grid grid-cols-1 lg:grid-cols-2">
+                  {/* Left: Preview */}
+                  <div className="p-8 border-r border-slate-100">
+                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Description Preview</h4>
+                     <div className="prose prose-sm prose-slate max-w-none h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                        <div dangerouslySetInnerHTML={{ __html: output.htmlDescription }} />
+                     </div>
                   </div>
-                  <div className="bg-[#0F172A] rounded-2xl p-6 font-mono text-[12px] text-slate-300 overflow-x-auto border border-slate-800 leading-relaxed">
-                    {output.htmlDescription}
+
+                  {/* Right: Raw Data */}
+                  <div className="bg-slate-50 p-8">
+                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">SEO Titles</h4>
+                     <div className="space-y-3 mb-8">
+                        {output.titles.map((t, i) => (
+                           <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:border-blue-400 cursor-pointer transition group flex justify-between gap-2" onClick={() => copyToClipboard(t)}>
+                              <span className="truncate">{t}</span>
+                              <span className="text-blue-500 opacity-0 group-hover:opacity-100 text-xs font-bold">COPY</span>
+                           </div>
+                        ))}
+                     </div>
+
+                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">HTML Source</h4>
+                     <div className="bg-[#1E293B] rounded-xl p-4 font-mono text-xs text-blue-300 h-[200px] overflow-y-auto">
+                        {output.htmlDescription}
+                     </div>
                   </div>
-                </div>
-              </div>
+               </div>
             </div>
           </div>
         )}
+
       </div>
     </div>
   );
