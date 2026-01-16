@@ -61,7 +61,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 
                 <p className="text-lg sm:text-xl text-slate-500 max-w-lg leading-relaxed mb-8 mx-auto">
                   The ultimate AI engine for E-commerce. Upload one photo and get 
-                  SEO-optimized titles, descriptions, and specs for Shopify, eBay, Poshmark, and more.
+                  SEO-optimized titles, descriptions, and specs for Shopify, Amazon, eBay, and more.
                 </p>
                 
                 <button 
@@ -71,19 +71,30 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   Start Listing Free
                 </button>
                 
-                {/* Multi-Platform Trust Bar */}
-                <div className="pt-6 border-t border-slate-200/50 w-full">
-                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Optimized for</p>
-                   <div className="flex flex-wrap justify-center gap-6 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                      <span className="text-slate-800 font-bold text-lg">Shopify</span>
-                      <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                      <span className="text-slate-800 font-bold text-lg">eBay</span>
-                      <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                      <span className="text-slate-800 font-bold text-lg">Poshmark</span>
-                      <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                      <span className="text-slate-800 font-bold text-lg">Mercari</span>
-                      <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                      <span className="text-slate-800 font-bold text-lg">Depop</span>
+                {/* Multi-Platform Trust Bar - UPDATED PREMIUM LOOK */}
+                <div className="pt-8 border-t border-slate-200/60 w-full max-w-4xl mx-auto">
+                   {/* Premium Gradient Label */}
+                   <p className="text-xs font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent uppercase tracking-[0.25em] mb-8">
+                     Optimized for all major platforms
+                   </p>
+                   
+                   {/* Darker, Bolder Platform List with new additions */}
+                   <div className="flex flex-wrap justify-center gap-x-8 gap-y-5 items-center text-slate-900 font-bold text-lg">
+                      <span>Shopify</span>
+                      <span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
+                      <span>Amazon</span>
+                      <span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
+                      <span>eBay</span>
+                      <span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
+                      <span>Etsy</span>
+                      <span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
+                      <span>Facebook Marketplace</span>
+                      <span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
+                      <span>Poshmark</span>
+                      <span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
+                      <span>Mercari</span>
+                      <span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
+                      <span>Depop</span>
                    </div>
                 </div>
               </div>
