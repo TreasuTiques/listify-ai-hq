@@ -27,25 +27,26 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
-      {/* HERO SECTION — CENTERED "CROWN" UPGRADE */}
+      {/* HERO SECTION — TIGHTER VERTICAL SPACING */}
       {/* ===================================================== */}
-      <section className="relative pt-12 sm:pt-20 pb-28 sm:pb-36 bg-[#F8FAFC] overflow-hidden">
+      <section className="relative pt-12 sm:pt-16 pb-16 sm:pb-20 bg-[#F8FAFC] overflow-hidden">
         
         {/* Aurora Background */}
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-80 animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/60 blur-[100px] rounded-full -mr-20 -mb-20 mix-blend-multiply opacity-80"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="relative bg-white/40 backdrop-blur-md rounded-[48px] border border-white/60 shadow-[0_32px_80px_-20px_rgba(15,23,42,0.1)] p-8 sm:p-12 lg:p-20 overflow-hidden">
+          {/* Reduced internal padding from lg:p-20 to lg:p-12 */}
+          <div className="relative bg-white/40 backdrop-blur-md rounded-[48px] border border-white/60 shadow-[0_32px_80px_-20px_rgba(15,23,42,0.1)] p-8 sm:p-10 lg:p-12 overflow-hidden">
             
-            {/* CHANGED: Flex Column for Centered Layout instead of Grid */}
-            <div className="flex flex-col items-center text-center gap-12">
+            {/* Reduced gap from gap-12 to gap-2 */}
+            <div className="flex flex-col items-center text-center gap-2">
               
               {/* Top Content: Centered Text */}
               <div className="max-w-3xl mx-auto relative z-20 flex flex-col items-center">
                 
-                {/* THE CROWN BADGE: Centered & Premium Glass Style */}
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-blue-200 shadow-sm text-[#2563EB] text-[11px] font-bold uppercase tracking-widest mb-8 backdrop-blur-sm">
+                {/* THE CROWN BADGE */}
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-blue-200 shadow-sm text-[#2563EB] text-[11px] font-bold uppercase tracking-widest mb-6 backdrop-blur-sm">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
@@ -53,25 +54,25 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   Trusted by 7-Figure Sellers Worldwide
                 </div>
                 
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#0F172A] tracking-tight leading-[1.1] mb-8">
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#0F172A] tracking-tight leading-[1.1] mb-6">
                   Generate High-Converting Product Listings —{' '}
                   <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Instantly</span>
                 </h1>
                 
-                <p className="text-lg sm:text-xl text-slate-500 max-w-lg leading-relaxed mb-10 mx-auto">
+                <p className="text-lg sm:text-xl text-slate-500 max-w-lg leading-relaxed mb-8 mx-auto">
                   The ultimate AI engine for E-commerce. Upload one photo and get 
                   SEO-optimized titles, descriptions, and specs for Shopify, eBay, Poshmark, and more.
                 </p>
                 
                 <button 
                   onClick={() => onNavigate('/builder')}
-                  className="bg-[#2563EB] text-white px-10 py-5 rounded-3xl text-lg font-bold shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition-all hover:-translate-y-1 active:scale-95"
+                  className="bg-[#2563EB] text-white px-10 py-5 rounded-3xl text-lg font-bold shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition-all hover:-translate-y-1 active:scale-95 mb-10"
                 >
                   Start Listing Free
                 </button>
                 
-                {/* Multi-Platform Trust Bar - Centered */}
-                <div className="mt-10 pt-8 border-t border-slate-200/50 w-full">
+                {/* Multi-Platform Trust Bar */}
+                <div className="pt-6 border-t border-slate-200/50 w-full">
                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Optimized for</p>
                    <div className="flex flex-wrap justify-center gap-6 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
                       <span className="text-slate-800 font-bold text-lg">Shopify</span>
@@ -88,7 +89,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               </div>
 
               {/* Bottom Content: Centered Dashboard Image */}
-              <div className="relative perspective-1000 w-full flex justify-center items-center z-10 mt-4">
+              <div className="relative perspective-1000 w-full flex justify-center items-center z-10 -mt-8 lg:-mt-16">
                 <img 
                   src="/hero-dashboard.png" 
                   alt="Listify AI Dashboard Interface" 
