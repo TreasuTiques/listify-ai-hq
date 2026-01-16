@@ -27,7 +27,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
-      {/* HERO SECTION — MULTI-MARKETPLACE UPGRADE */}
+      {/* HERO SECTION — CENTERED "CROWN" UPGRADE */}
       {/* ===================================================== */}
       <section className="relative pt-12 sm:pt-20 pb-28 sm:pb-36 bg-[#F8FAFC] overflow-hidden">
         
@@ -37,12 +37,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="relative bg-white/40 backdrop-blur-md rounded-[48px] border border-white/60 shadow-[0_32px_80px_-20px_rgba(15,23,42,0.1)] p-8 sm:p-12 lg:p-20 overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            
+            {/* CHANGED: Flex Column for Centered Layout instead of Grid */}
+            <div className="flex flex-col items-center text-center gap-12">
               
-              {/* Left Content */}
-              <div className="text-left relative z-20">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[#2563EB] text-[11px] font-bold uppercase tracking-widest mb-8">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+              {/* Top Content: Centered Text */}
+              <div className="max-w-3xl mx-auto relative z-20 flex flex-col items-center">
+                
+                {/* THE CROWN BADGE: Centered & Premium Glass Style */}
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-blue-200 shadow-sm text-[#2563EB] text-[11px] font-bold uppercase tracking-widest mb-8 backdrop-blur-sm">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+                  </span>
                   Trusted by 7-Figure Sellers Worldwide
                 </div>
                 
@@ -51,10 +58,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Instantly</span>
                 </h1>
                 
-                <p className="text-lg sm:text-xl text-slate-500 max-w-lg leading-relaxed mb-10">
+                <p className="text-lg sm:text-xl text-slate-500 max-w-lg leading-relaxed mb-10 mx-auto">
                   The ultimate AI engine for E-commerce. Upload one photo and get 
                   SEO-optimized titles, descriptions, and specs for Shopify, eBay, Poshmark, and more.
                 </p>
+                
                 <button 
                   onClick={() => onNavigate('/builder')}
                   className="bg-[#2563EB] text-white px-10 py-5 rounded-3xl text-lg font-bold shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition-all hover:-translate-y-1 active:scale-95"
@@ -62,11 +70,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   Start Listing Free
                 </button>
                 
-                {/* Multi-Platform Trust Bar */}
-                <div className="mt-10 pt-8 border-t border-slate-200/50">
+                {/* Multi-Platform Trust Bar - Centered */}
+                <div className="mt-10 pt-8 border-t border-slate-200/50 w-full">
                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Optimized for</p>
-                   <div className="flex flex-wrap gap-6 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
-                      {/* Simple Text Labels for Cleanliness or replace with SVGs later */}
+                   <div className="flex flex-wrap justify-center gap-6 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
                       <span className="text-slate-800 font-bold text-lg">Shopify</span>
                       <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
                       <span className="text-slate-800 font-bold text-lg">eBay</span>
@@ -80,15 +87,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 </div>
               </div>
 
-              {/* Centered Image with Fade */}
-              <div className="relative perspective-1000 flex justify-center items-center z-10 h-full">
+              {/* Bottom Content: Centered Dashboard Image */}
+              <div className="relative perspective-1000 w-full flex justify-center items-center z-10 mt-4">
                 <img 
                   src="/hero-dashboard.png" 
                   alt="Listify AI Dashboard Interface" 
-                  className="w-full max-w-[800px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out scale-[1.3]"
+                  className="w-full max-w-[900px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out scale-[1.1]"
                   style={{
-                    WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 100%)',
-                    maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 100%)'
+                    WebkitMaskImage: 'radial-gradient(ellipse at center, black 50%, transparent 100%)',
+                    maskImage: 'radial-gradient(ellipse at center, black 50%, transparent 100%)'
                   }}
                 />
               </div>
