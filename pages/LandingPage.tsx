@@ -27,7 +27,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
-      {/* SECTION 1 — PREMIUM 3D HERO UPGRADE (CENTERED & FADED) */}
+      {/* HERO SECTION — MULTI-MARKETPLACE UPGRADE */}
       {/* ===================================================== */}
       <section className="relative pt-12 sm:pt-20 pb-28 sm:pb-36 bg-[#F8FAFC] overflow-hidden">
         
@@ -43,39 +43,45 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               <div className="text-left relative z-20">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[#2563EB] text-[11px] font-bold uppercase tracking-widest mb-8">
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
-                  Trusted by eBay resellers worldwide
+                  Trusted by 7-Figure Sellers Worldwide
                 </div>
                 
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#0F172A] tracking-tight leading-[1.1] mb-8">
-                  Create High-Converting eBay Listings from Photos —{' '}
+                  Generate High-Converting Product Listings —{' '}
                   <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Instantly</span>
                 </h1>
                 
                 <p className="text-lg sm:text-xl text-slate-500 max-w-lg leading-relaxed mb-10">
-                  AI built for real-world resellers. Upload product photos and generate
-                  SEO-ready titles and clean HTML descriptions in seconds.
+                  The ultimate AI engine for E-commerce. Upload one photo and get 
+                  SEO-optimized titles, descriptions, and specs for Shopify, eBay, Poshmark, and more.
                 </p>
                 <button 
                   onClick={() => onNavigate('/builder')}
                   className="bg-[#2563EB] text-white px-10 py-5 rounded-3xl text-lg font-bold shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition-all hover:-translate-y-1 active:scale-95"
                 >
-                  Create My First Listing Free
+                  Start Listing Free
                 </button>
                 
-                <div className="mt-8 flex items-center gap-4 text-sm text-slate-400 font-medium">
-                   <span>Works with:</span>
-                   <div className="flex gap-3 grayscale opacity-60">
-                      <span>eBay</span> • <span>Poshmark</span> • <span>Mercari</span>
+                {/* Multi-Platform Trust Bar */}
+                <div className="mt-10 pt-8 border-t border-slate-200/50">
+                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Optimized for</p>
+                   <div className="flex flex-wrap gap-6 items-center opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+                      {/* Simple Text Labels for Cleanliness or replace with SVGs later */}
+                      <span className="text-slate-800 font-bold text-lg">Shopify</span>
+                      <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                      <span className="text-slate-800 font-bold text-lg">eBay</span>
+                      <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                      <span className="text-slate-800 font-bold text-lg">Poshmark</span>
+                      <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                      <span className="text-slate-800 font-bold text-lg">Mercari</span>
+                      <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                      <span className="text-slate-800 font-bold text-lg">Depop</span>
                    </div>
                 </div>
               </div>
 
-              {/* --- UPGRADE 3: CENTERED & UNIFORM FADE IMAGE --- */}
+              {/* Centered Image with Fade */}
               <div className="relative perspective-1000 flex justify-center items-center z-10 h-full">
-                {/* - justify-center items-center: Centers it perfectly in the grid column.
-                   - scale-[1.3]: Kept it large for impact.
-                   - maskImage: Changed to a radial ellipse that fades ALL edges uniformly.
-                */}
                 <img 
                   src="/hero-dashboard.png" 
                   alt="Listify AI Dashboard Interface" 
@@ -93,16 +99,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* RESTORED: FEATURE STRIP */}
+      {/* FEATURES — PLATFORM NEUTRAL */}
       {/* ===================================================== */}
       <section className="py-12 sm:py-14 bg-white border-y border-slate-100">
         <div className="max-w-7xl mx-auto px-4 text-left">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
-              { title: 'AI Product Vision', icon: '🧠', label: 'brain', text: 'Detects brand, model, and details from photos.' },
-              { title: 'Cassini-Friendly Titles', icon: '🏷', label: 'tag', text: 'Keyword-aware, buyer-search phrasing built-in.' },
-              { title: 'Clean HTML Output', icon: '🧾', label: 'receipt', text: 'Copy and paste into eBay with zero cleanup.' },
-              { title: 'Built For Speed', icon: '⚡', label: 'bolt', text: 'List faster so you can source and ship more.' }
+              { title: 'AI Product Vision', icon: '🧠', label: 'brain', text: 'Instantly identifies brand, model, and condition from a single photo.' },
+              { title: 'Multi-Channel SEO', icon: '🚀', label: 'rocket', text: 'Titles & keywords optimized for Google, eBay, and marketplace algorithms.' },
+              { title: 'Universal Format', icon: '🌎', label: 'globe', text: 'Get clean descriptions ready for Shopify, Amazon, or any selling platform.' },
+              { title: 'List 10x Faster', icon: '⚡', label: 'bolt', text: 'Stop manual data entry. Focus on sourcing and scaling your store.' }
             ].map((f) => (
               <div key={f.title} className="p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-blue-100 transition-colors">
                 <div className="flex items-start gap-3">
@@ -119,19 +125,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* RESTORED: BEFORE & AFTER SLIDER */}
+      {/* BEFORE & AFTER SLIDER */}
       {/* ===================================================== */}
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-[#0F172A]">See the AI in Action</h2>
+            <p className="text-slate-500 mt-4">Turn a messy photo into a professional listing in seconds.</p>
           </div>
           <div className="relative rounded-[32px] overflow-hidden border border-slate-200 shadow-2xl h-[450px]">
             <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover" alt="Scan" />
             <div className="absolute inset-0 bg-blue-600/20 backdrop-blur-[2px]">
                <div className="absolute top-10 right-10 p-6 bg-white/90 backdrop-blur rounded-2xl border border-blue-100">
-                  <span className="text-[10px] font-bold text-blue-600 uppercase block mb-1 text-left">AI Extraction</span>
-                  <div className="text-sm font-bold text-slate-800 underline decoration-blue-500">Model: Plus/4 NTSC</div>
+                  <span className="text-[10px] font-bold text-blue-600 uppercase block mb-1 text-left">AI Data Extraction</span>
+                  <div className="text-sm font-bold text-slate-800">Model: Commodore Plus/4</div>
+                  <div className="text-xs text-slate-500">Condition: Good/Boxed</div>
                </div>
             </div>
             <div className="absolute inset-0 overflow-hidden border-r-4 border-white" style={{ width: `${sliderVal}%` }}>
@@ -146,30 +154,30 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* RESTORED: COMPARISON TABLE */}
+      {/* COMPARISON TABLE */}
       {/* ===================================================== */}
       <section className="py-20 bg-slate-50">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-[#0F172A] mb-12">Compare the difference</h2>
+          <h2 className="text-3xl font-bold text-[#0F172A] mb-12">The Professional Advantage</h2>
           <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
                   <th className="p-6 font-bold uppercase tracking-wider text-slate-400">Feature</th>
                   <th className="p-6 font-bold text-blue-600 text-center">Listify AI HQ</th>
-                  <th className="p-6 font-bold text-slate-400 text-center">Snap2List</th>
+                  <th className="p-6 font-bold text-slate-400 text-center">Standard Apps</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b border-slate-100">
-                  <td className="p-6 font-bold">AI Image Analysis</td>
-                  <td className="p-6 text-blue-600 font-medium text-center">Deep (Brand, Model, Condition)</td>
-                  <td className="p-6 text-slate-400 text-center">Basic (Category only)</td>
+                  <td className="p-6 font-bold">Platform Support</td>
+                  <td className="p-6 text-blue-600 font-medium text-center">Shopify, eBay, Poshmark +</td>
+                  <td className="p-6 text-slate-400 text-center">Single Platform Only</td>
                 </tr>
                 <tr>
-                  <td className="p-6 font-bold">SEO Focus</td>
-                  <td className="p-6 text-blue-600 font-medium text-center">High (Marketplace-specific)</td>
-                  <td className="p-6 text-slate-400 text-center">Low (Generic)</td>
+                  <td className="p-6 font-bold">SEO Intelligence</td>
+                  <td className="p-6 text-blue-600 font-medium text-center">Cross-Marketplace Keywords</td>
+                  <td className="p-6 text-slate-400 text-center">Basic Titles</td>
                 </tr>
               </tbody>
             </table>
@@ -178,17 +186,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* RESTORED: SAMPLE LISTING */}
+      {/* SAMPLE LISTING */}
       {/* ===================================================== */}
       <section className="py-24 sm:py-28 px-4 bg-slate-50">
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-xs font-bold text-[#2563EB] uppercase tracking-[0.35em] mb-3">Sample Listing Output</h2>
-          <h3 className="text-3xl font-semibold text-[#0F172A] mb-3">Exactly what your buyers will see.</h3>
+          <h2 className="text-xs font-bold text-[#2563EB] uppercase tracking-[0.35em] mb-3">Output Preview</h2>
+          <h3 className="text-3xl font-semibold text-[#0F172A] mb-3">One click. Ready to publish anywhere.</h3>
 
           <div className="max-w-3xl mx-auto relative group">
             <div className="flex bg-slate-200/50 p-1 rounded-xl mb-6 w-fit mx-auto border border-slate-200">
-              <button onClick={() => setActiveTab('preview')} className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'preview' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>Live Preview</button>
-              <button onClick={() => setActiveTab('html')} className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'html' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>Raw HTML</button>
+              <button onClick={() => setActiveTab('preview')} className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'preview' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>Visual Preview</button>
+              <button onClick={() => setActiveTab('html')} className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'html' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500'}`}>Raw Data</button>
             </div>
 
             <div className="bg-white border border-slate-200 rounded-[40px] shadow-2xl overflow-hidden relative">
@@ -196,12 +204,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 {activeTab === 'preview' ? (
                   <div className="animate-in fade-in duration-500 pb-20">
                     <section>
-                      <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-2">Title</div>
+                      <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-2">Optimized Title</div>
                       <h4 className="text-2xl font-bold text-[#0F172A] leading-tight">Commodore Plus 4 Canadian NTSC Le Nouveau Boxed Computer System 1984 Complete</h4>
                     </section>
                     <hr className="my-8 border-slate-100" />
                     <section>
-                      <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-4 font-bold">Hardware Specifications</div>
+                      <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-4 font-bold">Key Specifications</div>
                       <ul className="list-disc pl-5 text-sm text-slate-700 space-y-2">
                         <li><strong>Model:</strong> Commodore Plus/4 Canadian NTSC variant</li>
                         <li><strong>CPU:</strong> 7501 / 8501 family 8-bit processor</li>
@@ -209,8 +217,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                       </ul>
                     </section>
                     <section className="mt-10">
-                      <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-4 font-bold">Condition Summary</div>
-                      <p className="text-sm text-slate-700 leading-relaxed">The console presents well with <strong>clean casing</strong> and intact legends.</p>
+                      <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-4 font-bold">Sales Description</div>
+                      <p className="text-sm text-slate-700 leading-relaxed">The console presents well with <strong>clean casing</strong> and intact legends. Perfect for collectors looking for a complete-in-box unit for their retro computing setup.</p>
                     </section>
                   </div>
                 ) : (
@@ -235,20 +243,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* RESTORED: PRICING SECTION */}
+      {/* PRICING SECTION */}
       {/* ===================================================== */}
       <section className="py-24 px-4 bg-white text-left">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold text-[#0F172A] mb-4">Pricing for every stage.</h2>
+          <h2 className="text-4xl sm:text-5xl font-bold text-[#0F172A] mb-4">Pricing for every business size.</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left mt-16">
             {/* Free */}
             <div className="p-8 rounded-[32px] border border-slate-100 bg-slate-50/50 flex flex-col">
-              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Free</h3>
+              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Starter</h3>
               <div className="text-4xl font-bold mb-8">$0 <span className="text-base font-medium text-slate-400">/mo</span></div>
               <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-10">
                 <li>✓ 25 AI listings / mo</li>
-                <li>✓ Standard SEO titles</li>
-                <li>✓ Basic HTML templates</li>
+                <li>✓ Multi-platform templates</li>
+                <li>✓ Basic SEO titles</li>
               </ul>
               <button className="w-full py-3 rounded-2xl border border-slate-200 bg-white font-bold hover:bg-slate-50 transition">Get Started Free</button>
             </div>
@@ -258,6 +266,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               <div className="text-4xl font-bold mb-8">$24 <span className="text-base font-medium text-slate-400">/mo</span></div>
               <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-10">
                 <li>✓ 400 AI listings / mo</li>
+                <li>✓ Shopify & eBay formats</li>
                 <li>✓ Priority processing</li>
               </ul>
               <button className="w-full py-3 rounded-2xl border border-slate-200 bg-white font-bold hover:bg-slate-50 transition">Choose Growth</button>
@@ -265,20 +274,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             {/* Premium Tier */}
             <div className="p-8 rounded-[32px] border-2 border-blue-500 bg-white flex flex-col relative shadow-2xl">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">Most Popular</div>
-              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Premium</h3>
+              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Pro</h3>
               <div className="text-4xl font-bold mb-8">$49 <span className="text-base font-medium text-slate-400">/mo</span></div>
               <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-10">
                 <li className="text-blue-600 font-bold">✓ 1,000 AI listings / mo</li>
-                <li>✓ Advanced SEO analysis</li>
+                <li>✓ Advanced SEO Intelligence</li>
+                <li>✓ Cross-channel export</li>
               </ul>
-              <button className="w-full py-3.5 rounded-2xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition">Go Premium</button>
+              <button className="w-full py-3.5 rounded-2xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition">Go Pro</button>
             </div>
             {/* Power Seller Tier */}
             <div className="p-8 rounded-[32px] border border-slate-100 bg-slate-50/50 flex flex-col">
-              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Power Seller</h3>
+              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Enterprise</h3>
               <div className="text-4xl font-bold mb-8">$99 <span className="text-base font-medium text-slate-400">/mo</span></div>
               <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-10">
                 <li>✓ 3,000 AI listings / mo</li>
+                <li>✓ API Access</li>
                 <li>✓ Team access (3 seats)</li>
               </ul>
               <button className="w-full py-3 rounded-2xl border border-slate-200 bg-white font-bold hover:bg-slate-50 transition">Contact Sales</button>
@@ -288,17 +299,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* RESTORED: FAQ SECTION */}
+      {/* FAQ SECTION */}
       {/* ===================================================== */}
       <section className="py-20 bg-white border-t border-slate-100">
         <div className="max-w-6xl mx-auto px-4 text-left">
           <h2 className="text-3xl font-bold text-center mb-16 text-[#0F172A]">Frequently Asked Questions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12">
             {[
-              { q: 'Is there a free trial for the paid plans?', a: 'The Free plan serves as our permanent trial. You can use all core features for 25 listings every month without ever entering a credit card.' },
-              { q: 'Can I change or cancel my plan later?', a: 'Yes. You can upgrade, downgrade, or cancel your subscription at any time from your dashboard.' },
-              { q: 'What counts as a single listing?', a: 'A listing is counted when the AI successfully generates a title and description for a unique item.' },
-              { q: 'Do I need a credit card for the Free plan?', a: 'No. We only ask for payment details when you are ready to move to a high-volume paid plan.' }
+              { q: 'Does this work for Shopify and Poshmark?', a: 'Yes! Our AI generates universal product data that works perfectly on Shopify, eBay, Poshmark, Mercari, and Depop.' },
+              { q: 'Is there a free trial?', a: 'The Free plan is your permanent trial. You can create 25 high-quality listings every month for free.' },
+              { q: 'Can I export to multiple platforms?', a: 'Absolutely. You can copy the generated titles and descriptions to as many platforms as you need.' },
+              { q: 'Do I need a credit card?', a: 'No credit card is required for the Free Starter plan.' }
             ].map(faq => (
               <div key={faq.q}>
                 <h4 className="font-bold text-[#0F172A] mb-2">{faq.q}</h4>
@@ -312,7 +323,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* FINAL CTA */}
       <section className="py-24 sm:py-28 px-4 bg-slate-50">
         <div className="max-w-6xl mx-auto rounded-[40px] border border-slate-200 bg-white shadow-2xl p-8 sm:p-14 text-center">
-          <h2 className="text-4xl font-bold text-[#0F172A] mb-4">Stop typing. Start selling.</h2>
+          <h2 className="text-4xl font-bold text-[#0F172A] mb-4">Stop typing. Start scaling.</h2>
           <button onClick={() => onNavigate('/builder')} className="bg-[#2563EB] text-white px-12 py-5 rounded-3xl text-xl font-bold shadow-xl hover:bg-blue-700 transition active:scale-95">Create My First Listing Free</button>
         </div>
       </section>
