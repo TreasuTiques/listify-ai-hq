@@ -9,13 +9,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
-  // Pricing Data for the Landing Page
+  // Pricing Data - NOW EXPANDED WITH MORE FEATURES
   const plans = [
     {
       name: "Starter",
       summary: "Perfect for casual sellers.",
       price: "$0",
-      features: ["25 AI Listings / mo", "Basic AI Vision", "HTML & Plain Text"],
+      features: [
+        "25 AI Listings / mo", 
+        "Basic AI Vision", 
+        "HTML & Plain Text",
+        "Mobile-Friendly Output",
+        "Community Support"
+      ],
       cta: "Get Started Free",
       popular: false,
       platforms: ['shopify', 'ebay', 'poshmark']
@@ -24,7 +30,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       name: "Growth",
       summary: "For growing businesses.",
       price: "$24",
-      features: ["400 AI Listings / mo", "Advanced AI Vision", "Bulk Export Tools"],
+      features: [
+        "400 AI Listings / mo", 
+        "Advanced AI Vision", 
+        "Bulk Export Tools",
+        "Premium Collector Mode",
+        "SEO Keyword Research",
+        "Priority Email Support"
+      ],
       cta: "Choose Growth",
       popular: false,
       platforms: ['shopify', 'ebay', 'poshmark', 'mercari']
@@ -33,7 +46,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       name: "Pro",
       summary: "The complete power seller toolkit.",
       price: "$49",
-      features: ["1,000 AI Listings / mo", "Premium Storytelling", "Inventory Sync (Beta)", "Dedicated Support"],
+      features: [
+        "1,000 AI Listings / mo", 
+        "Premium Storytelling", 
+        "Inventory Sync (Beta)", 
+        "Smart Pricing Tools",
+        "Unlimited Cloud Storage",
+        "Dedicated Human Support"
+      ],
       cta: "Go Pro",
       popular: true,
       platforms: ['shopify', 'ebay', 'poshmark', 'mercari', 'depop', 'etsy']
@@ -42,7 +62,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       name: "Enterprise",
       summary: "Custom solutions for teams.",
       price: "$99",
-      features: ["3,000+ AI Listings", "API Access", "Custom AI Models"],
+      features: [
+        "3,000+ AI Listings", 
+        "API Access & Webhooks", 
+        "Custom AI Models",
+        "Multi-User Access (3 Seats)",
+        "Advanced Analytics",
+        "White-Glove Onboarding"
+      ],
       cta: "Contact Sales",
       popular: false,
       platforms: ['all']
@@ -386,7 +413,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* PRICING SECTION — RESTORED PREMIUM DESIGN */}
       {/* ===================================================== */}
       <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
-        {/* Ambient Glows */}
         <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[120px] -z-10"></div>
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-100/50 rounded-full blur-[120px] -z-10"></div>
 
@@ -417,6 +443,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                       </div>
                       <p className="text-xs text-slate-500 font-medium h-8 leading-relaxed">{plan.summary}</p>
                     </div>
+                    
                     {/* Platform Box */}
                     <div className={`rounded-xl p-4 mb-8 ${isPro ? 'bg-[#0F172A] border border-slate-700' : 'bg-slate-100 border border-slate-200'}`}>
                       <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${isPro ? 'text-blue-300' : 'text-slate-500'}`}>Platforms Included:</p>
@@ -433,6 +460,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                         )}
                       </div>
                     </div>
+
                     <ul className="flex-1 space-y-4 mb-10">
                       {plan.features.map((feat, fIdx) => (
                         <li key={fIdx} className="flex items-start gap-3 text-sm text-slate-600">
@@ -441,6 +469,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                         </li>
                       ))}
                     </ul>
+                    
                     <div className="mt-auto">
                       <button className={`w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-md ${
                         isPro 
@@ -458,7 +487,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* FINAL CTA - PREMIUM UPGRADE */}
+      {/* FINAL CTA */}
       <section className="py-24 px-4 bg-white relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-purple-600 rounded-[44px] blur opacity-50 animate-pulse"></div>
@@ -479,8 +508,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
       
+      {/* Tailwind Config for Custom Animations */}
       <style>{`
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-15px); }
+        }
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(-10px); }
+          50% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 5s ease-in-out infinite; }
         .perspective-1000 { perspective: 1000px; }
       `}</style>
 
