@@ -9,7 +9,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
-  // PREVIOUSLY FIXED: Forced Colors Style Block
+  // PREVIOUSLY FIXED: Forced Colors Style Block for the Preview Window
   const rawHtml = `
 <div class="listing-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #000000; line-height: 1.6;">
   
