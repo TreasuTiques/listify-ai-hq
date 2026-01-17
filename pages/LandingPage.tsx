@@ -9,12 +9,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
-  // UPDATED: Added a <style> block to force colors with !important
+  // PREVIOUSLY FIXED: Forced Colors Style Block
   const rawHtml = `
 <div class="listing-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #000000; line-height: 1.6;">
   
   <style>
-    /* FORCE TEXT COLORS */
     .listing-container h1, .listing-container h2, .listing-container h3, .listing-container strong { color: #003366 !important; }
     .listing-container p, .listing-container li, .listing-container span { color: #111827 !important; }
     .listing-container table td { color: #000000 !important; }
@@ -227,9 +226,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* COMPARISON TABLE */}
+      {/* COMPARISON TABLE — UPDATED PADDING */}
       {/* ===================================================== */}
-      <section className="py-20 bg-slate-50">
+      {/* Changed py-20 to pt-20 pb-10 to reduce bottom whitespace */}
+      <section className="pt-20 pb-10 bg-slate-50">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-[#0F172A] mb-12">The Professional Advantage</h2>
           <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
@@ -278,9 +278,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* PREMIUM SAMPLE LISTING — NEW UPDATED SECTION */}
+      {/* PREMIUM SAMPLE LISTING — UPDATED PADDING */}
       {/* ===================================================== */}
-      <section className="py-24 sm:py-28 px-4 bg-white relative overflow-hidden">
+      {/* Changed py-24 to pt-10 pb-24 to reduce top whitespace */}
+      <section className="pt-10 pb-24 sm:pb-28 px-4 bg-white relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-50 rounded-full blur-[100px] -z-10"></div>
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-xs font-bold text-[#2563EB] uppercase tracking-[0.35em] mb-3">Output Preview</h2>
@@ -326,8 +327,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                     <pre className="whitespace-pre-wrap leading-relaxed opacity-90">{rawHtml}</pre>
                   </div>
                 )}
-                
-                {/* UPDATED FADE OVERLAY: Reduced height */}
                 {activeTab === 'preview' && (
                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10"></div>
                 )}
