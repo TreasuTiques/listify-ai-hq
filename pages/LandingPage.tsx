@@ -9,38 +9,57 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
-  // UPDATED: Darker Text Colors for Better Visibility
-  const rawHtml = `<div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #1F2937; line-height: 1.6;">
+  // UPDATED: Forced High-Contrast Colors (The "Nuclear" Fix)
+  const rawHtml = `<div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #000000; line-height: 1.6;">
   
   <div style="text-align: center; border-bottom: 2px solid #0053A0; padding-bottom: 20px; margin-bottom: 30px;">
     <h1 style="color: #0053A0; font-size: 28px; font-weight: bold; margin: 0;">Canon AE-1 Program 35mm SLR Camera</h1>
-    <h2 style="color: #4B5563; font-size: 18px; font-weight: normal; margin: 10px 0 0 0;">with Canon FD 50mm f/1.8 Lens | Tested & Working</h2>
+    <h2 style="color: #333333; font-size: 18px; font-weight: normal; margin: 10px 0 0 0;">with Canon FD 50mm f/1.8 Lens | Tested & Working</h2>
   </div>
 
-  <p style="font-size: 16px; margin-bottom: 25px; color: #374151;">
+  <p style="font-size: 16px; margin-bottom: 25px; color: #333333;">
     <strong>Capture the golden age of photography.</strong> The Canon AE-1 Program isn't just a camera; it's a legend. Introduced in 1981, this camera offers the perfect balance of manual control for purists and "Program" automation for spontaneous shooting. Whether you are a film student or a seasoned collector, the tactile click of the shutter and the bright viewfinder will remind you why film is timeless.
   </p>
 
-  <div style="background-color: #F3F4F6; border-radius: 8px; padding: 20px; margin-bottom: 30px; border: 1px solid #E5E7EB;">
-    <h3 style="color: #0053A0; margin-top: 0; font-size: 18px; border-bottom: 1px solid #D1D5DB; padding-bottom: 10px;">Technical Specifications</h3>
-    <ul style="list-style-type: none; padding: 0; margin: 15px 0 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; color: #111827;">
-      <li><strong>Type:</strong> 35mm SLR</li>
-      <li><strong>Mount:</strong> Canon FD</li>
-      <li><strong>Shutter:</strong> 2s - 1/1000s + Bulb</li>
-      <li><strong>ISO Range:</strong> 12 - 3200</li>
-      <li><strong>Metering:</strong> TTL Center-Weighted</li>
-      <li><strong>Battery:</strong> 4LR44 (Included)</li>
-    </ul>
+  <div style="background-color: #F8F9FA; border-radius: 8px; padding: 20px; margin-bottom: 30px; border: 1px solid #E9ECEF;">
+    <h3 style="color: #0053A0; margin-top: 0; font-size: 18px; border-bottom: 1px solid #CED4DA; padding-bottom: 10px; font-weight: bold;">Technical Specifications</h3>
+    
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+      <tr>
+        <td style="padding: 5px 0; width: 50%; vertical-align: top;">
+          <strong style="color: #0053A0;">Type:</strong> <span style="color: #000000;">35mm SLR</span>
+        </td>
+        <td style="padding: 5px 0; width: 50%; vertical-align: top;">
+          <strong style="color: #0053A0;">Mount:</strong> <span style="color: #000000;">Canon FD</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; vertical-align: top;">
+          <strong style="color: #0053A0;">Shutter:</strong> <span style="color: #000000;">2s - 1/1000s + Bulb</span>
+        </td>
+        <td style="padding: 5px 0; vertical-align: top;">
+          <strong style="color: #0053A0;">ISO Range:</strong> <span style="color: #000000;">12 - 3200</span>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; vertical-align: top;">
+          <strong style="color: #0053A0;">Metering:</strong> <span style="color: #000000;">TTL Center-Weighted</span>
+        </td>
+        <td style="padding: 5px 0; vertical-align: top;">
+          <strong style="color: #0053A0;">Battery:</strong> <span style="color: #000000;">4LR44 (Included)</span>
+        </td>
+      </tr>
+    </table>
   </div>
 
-  <div style="margin-bottom: 30px; color: #1F2937;">
-    <h3 style="color: #0053A0; font-size: 18px; margin-bottom: 15px;">Condition Report: Excellent (A)</h3>
-    <p style="margin-bottom: 15px;">This camera has been professionally inspected and tested.</p>
+  <div style="margin-bottom: 30px; color: #000000;">
+    <h3 style="color: #0053A0; font-size: 18px; margin-bottom: 15px; font-weight: bold;">Condition Report: Excellent (A)</h3>
+    <p style="margin-bottom: 15px; color: #333333;">This camera has been professionally inspected and tested.</p>
     <ul style="list-style: none; padding-left: 0;">
-      <li style="margin-bottom: 8px;">✅ <strong>Mechanics:</strong> Shutter fires accurately at all speeds. No "Canon Squeak".</li>
-      <li style="margin-bottom: 8px;">✅ <strong>Optics:</strong> Lens is clean and clear. No fungus, haze, or separation.</li>
-      <li style="margin-bottom: 8px;">✅ <strong>Light Seals:</strong> Recently replaced foam seals. Light-tight.</li>
-      <li style="margin-bottom: 8px;">✅ <strong>Cosmetics:</strong> Minimal signs of wear. Chrome finish is bright and clean.</li>
+      <li style="margin-bottom: 8px; color: #000000;">✅ <strong>Mechanics:</strong> Shutter fires accurately at all speeds. No "Canon Squeak".</li>
+      <li style="margin-bottom: 8px; color: #000000;">✅ <strong>Optics:</strong> Lens is clean and clear. No fungus, haze, or separation.</li>
+      <li style="margin-bottom: 8px; color: #000000;">✅ <strong>Light Seals:</strong> Recently replaced foam seals. Light-tight.</li>
+      <li style="margin-bottom: 8px; color: #000000;">✅ <strong>Cosmetics:</strong> Minimal signs of wear. Chrome finish is bright and clean.</li>
     </ul>
   </div>
 
@@ -299,8 +318,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                     <pre className="whitespace-pre-wrap leading-relaxed opacity-90">{rawHtml}</pre>
                   </div>
                 )}
+                
+                {/* UPDATED FADE OVERLAY: Reduced height to prevent hiding content */}
                 {activeTab === 'preview' && (
-                   <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10"></div>
+                   <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10"></div>
                 )}
               </div>
               {activeTab === 'preview' && (
