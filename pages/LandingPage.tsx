@@ -10,9 +10,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [sliderVal, setSliderVal] = useState(50);
 
   const rawHtml = `<div style="font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; border: 1px solid #f1f5f9; border-radius: 12px;">
-  <h2 style="font-size: 20px; color: #0F172A;">Commodore Plus 4 Canadian NTSC Le Nouveau Boxed Computer System 1984 Complete</h2>
+  <h2 style="font-size: 20px; color: #0F172A;">Canon AE-1 Program 35mm Film Camera with 50mm f/1.8 Lens</h2>
   <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-  <p>This unit is the rare Canadian NTSC Commodore Plus/4 featuring the bilingual “Le Nouveau” retail box...</p>
+  <p>This vintage Canon AE-1 Program is in excellent working condition...</p>
 </div>`;
 
   const handleCopy = async () => {
@@ -29,7 +29,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* ===================================================== */}
       {/* HERO SECTION — TIGHTER SPACING */}
       {/* ===================================================== */}
-      {/* Reduced pb-16 to pb-8 to pull the next section up */}
       <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
         
         {/* Aurora Background */}
@@ -115,15 +114,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* FEATURES — REDUCED PADDING */}
+      {/* FEATURES — PREMIUM CARDS */}
       {/* ===================================================== */}
-      {/* Reduced py-24 to py-12 to remove whitespace */}
       <section className="py-12 sm:py-16 bg-white border-b border-slate-100 relative overflow-hidden">
-        {/* Subtle background glow to connect sections */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-blue-50/50 blur-[120px] rounded-full -z-10"></div>
 
         <div className="max-w-7xl mx-auto px-4 text-left">
-          {/* Reduced mb-16 to mb-10 */}
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-[#0F172A] tracking-tight">Why Power Sellers Choose Listify</h2>
             <p className="text-slate-500 mt-4 text-lg">We automated the boring parts so you can focus on sourcing.</p>
@@ -160,7 +156,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 key={f.title} 
                 className="group relative bg-white p-8 rounded-[32px] border border-slate-100 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-10px_rgba(37,99,235,0.15)] hover:border-blue-100 transition-all duration-300 hover:-translate-y-2"
               >
-                {/* Gradient Icon Container */}
                 <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center text-2xl text-white shadow-lg shadow-blue-200/50 mb-6 group-hover:scale-110 transition-transform duration-300`}>
                   {f.icon}
                 </div>
@@ -170,7 +165,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   {f.text}
                 </p>
                 
-                {/* Subtle arrow that appears on hover */}
                 <div className="absolute bottom-8 right-8 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 text-[#2563EB]">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
@@ -181,31 +175,73 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* BEFORE & AFTER SLIDER */}
+      {/* BEFORE & AFTER SLIDER — DARK MODE "THEATER" UPGRADE */}
       {/* ===================================================== */}
-      <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-[#0F172A]">See the AI in Action</h2>
-            <p className="text-slate-500 mt-4">Turn a messy photo into a professional listing in seconds.</p>
+      <section className="py-24 bg-[#0F172A] relative overflow-hidden">
+        {/* Background Glows for "Premium Tech" Vibe */}
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+
+        <div className="max-w-4xl mx-auto px-4 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-white tracking-tight">AI That Sees Details You Miss</h2>
+            <p className="text-slate-400 mt-4 text-lg">Our vision engine identifies defects, model numbers, and value—instantly.</p>
           </div>
-          <div className="relative rounded-[32px] overflow-hidden border border-slate-200 shadow-2xl h-[450px]">
-            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover" alt="Scan" />
-            <div className="absolute inset-0 bg-blue-600/20 backdrop-blur-[2px]">
-               <div className="absolute top-10 right-10 p-6 bg-white/90 backdrop-blur rounded-2xl border border-blue-100">
-                  <span className="text-[10px] font-bold text-blue-600 uppercase block mb-1 text-left">AI Data Extraction</span>
-                  <div className="text-sm font-bold text-slate-800">Model: Commodore Plus/4</div>
-                  <div className="text-xs text-slate-500">Condition: Good/Boxed</div>
+          
+          <div className="relative rounded-[24px] overflow-hidden border border-slate-700 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] h-[500px] group">
+            
+            {/* The "After" Image (The Analysis Layer) */}
+            <div className="absolute inset-0">
+               <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover opacity-60 mix-blend-luminosity" alt="Analyzed" />
+               <div className="absolute inset-0 bg-[#0F172A]/80 mix-blend-multiply"></div>
+               {/* Digital Grid Overlay */}
+               <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+               
+               {/* Floating HUD Card */}
+               <div className="absolute top-12 right-12 p-6 bg-[#0F172A]/80 backdrop-blur-xl rounded-2xl border border-blue-500/30 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                  <div className="flex items-center gap-3 mb-3">
+                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                     <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Analysis Complete</span>
+                  </div>
+                  <div className="text-lg font-bold text-white mb-1">Canon AE-1 Program</div>
+                  <div className="text-sm text-slate-400 mb-4">Vintage 35mm Film Camera</div>
+                  
+                  <div className="space-y-2">
+                     <div className="flex justify-between text-xs border-b border-slate-700 pb-2">
+                        <span className="text-slate-500">Lens</span>
+                        <span className="text-white font-mono">50mm f/1.8 FD</span>
+                     </div>
+                     <div className="flex justify-between text-xs border-b border-slate-700 pb-2">
+                        <span className="text-slate-500">Condition</span>
+                        <span className="text-green-400 font-mono">Excellent (A+)</span>
+                     </div>
+                     <div className="flex justify-between text-xs">
+                        <span className="text-slate-500">Market Value</span>
+                        <span className="text-white font-mono">$150 - $200</span>
+                     </div>
+                  </div>
                </div>
             </div>
-            <div className="absolute inset-0 overflow-hidden border-r-4 border-white" style={{ width: `${sliderVal}%` }}>
-              <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover max-w-none" style={{ width: '900px' }} alt="Original" />
+
+            {/* The "Before" Image (The Raw Photo) - this is what gets masked by the slider */}
+            <div className="absolute inset-0 overflow-hidden border-r border-blue-500/50" style={{ width: `${sliderVal}%` }}>
+              <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover max-w-none" style={{ width: '896px' }} alt="Original" />
+              {/* Label for 'Original' */}
+              <div className="absolute bottom-6 left-6 bg-black/50 backdrop-blur px-3 py-1 rounded-full border border-white/10">
+                 <span className="text-[10px] font-bold text-white uppercase tracking-wider">Raw Photo</span>
+              </div>
             </div>
+
+            {/* The Slider Handle */}
             <input type="range" min="0" max="100" value={sliderVal} onChange={(e) => setSliderVal(parseInt(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-30" />
-            <div className="absolute top-0 bottom-0 left-[var(--slider-pos)] w-1 bg-white z-20 pointer-events-none" style={{ left: `${sliderVal}%` }}>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-xl flex items-center justify-center text-blue-600 font-bold">↔</div>
+            <div className="absolute top-0 bottom-0 left-[var(--slider-pos)] w-0.5 bg-blue-500 z-20 pointer-events-none shadow-[0_0_20px_rgba(59,130,246,0.8)]" style={{ left: `${sliderVal}%` }}>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-[#0F172A] border-2 border-blue-500 rounded-full flex items-center justify-center text-white shadow-xl">
+                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8L22 12L18 16"/><path d="M6 8L2 12L6 16"/></svg>
+              </div>
             </div>
           </div>
+          
+          <p className="text-center text-xs text-slate-500 mt-6 font-mono">Drag slider to simulate AI analysis</p>
         </div>
       </section>
 
@@ -261,20 +297,20 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   <div className="animate-in fade-in duration-500 pb-20">
                     <section>
                       <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-2">Optimized Title</div>
-                      <h4 className="text-2xl font-bold text-[#0F172A] leading-tight">Commodore Plus 4 Canadian NTSC Le Nouveau Boxed Computer System 1984 Complete</h4>
+                      <h4 className="text-2xl font-bold text-[#0F172A] leading-tight">Canon AE-1 Program 35mm Film Camera with 50mm f/1.8 Lens - Tested Excellent</h4>
                     </section>
                     <hr className="my-8 border-slate-100" />
                     <section>
                       <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-4 font-bold">Key Specifications</div>
                       <ul className="list-disc pl-5 text-sm text-slate-700 space-y-2">
-                        <li><strong>Model:</strong> Commodore Plus/4 Canadian NTSC variant</li>
-                        <li><strong>CPU:</strong> 7501 / 8501 family 8-bit processor</li>
-                        <li><strong>Region:</strong> North American NTSC</li>
+                        <li><strong>Model:</strong> Canon AE-1 Program (Silver)</li>
+                        <li><strong>Lens:</strong> Canon FD 50mm f/1.8</li>
+                        <li><strong>Format:</strong> 35mm Film SLR</li>
                       </ul>
                     </section>
                     <section className="mt-10">
                       <div className="text-[11px] font-bold uppercase tracking-[0.3em] text-slate-400 mb-4 font-bold">Sales Description</div>
-                      <p className="text-sm text-slate-700 leading-relaxed">The console presents well with <strong>clean casing</strong> and intact legends. Perfect for collectors looking for a complete-in-box unit for their retro computing setup.</p>
+                      <p className="text-sm text-slate-700 leading-relaxed">This legendary <strong>Canon AE-1 Program</strong> is in beautiful cosmetic condition. The shutter fires accurately at all speeds. The light meter is responsive. Perfect for students or collectors looking for a reliable film shooter.</p>
                     </section>
                   </div>
                 ) : (
