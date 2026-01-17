@@ -175,10 +175,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* BEFORE & AFTER SLIDER — DARK MODE "THEATER" UPGRADE */}
+      {/* BEFORE & AFTER SLIDER — DARK MODE "THEATER" */}
       {/* ===================================================== */}
       <section className="py-24 bg-[#0F172A] relative overflow-hidden">
-        {/* Background Glows for "Premium Tech" Vibe */}
+        {/* Background Glows */}
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none"></div>
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
 
@@ -190,7 +190,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           
           <div className="relative rounded-[24px] overflow-hidden border border-slate-700 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] h-[500px] group">
             
-            {/* The "After" Image (The Analysis Layer) */}
+            {/* The "After" Image */}
             <div className="absolute inset-0">
                <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover opacity-60 mix-blend-luminosity" alt="Analyzed" />
                <div className="absolute inset-0 bg-[#0F172A]/80 mix-blend-multiply"></div>
@@ -223,10 +223,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                </div>
             </div>
 
-            {/* The "Before" Image (The Raw Photo) - this is what gets masked by the slider */}
+            {/* The "Before" Image */}
             <div className="absolute inset-0 overflow-hidden border-r border-blue-500/50" style={{ width: `${sliderVal}%` }}>
               <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover max-w-none" style={{ width: '896px' }} alt="Original" />
-              {/* Label for 'Original' */}
               <div className="absolute bottom-6 left-6 bg-black/50 backdrop-blur px-3 py-1 rounded-full border border-white/10">
                  <span className="text-[10px] font-bold text-white uppercase tracking-wider">Raw Photo</span>
               </div>
@@ -246,31 +245,66 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* COMPARISON TABLE */}
+      {/* COMPARISON TABLE — PREMIUM UPGRADE */}
       {/* ===================================================== */}
-      <section className="py-20 bg-slate-50">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-[#0F172A] mb-12">The Professional Advantage</h2>
-          <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 border-b border-slate-200">
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-[#0F172A] mb-4">Don't Settle for Basic Tools</h2>
+          <p className="text-slate-500 mb-16 text-lg">See why top sellers are switching from manual listing to AI automation.</p>
+          
+          <div className="bg-white rounded-[40px] border border-slate-200 shadow-xl overflow-hidden relative">
+            {/* Decoration: Top Highlight Line */}
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500"></div>
+
+            <table className="w-full text-left border-collapse">
+              <thead>
                 <tr>
-                  <th className="p-6 font-bold uppercase tracking-wider text-slate-400">Feature</th>
-                  <th className="p-6 font-bold text-blue-600 text-center">Listify AI HQ</th>
-                  <th className="p-6 font-bold text-slate-400 text-center">Standard Apps</th>
+                  <th className="p-6 md:p-8 w-1/3"></th>
+                  <th className="p-6 md:p-8 w-1/3 bg-blue-50/30 border-x border-blue-100/50">
+                    <div className="flex flex-col items-center">
+                       <span className="text-lg font-black text-[#0F172A] tracking-tight">Listify AI HQ</span>
+                       <span className="text-[10px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full mt-2 uppercase tracking-wide">Recommended</span>
+                    </div>
+                  </th>
+                  <th className="p-6 md:p-8 w-1/3 text-center">
+                     <span className="text-lg font-bold text-slate-400">Standard Apps</span>
+                  </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr className="border-b border-slate-100">
-                  <td className="p-6 font-bold">Platform Support</td>
-                  <td className="p-6 text-blue-600 font-medium text-center">Shopify, eBay, Poshmark +</td>
-                  <td className="p-6 text-slate-400 text-center">Single Platform Only</td>
-                </tr>
-                <tr>
-                  <td className="p-6 font-bold">SEO Intelligence</td>
-                  <td className="p-6 text-blue-600 font-medium text-center">Cross-Marketplace Keywords</td>
-                  <td className="p-6 text-slate-400 text-center">Basic Titles</td>
-                </tr>
+              <tbody className="divide-y divide-slate-100">
+                {[
+                  { feature: "AI Model Depth", listify: "GPT-4o Vision (Deep Analysis)", standard: "Basic OCR / Text Scan" },
+                  { feature: "Listing Speed", listify: "10x Faster (Instant)", standard: "Manual Typing" },
+                  { feature: "Platform Support", listify: "Shopify, eBay, Poshmark, Mercari", standard: "Single Platform Only" },
+                  { feature: "SEO Optimization", listify: "Multi-Marketplace Keywords", standard: "None" },
+                  { feature: "Format Output", listify: "HTML, Plain Text, Tables", standard: "Plain Text Only" },
+                  { feature: "Return on Investment", listify: "High (Scale Inventory)", standard: "Low (Time Consuming)" }
+                ].map((row, i) => (
+                  <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="p-6 md:p-8 font-bold text-slate-700 text-sm md:text-base">{row.feature}</td>
+                    
+                    {/* Listify Column */}
+                    <td className="p-6 md:p-8 bg-blue-50/30 border-x border-blue-100/50 text-center relative group">
+                      <div className="absolute inset-0 bg-blue-100/0 group-hover:bg-blue-100/20 transition-colors pointer-events-none"></div>
+                      <div className="flex flex-col items-center gap-1">
+                        <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mb-1">
+                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <span className="font-bold text-[#0F172A] text-sm">{row.listify}</span>
+                      </div>
+                    </td>
+                    
+                    {/* Standard App Column */}
+                    <td className="p-6 md:p-8 text-center">
+                       <div className="flex flex-col items-center gap-1 opacity-50">
+                        <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-1">
+                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20 12H4"></path></svg>
+                        </div>
+                        <span className="font-medium text-slate-500 text-sm">{row.standard}</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -280,7 +314,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* ===================================================== */}
       {/* SAMPLE LISTING */}
       {/* ===================================================== */}
-      <section className="py-24 sm:py-28 px-4 bg-slate-50">
+      <section className="py-24 sm:py-28 px-4 bg-slate-50 border-t border-slate-200">
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-xs font-bold text-[#2563EB] uppercase tracking-[0.35em] mb-3">Output Preview</h2>
           <h3 className="text-3xl font-semibold text-[#0F172A] mb-3">One click. Ready to publish anywhere.</h3>
