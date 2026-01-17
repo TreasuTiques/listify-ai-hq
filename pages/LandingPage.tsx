@@ -9,21 +9,21 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
-  // UPDATED: A Real, Premium eBay Listing Description
-  const rawHtml = `<div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #333; line-height: 1.6;">
+  // UPDATED: Darker Text Colors for Better Visibility
+  const rawHtml = `<div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #1F2937; line-height: 1.6;">
   
   <div style="text-align: center; border-bottom: 2px solid #0053A0; padding-bottom: 20px; margin-bottom: 30px;">
     <h1 style="color: #0053A0; font-size: 28px; font-weight: bold; margin: 0;">Canon AE-1 Program 35mm SLR Camera</h1>
-    <h2 style="color: #555; font-size: 18px; font-weight: normal; margin: 10px 0 0 0;">with Canon FD 50mm f/1.8 Lens | Tested & Working</h2>
+    <h2 style="color: #4B5563; font-size: 18px; font-weight: normal; margin: 10px 0 0 0;">with Canon FD 50mm f/1.8 Lens | Tested & Working</h2>
   </div>
 
-  <p style="font-size: 16px; margin-bottom: 25px;">
+  <p style="font-size: 16px; margin-bottom: 25px; color: #374151;">
     <strong>Capture the golden age of photography.</strong> The Canon AE-1 Program isn't just a camera; it's a legend. Introduced in 1981, this camera offers the perfect balance of manual control for purists and "Program" automation for spontaneous shooting. Whether you are a film student or a seasoned collector, the tactile click of the shutter and the bright viewfinder will remind you why film is timeless.
   </p>
 
-  <div style="background-color: #f4f6f8; border-radius: 8px; padding: 20px; margin-bottom: 30px; border: 1px solid #e1e4e8;">
-    <h3 style="color: #0053A0; margin-top: 0; font-size: 18px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">Technical Specifications</h3>
-    <ul style="list-style-type: none; padding: 0; margin: 15px 0 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+  <div style="background-color: #F3F4F6; border-radius: 8px; padding: 20px; margin-bottom: 30px; border: 1px solid #E5E7EB;">
+    <h3 style="color: #0053A0; margin-top: 0; font-size: 18px; border-bottom: 1px solid #D1D5DB; padding-bottom: 10px;">Technical Specifications</h3>
+    <ul style="list-style-type: none; padding: 0; margin: 15px 0 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; color: #111827;">
       <li><strong>Type:</strong> 35mm SLR</li>
       <li><strong>Mount:</strong> Canon FD</li>
       <li><strong>Shutter:</strong> 2s - 1/1000s + Bulb</li>
@@ -33,9 +33,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     </ul>
   </div>
 
-  <div style="margin-bottom: 30px;">
+  <div style="margin-bottom: 30px; color: #1F2937;">
     <h3 style="color: #0053A0; font-size: 18px; margin-bottom: 15px;">Condition Report: Excellent (A)</h3>
-    <p>This camera has been professionally inspected and tested.</p>
+    <p style="margin-bottom: 15px;">This camera has been professionally inspected and tested.</p>
     <ul style="list-style: none; padding-left: 0;">
       <li style="margin-bottom: 8px;">✅ <strong>Mechanics:</strong> Shutter fires accurately at all speeds. No "Canon Squeak".</li>
       <li style="margin-bottom: 8px;">✅ <strong>Optics:</strong> Lens is clean and clear. No fungus, haze, or separation.</li>
@@ -44,7 +44,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     </ul>
   </div>
 
-  <div style="background-color: #e8f0fe; color: #0053A0; padding: 15px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 14px;">
+  <div style="background-color: #EFF6FF; color: #1E40AF; padding: 15px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 14px; border: 1px solid #DBEAFE;">
     📦 Fast Shipping: Orders ship within 24 hours via USPS Priority Mail with Tracking.
   </div>
 </div>`;
@@ -254,16 +254,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* PREMIUM SAMPLE LISTING — NEW UPDATED SECTION */}
       {/* ===================================================== */}
       <section className="py-24 sm:py-28 px-4 bg-white relative overflow-hidden">
-        {/* Background blobs for premium feel */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-50 rounded-full blur-[100px] -z-10"></div>
-        
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-xs font-bold text-[#2563EB] uppercase tracking-[0.35em] mb-3">Output Preview</h2>
           <h3 className="text-3xl font-semibold text-[#0F172A] mb-8">One click. Ready to publish anywhere.</h3>
-
           <div className="max-w-3xl mx-auto relative group">
-            
-            {/* The Tab Switcher */}
             <div className="flex justify-center mb-8">
               <div className="bg-slate-100/80 backdrop-blur p-1.5 rounded-2xl flex border border-slate-200 shadow-sm">
                 <button 
@@ -281,11 +276,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 </button>
               </div>
             </div>
-
-            {/* The Window Container */}
             <div className="bg-white border border-slate-200 rounded-[20px] shadow-2xl overflow-hidden relative transition-all duration-500">
-              
-              {/* Window Header (Mac Style) */}
               <div className="h-10 bg-slate-50 border-b border-slate-100 flex items-center px-4 justify-between">
                  <div className="flex gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-400"></div>
@@ -295,10 +286,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     {activeTab === 'preview' ? 'eBay_Listing_Preview.html' : 'source_code.html'}
                  </div>
-                 <div className="w-12"></div> {/* Spacer for centering */}
+                 <div className="w-12"></div>
               </div>
-
-              {/* Window Content */}
               <div className="h-[550px] overflow-y-auto scrollbar-hide text-left relative bg-white">
                 {activeTab === 'preview' ? (
                   <div className="p-8 sm:p-12 animate-in fade-in duration-500 pb-28">
@@ -310,14 +299,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                     <pre className="whitespace-pre-wrap leading-relaxed opacity-90">{rawHtml}</pre>
                   </div>
                 )}
-                
-                {/* Fade Overlay for Bottom */}
                 {activeTab === 'preview' && (
                    <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10"></div>
                 )}
               </div>
-
-              {/* Floating Action Button */}
               {activeTab === 'preview' && (
                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40">
                   <div className="bg-white/80 backdrop-blur-md border border-white/50 text-[#0F172A] px-6 py-3 rounded-full text-[12px] font-bold shadow-[0_8px_30px_rgba(0,0,0,0.12)] uppercase tracking-widest flex items-center gap-3 transition hover:scale-105 active:scale-95 cursor-pointer hover:bg-white group">
