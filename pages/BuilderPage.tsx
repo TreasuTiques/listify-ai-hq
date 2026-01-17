@@ -54,15 +54,99 @@ const BuilderPage: React.FC = () => {
     }
   };
 
+  // --- THE "BRAIN" OF THE SIMULATION ---
+  // This simulates what the AI Back-end will do: Select different "Prompts" based on the platform.
+  const simulateAIOutput = (platform: Platform, formData: ListingFormValues): GeneratedListing => {
+    const baseTitle = formData.title || "Vintage Item";
+    
+    // 1. EBAY MODE (HTML, Tables, Specs)
+    if (platform === 'ebay') {
+       return {
+         titles: [
+           `🔥 ${baseTitle} - ${formData.condition} - ${formData.brand} - RARE`,
+           `${baseTitle} Genuine ${formData.brand} - Fast Shipping`,
+           `VTG ${baseTitle} - Tested & Working - ${formData.condition}`
+         ],
+         htmlDescription: `
+           <div style="font-family: Arial, sans-serif; max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 20px;">
+             <h2 style="color: #003366; text-align: center;">${baseTitle}</h2>
+             <hr />
+             <p><strong>Brand:</strong> ${formData.brand}</p>
+             <p><strong>Condition:</strong> ${formData.condition} - ${formData.conditionNotes}</p>
+             <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0;">
+                <h3 style="margin-top:0;">Item Specifics</h3>
+                <ul style="list-style-type: square;">
+                   <li><strong>Authenticity:</strong> 100% Genuine ${formData.brand}</li>
+                   <li><strong>Special Features:</strong> ${formData.specialFeatures}</li>
+                   <li><strong>Shipping:</strong> Ships within 24 hours</li>
+                </ul>
+             </div>
+             <p style="font-size: 12px; color: #666; text-align: center;">Thank you for viewing our listing!</p>
+           </div>
+         `,
+         tags: ['ebay', 'vintage', 'authentic']
+       };
+    }
+
+    // 2. POSHMARK/DEPOP MODE (Emojis, Hashtags, No HTML)
+    if (platform === 'poshmark' || platform === 'depop') {
+       return {
+         titles: [
+           `✨ ${baseTitle} - ${formData.brand} ✨`,
+           `Rare ${baseTitle} in ${formData.condition} Condition 👗`,
+           `${formData.brand} ${baseTitle} - Super Cute!`
+         ],
+         htmlDescription: `
+           ✨ <strong>${baseTitle}</strong> ✨<br/><br/>
+           Make a statement with this amazing ${formData.brand} piece! It is in <strong>${formData.condition}</strong> condition.<br/><br/>
+           📝 <strong>Details:</strong><br/>
+           • Brand: ${formData.brand}<br/>
+           • Condition: ${formData.conditionNotes}<br/>
+           • Features: ${formData.specialFeatures}<br/><br/>
+           Grab it before it's gone! Offers welcome! 💖<br/><br/>
+           #${formData.brand.replace(/\s/g, '')} #vintage #style #fashion #ootd #${platform}
+         `,
+         tags: ['fashion', 'style', 'ootd']
+       };
+    }
+
+    // 3. SHOPIFY/AMAZON MODE (Clean, Professional, SEO)
+    if (platform === 'shopify' || platform === 'amazon') {
+       return {
+         titles: [
+           `${formData.brand} ${baseTitle} - Premium Edition`,
+           `${baseTitle} by ${formData.brand} - Authentic`,
+           `${formData.brand} ${baseTitle} (${formData.condition})`
+         ],
+         htmlDescription: `
+           <h2>Product Overview</h2>
+           <p>Experience the quality of the <strong>${baseTitle}</strong> from <strong>${formData.brand}</strong>. This item has been inspected and is rated as <strong>${formData.condition}</strong>.</p>
+           
+           <h3>Key Features</h3>
+           <ul>
+             <li><strong>Manufacturer:</strong> ${formData.brand}</li>
+             <li><strong>Status:</strong> ${formData.condition}</li>
+             <li><strong>Highlights:</strong> ${formData.specialFeatures}</li>
+           </ul>
+           
+           <p>${formData.conditionNotes}</p>
+         `,
+         tags: ['ecommerce', 'shop', 'online']
+       };
+    }
+
+    // Default Fallback
+    return generateStandardListing(formData);
+  };
+
   const handleGenerate = (e: React.FormEvent) => {
     e.preventDefault();
     setIsGenerating(true);
     
-    // Simulate AI Processing
+    // Simulate AI Processing time
     setTimeout(() => {
-      const result = form.listingStyle === ListingStyle.STANDARD 
-        ? generateStandardListing(form) 
-        : generatePremiumListing(form);
+      // Use our new "Smart" Simulator
+      const result = simulateAIOutput(selectedPlatform, form);
       
       setOutput(result);
       setIsGenerating(false);
@@ -87,7 +171,7 @@ const BuilderPage: React.FC = () => {
             Listing Command Center
           </h1>
           <div className="text-sm text-slate-500 font-medium">
-            {images.length} Photos Uploaded • Target: <span className="text-[#2563EB] capitalize">{selectedPlatform}</span>
+            {images.length} Photos Uploaded • Target: <span className="text-[#2563EB] capitalize font-bold">{selectedPlatform}</span>
           </div>
         </div>
       </div>
@@ -172,7 +256,7 @@ const BuilderPage: React.FC = () => {
             
             {/* PLATFORM SELECTOR TABS */}
             <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap gap-1">
-               {['ebay', 'poshmark', 'mercari', 'depop', 'shopify', 'etsy'].map((p) => (
+               {['ebay', 'poshmark', 'mercari', 'depop', 'shopify', 'amazon'].map((p) => (
                  <button
                    key={p}
                    type="button"
@@ -247,6 +331,17 @@ const BuilderPage: React.FC = () => {
                       onChange={e => setForm({...form, conditionNotes: e.target.value})}
                     />
                   </div>
+                  
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Specific Details (Optional)</label>
+                    <textarea 
+                      rows={2}
+                      placeholder="e.g. Includes original remote, power cord..."
+                      className="w-full px-5 py-3.5 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] resize-none"
+                      value={form.specialFeatures}
+                      onChange={e => setForm({...form, specialFeatures: e.target.value})}
+                    />
+                  </div>
 
                   {/* Toggle: Standard vs Premium */}
                   <div className="pt-4 border-t border-slate-100">
@@ -272,7 +367,7 @@ const BuilderPage: React.FC = () => {
               disabled={isGenerating}
               className="w-full bg-[#2563EB] text-white py-5 rounded-2xl text-lg font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 hover:shadow-2xl transition-all transform active:scale-[0.99] disabled:opacity-70 disabled:cursor-wait"
             >
-              {isGenerating ? 'Analyzing visual data...' : `Generate ${selectedPlatform === 'ebay' ? 'eBay' : selectedPlatform === 'shopify' ? 'Shopify' : 'Marketplace'} Listing`}
+              {isGenerating ? 'Analyzing visual data...' : `Generate ${selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} Listing`}
             </button>
           </div>
         </form>
