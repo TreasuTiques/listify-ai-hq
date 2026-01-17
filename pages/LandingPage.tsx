@@ -27,9 +27,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
-      {/* HERO SECTION */}
+      {/* HERO SECTION — TIGHTER SPACING */}
       {/* ===================================================== */}
-      <section className="relative pt-12 sm:pt-16 pb-16 sm:pb-20 bg-[#F8FAFC] overflow-hidden">
+      {/* Reduced pb-16 to pb-8 to pull the next section up */}
+      <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
         
         {/* Aurora Background */}
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-80 animate-pulse"></div>
@@ -114,14 +115,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* FEATURES — PREMIUM CARDS UPGRADE */}
+      {/* FEATURES — REDUCED PADDING */}
       {/* ===================================================== */}
-      <section className="py-24 bg-white border-b border-slate-100 relative overflow-hidden">
+      {/* Reduced py-24 to py-12 to remove whitespace */}
+      <section className="py-12 sm:py-16 bg-white border-b border-slate-100 relative overflow-hidden">
         {/* Subtle background glow to connect sections */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-blue-50/50 blur-[120px] rounded-full -z-10"></div>
 
         <div className="max-w-7xl mx-auto px-4 text-left">
-          <div className="text-center mb-16">
+          {/* Reduced mb-16 to mb-10 */}
+          <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-[#0F172A] tracking-tight">Why Power Sellers Choose Listify</h2>
             <p className="text-slate-500 mt-4 text-lg">We automated the boring parts so you can focus on sourcing.</p>
           </div>
