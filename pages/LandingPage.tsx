@@ -9,7 +9,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
-  // PREVIOUSLY FIXED: Forced Colors Style Block
+  // FIXED: Forced Colors Style Block
   const rawHtml = `
 <div class="listing-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #000000; line-height: 1.6;">
   
@@ -345,140 +345,105 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* PRICING SECTION — THE "IMAGE 2" REPLICA */}
+      {/* PRICING & FOOTER SECTIONS REMAIN UNCHANGED */}
       {/* ===================================================== */}
-      <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
-        {/* Ambient Glows */}
-        <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[120px] -z-10"></div>
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-100/50 rounded-full blur-[120px] -z-10"></div>
-
+      <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold text-[#0F172A] mb-4">Transparent Pricing. Unlimited Potential.</h2>
-          <p className="text-slate-500 mb-16 text-lg max-w-2xl mx-auto">Choose the plan that fits your business stage. Scale up or down anytime.</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left relative z-10">
-            
-            {/* Starter */}
-            <div className="p-8 rounded-[32px] border border-blue-200 bg-white/60 backdrop-blur-md flex flex-col shadow-sm hover:shadow-lg transition-all duration-300 relative group">
-              <h3 className="text-xl font-bold text-[#0F172A] tracking-tight mb-2">Starter</h3>
-              <div className="text-5xl font-extrabold mb-4 text-[#0F172A] tracking-tight">$0<span className="text-lg font-medium text-slate-400">/mo</span></div>
-              <p className="text-xs text-slate-500 mb-6 h-8">Perfect for casual sellers.</p>
-              
-              {/* Platform Box */}
-              <div className="bg-slate-100 rounded-xl p-4 mb-6">
-                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Platforms Included:</p>
-                 <div className="flex gap-2">
-                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-lg" title="Shopify">🛍️</span>
-                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-[10px] font-bold text-blue-600" title="eBay">eBay</span>
-                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-[10px] font-bold text-pink-600" title="Poshmark">Posh</span>
-                 </div>
-              </div>
-
-              <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-8">
-                {['25 AI Listings / mo', 'Basic AI Vision Analysis', 'HTML & Plain Text Outputs', 'Community Support'].map(item => (
-                   <li key={item} className="flex items-center gap-3">
-                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 text-white text-[10px] font-bold">✓</div>
-                      <span>{item}</span>
-                   </li>
-                ))}
+          <h2 className="text-4xl sm:text-5xl font-bold text-[#0F172A] mb-4">Pricing for every business size.</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left mt-16">
+            {/* Free */}
+            <div className="p-8 rounded-[32px] border border-slate-100 bg-white flex flex-col">
+              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Starter</h3>
+              <div className="text-4xl font-bold mb-8">$0 <span className="text-base font-medium text-slate-400">/mo</span></div>
+              <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-10">
+                <li>✓ 25 AI listings / mo</li>
+                <li>✓ Multi-platform templates</li>
+                <li>✓ Basic SEO titles</li>
               </ul>
-              <button className="w-full py-4 rounded-2xl border border-slate-300 bg-white font-bold hover:bg-slate-50 transition shadow-sm text-slate-700">Get Started Free</button>
+              <button className="w-full py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold hover:bg-slate-100 transition">Get Started Free</button>
             </div>
-
             {/* Growth Tier */}
-            <div className="p-8 rounded-[32px] border-2 border-blue-400 bg-white/80 backdrop-blur-md flex flex-col shadow-lg shadow-blue-100 hover:-translate-y-1 transition-transform duration-300 relative">
-              <h3 className="text-xl font-bold text-[#0F172A] tracking-tight mb-2">Growth</h3>
-              <div className="text-5xl font-extrabold mb-4 text-[#0F172A] tracking-tight">$24<span className="text-lg font-medium text-slate-400">/mo</span></div>
-              <p className="text-xs text-slate-500 mb-6 h-8">For growing businesses.</p>
-              
-              {/* Platform Box */}
-              <div className="bg-slate-100 rounded-xl p-4 mb-6">
-                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Platforms Included:</p>
-                 <div className="flex gap-2">
-                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-lg">🛍️</span>
-                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-[10px] font-bold text-blue-600">eBay</span>
-                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-[10px] font-bold text-pink-600">Posh</span>
-                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-[10px] font-bold text-purple-600">M</span>
-                 </div>
-              </div>
-
-              <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-8">
-                {['400 AI Listings / mo', 'Advanced AI Vision', 'Multi-Marketplace SEO Keywords', 'Bulk Export Tools', 'Priority Email Support'].map(item => (
-                   <li key={item} className="flex items-center gap-3">
-                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 text-white text-[10px] font-bold">✓</div>
-                      <span>{item}</span>
-                   </li>
-                ))}
+            <div className="p-8 rounded-[32px] border border-slate-100 bg-white flex flex-col">
+              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Growth</h3>
+              <div className="text-4xl font-bold mb-8">$24 <span className="text-base font-medium text-slate-400">/mo</span></div>
+              <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-10">
+                <li>✓ 400 AI listings / mo</li>
+                <li>✓ Shopify & eBay formats</li>
+                <li>✓ Priority processing</li>
               </ul>
-              <button className="w-full py-4 rounded-2xl border border-blue-200 bg-blue-50 font-bold text-blue-700 hover:bg-blue-100 transition shadow-sm">Choose Growth</button>
+              <button className="w-full py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold hover:bg-slate-100 transition">Choose Growth</button>
             </div>
-
-            {/* Premium Tier (THE WINNER - FIXED GLOW) */}
-            <div className="relative group z-20 transform scale-105">
-               {/* The Glow Effect - IMPROVED */}
-               <div className="absolute -inset-[3px] bg-gradient-to-b from-cyan-300 via-blue-500 to-purple-600 rounded-[35px] blur-sm opacity-100"></div>
-               <div className="relative p-8 rounded-[32px] bg-white flex flex-col h-full">
-                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">Most Popular</div>
-                  
-                  <h3 className="text-xl font-bold text-[#0F172A] tracking-tight mb-2">Pro</h3>
-                  <div className="text-5xl font-extrabold mb-4 text-[#0F172A] tracking-tight">$49<span className="text-lg font-medium text-slate-400">/mo</span></div>
-                  <p className="text-xs text-slate-500 mb-6 h-8">The complete power seller toolkit.</p>
-                  
-                  {/* Platform Box (Dark Mode for Pro) */}
-                  <div className="bg-[#0F172A] rounded-xl p-4 mb-6 shadow-inner border border-slate-700">
-                     <p className="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-3">All Supported Platforms</p>
-                     <div className="flex flex-wrap gap-2">
-                        <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-lg">🛍️</span>
-                        <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-white">Etsy</span>
-                        <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-white">Posh</span>
-                        <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-white">M</span>
-                        <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-white">D</span>
-                     </div>
-                  </div>
-
-                  <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-8">
-                    {['1,000 AI Listings / mo', 'Premium AI Storytelling', 'Cross-Channel Inventory Sync', 'Advanced Analytics Dashboard', 'Dedicated Success Manager'].map(item => (
-                       <li key={item} className="flex items-center gap-3">
-                          <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 text-white text-[10px] font-bold">✓</div>
-                          <span>{item}</span>
-                       </li>
-                    ))}
-                  </ul>
-                  <button className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold shadow-lg hover:shadow-cyan-500/25 transition transform hover:-translate-y-0.5">Go Pro</button>
-               </div>
-            </div>
-
-            {/* Power Seller Tier (Silver/Metal Look) */}
-            <div className="p-8 rounded-[32px] border-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 flex flex-col relative hover:shadow-xl transition-all duration-300">
-              <h3 className="text-xl font-bold text-[#0F172A] tracking-tight mb-2">Enterprise</h3>
-              <div className="text-5xl font-extrabold mb-4 text-[#0F172A] tracking-tight">$99<span className="text-lg font-medium text-slate-400">/mo+</span></div>
-              <p className="text-xs text-slate-500 mb-6 h-8">Custom solutions for large teams.</p>
-              
-              {/* Platform Box */}
-              <div className="bg-slate-200/50 border border-slate-200 rounded-xl p-4 mb-6">
-                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Platforms:</p>
-                 <div className="text-xs font-bold text-slate-600">All + Custom Integrations</div>
-              </div>
-
-              <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-8">
-                {['Custom AI Listing Volume', 'API Access & Webhooks', 'White-Label Options', 'Custom AI Model Training', '24/7 Dedicated Support'].map(item => (
-                   <li key={item} className="flex items-center gap-3">
-                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 text-white text-[10px] font-bold">✓</div>
-                      <span>{item}</span>
-                   </li>
-                ))}
+            {/* Premium Tier */}
+            <div className="p-8 rounded-[32px] border-2 border-blue-500 bg-white flex flex-col relative shadow-2xl">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">Most Popular</div>
+              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Pro</h3>
+              <div className="text-4xl font-bold mb-8">$49 <span className="text-base font-medium text-slate-400">/mo</span></div>
+              <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-10">
+                <li className="text-blue-600 font-bold">✓ 1,000 AI listings / mo</li>
+                <li>✓ Advanced SEO Intelligence</li>
+                <li>✓ Cross-channel export</li>
               </ul>
-              <button className="w-full py-4 rounded-2xl border border-slate-300 bg-white font-bold hover:bg-slate-50 transition shadow-sm text-slate-700">Contact Sales</button>
+              <button className="w-full py-3.5 rounded-2xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition">Go Pro</button>
+            </div>
+            {/* Power Seller Tier */}
+            <div className="p-8 rounded-[32px] border border-slate-100 bg-white flex flex-col">
+              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Enterprise</h3>
+              <div className="text-4xl font-bold mb-8">$99 <span className="text-base font-medium text-slate-400">/mo</span></div>
+              <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-10">
+                <li>✓ 3,000 AI listings / mo</li>
+                <li>✓ API Access</li>
+                <li>✓ Team access (3 seats)</li>
+              </ul>
+              <button className="w-full py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold hover:bg-slate-100 transition">Contact Sales</button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="py-24 sm:py-28 px-4 bg-white">
-        <div className="max-w-6xl mx-auto rounded-[40px] border border-slate-200 bg-slate-50 shadow-2xl p-8 sm:p-14 text-center">
-          <h2 className="text-4xl font-bold text-[#0F172A] mb-4">Stop typing. Start scaling.</h2>
-          <button onClick={() => onNavigate('/builder')} className="bg-[#2563EB] text-white px-12 py-5 rounded-3xl text-xl font-bold shadow-xl hover:bg-blue-700 transition active:scale-95">Create My First Listing Free</button>
+      {/* FINAL CTA - PREMIUM UPGRADE */}
+      <section className="py-24 px-4 bg-white relative overflow-hidden">
+        <div className="max-w-5xl mx-auto relative z-10">
+          
+          {/* Glowing Background Effect */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-purple-600 rounded-[44px] blur opacity-50 animate-pulse"></div>
+          
+          {/* The Card Itself */}
+          <div className="relative rounded-[40px] bg-[#0F172A] p-10 sm:p-20 text-center overflow-hidden border border-white/10 shadow-2xl">
+            
+            {/* Interior Background Effects (Grain + Color Blobs) */}
+            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500 rounded-full blur-[100px] opacity-30"></div>
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500 rounded-full blur-[100px] opacity-30"></div>
+            
+            {/* Content */}
+            <div className="relative z-10">
+              <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight">
+                Stop typing. Start scaling.
+              </h2>
+              <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed">
+                Join the thousands of professional resellers automating their inventory with Listify AI HQ.
+              </p>
+              
+              <button 
+                onClick={() => onNavigate('/builder')} 
+                className="bg-white text-[#0F172A] px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300"
+              >
+                Create My First Listing Free
+              </button>
+              
+              {/* Trust Signals */}
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-slate-400 font-medium">
+                <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
+                  No credit card required
+                </span>
+                <span className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
+                  Free 25 listings/mo
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       
