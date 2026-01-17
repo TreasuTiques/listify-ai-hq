@@ -9,6 +9,46 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
+  // Pricing Data for the Landing Page
+  const plans = [
+    {
+      name: "Starter",
+      summary: "Perfect for casual sellers.",
+      price: "$0",
+      features: ["25 AI Listings / mo", "Basic AI Vision", "HTML & Plain Text"],
+      cta: "Get Started Free",
+      popular: false,
+      platforms: ['shopify', 'ebay', 'poshmark']
+    },
+    {
+      name: "Growth",
+      summary: "For growing businesses.",
+      price: "$24",
+      features: ["400 AI Listings / mo", "Advanced AI Vision", "Bulk Export Tools"],
+      cta: "Choose Growth",
+      popular: false,
+      platforms: ['shopify', 'ebay', 'poshmark', 'mercari']
+    },
+    {
+      name: "Pro",
+      summary: "The complete power seller toolkit.",
+      price: "$49",
+      features: ["1,000 AI Listings / mo", "Premium Storytelling", "Inventory Sync (Beta)", "Dedicated Support"],
+      cta: "Go Pro",
+      popular: true,
+      platforms: ['shopify', 'ebay', 'poshmark', 'mercari', 'depop', 'etsy']
+    },
+    {
+      name: "Enterprise",
+      summary: "Custom solutions for teams.",
+      price: "$99",
+      features: ["3,000+ AI Listings", "API Access", "Custom AI Models"],
+      cta: "Contact Sales",
+      popular: false,
+      platforms: ['all']
+    }
+  ];
+
   // FIXED: Forced Colors Style Block
   const rawHtml = `
 <div class="listing-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #000000; line-height: 1.6;">
@@ -325,8 +365,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                     <pre className="whitespace-pre-wrap leading-relaxed opacity-90">{rawHtml}</pre>
                   </div>
                 )}
-                
-                {/* UPDATED FADE OVERLAY: Reduced height */}
                 {activeTab === 'preview' && (
                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10"></div>
                 )}
@@ -345,57 +383,77 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* PRICING & FOOTER SECTIONS REMAIN UNCHANGED */}
+      {/* PRICING SECTION — RESTORED PREMIUM DESIGN */}
       {/* ===================================================== */}
-      <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200">
+      <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
+        {/* Ambient Glows */}
+        <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[120px] -z-10"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-100/50 rounded-full blur-[120px] -z-10"></div>
+
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-4xl sm:text-5xl font-bold text-[#0F172A] mb-4">Pricing for every business size.</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left mt-16">
-            {/* Free */}
-            <div className="p-8 rounded-[32px] border border-slate-100 bg-white flex flex-col">
-              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Starter</h3>
-              <div className="text-4xl font-bold mb-8">$0 <span className="text-base font-medium text-slate-400">/mo</span></div>
-              <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-10">
-                <li>✓ 25 AI listings / mo</li>
-                <li>✓ Multi-platform templates</li>
-                <li>✓ Basic SEO titles</li>
-              </ul>
-              <button className="w-full py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold hover:bg-slate-100 transition">Get Started Free</button>
-            </div>
-            {/* Growth Tier */}
-            <div className="p-8 rounded-[32px] border border-slate-100 bg-white flex flex-col">
-              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Growth</h3>
-              <div className="text-4xl font-bold mb-8">$24 <span className="text-base font-medium text-slate-400">/mo</span></div>
-              <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-10">
-                <li>✓ 400 AI listings / mo</li>
-                <li>✓ Shopify & eBay formats</li>
-                <li>✓ Priority processing</li>
-              </ul>
-              <button className="w-full py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold hover:bg-slate-100 transition">Choose Growth</button>
-            </div>
-            {/* Premium Tier */}
-            <div className="p-8 rounded-[32px] border-2 border-blue-500 bg-white flex flex-col relative shadow-2xl">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">Most Popular</div>
-              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Pro</h3>
-              <div className="text-4xl font-bold mb-8">$49 <span className="text-base font-medium text-slate-400">/mo</span></div>
-              <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-10">
-                <li className="text-blue-600 font-bold">✓ 1,000 AI listings / mo</li>
-                <li>✓ Advanced SEO Intelligence</li>
-                <li>✓ Cross-channel export</li>
-              </ul>
-              <button className="w-full py-3.5 rounded-2xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition">Go Pro</button>
-            </div>
-            {/* Power Seller Tier */}
-            <div className="p-8 rounded-[32px] border border-slate-100 bg-white flex flex-col">
-              <h3 className="text-lg font-bold text-slate-400 uppercase tracking-wider mb-2">Enterprise</h3>
-              <div className="text-4xl font-bold mb-8">$99 <span className="text-base font-medium text-slate-400">/mo</span></div>
-              <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-10">
-                <li>✓ 3,000 AI listings / mo</li>
-                <li>✓ API Access</li>
-                <li>✓ Team access (3 seats)</li>
-              </ul>
-              <button className="w-full py-3 rounded-2xl border border-slate-200 bg-slate-50 font-bold hover:bg-slate-100 transition">Contact Sales</button>
-            </div>
+          <p className="text-slate-500 mb-16 text-lg max-w-2xl mx-auto">Choose the plan that fits your business stage. Scale up or down anytime.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left relative z-10">
+            {plans.map((plan, idx) => {
+              const isPro = plan.popular;
+              const isEnterprise = plan.name === "Enterprise";
+              return (
+                <div key={idx} className={`relative h-full ${isPro ? 'z-10 transform scale-105' : 'z-0'}`}>
+                  {isPro && <div className="absolute -inset-[3px] bg-gradient-to-b from-cyan-300 via-blue-500 to-purple-600 rounded-[35px] blur-sm opacity-100"></div>}
+                  <div className={`relative flex flex-col p-8 rounded-[32px] h-full transition-all duration-300 ${
+                    isPro ? 'bg-white' : 
+                    isEnterprise ? 'bg-gradient-to-b from-slate-50 to-slate-100 border-2 border-slate-300' : 
+                    'bg-white/60 border border-slate-200 backdrop-blur-md hover:shadow-xl'
+                  }`}>
+                    {isPro && (
+                      <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">Most Popular</div>
+                    )}
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-[#0F172A] tracking-tight mb-2">{plan.name}</h3>
+                      <div className="flex items-baseline gap-1 mb-4">
+                        <span className="text-5xl font-extrabold text-[#0F172A] tracking-tight">{plan.price}</span>
+                        <span className="text-lg font-medium text-slate-400">/mo</span>
+                      </div>
+                      <p className="text-xs text-slate-500 font-medium h-8 leading-relaxed">{plan.summary}</p>
+                    </div>
+                    {/* Platform Box */}
+                    <div className={`rounded-xl p-4 mb-8 ${isPro ? 'bg-[#0F172A] border border-slate-700' : 'bg-slate-100 border border-slate-200'}`}>
+                      <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${isPro ? 'text-blue-300' : 'text-slate-500'}`}>Platforms Included:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {plan.platforms[0] === 'all' ? (
+                          <div className="text-xs font-bold text-slate-600">All + Custom Integrations</div>
+                        ) : (
+                          <>
+                            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${isPro ? 'bg-white/10' : 'bg-white shadow-sm'}`}>🛍️</span>
+                            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${isPro ? 'bg-white/10 text-white' : 'bg-white shadow-sm text-blue-600'}`}>eBay</span>
+                            <span className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${isPro ? 'bg-white/10 text-white' : 'bg-white shadow-sm text-pink-600'}`}>Posh</span>
+                            {plan.platforms.length > 3 && <span className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${isPro ? 'bg-white/10 text-white' : 'bg-white shadow-sm text-purple-600'}`}>M</span>}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <ul className="flex-1 space-y-4 mb-10">
+                      {plan.features.map((feat, fIdx) => (
+                        <li key={fIdx} className="flex items-start gap-3 text-sm text-slate-600">
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold ${isPro ? 'bg-blue-600 text-white' : 'bg-green-500 text-white'}`}>✓</div>
+                          <span className="leading-tight">{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-auto">
+                      <button className={`w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-md ${
+                        isPro 
+                        ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:shadow-cyan-500/25 hover:-translate-y-0.5' 
+                        : 'bg-white border border-slate-300 text-[#0F172A] hover:bg-slate-50'
+                      }`}>
+                        {plan.cta}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -403,61 +461,26 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* FINAL CTA - PREMIUM UPGRADE */}
       <section className="py-24 px-4 bg-white relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative z-10">
-          
-          {/* Glowing Background Effect */}
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-purple-600 rounded-[44px] blur opacity-50 animate-pulse"></div>
-          
-          {/* The Card Itself */}
           <div className="relative rounded-[40px] bg-[#0F172A] p-10 sm:p-20 text-center overflow-hidden border border-white/10 shadow-2xl">
-            
-            {/* Interior Background Effects (Grain + Color Blobs) */}
             <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500 rounded-full blur-[100px] opacity-30"></div>
             <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500 rounded-full blur-[100px] opacity-30"></div>
-            
-            {/* Content */}
             <div className="relative z-10">
-              <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight">
-                Stop typing. Start scaling.
-              </h2>
-              <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed">
-                Join the thousands of professional resellers automating their inventory with Listify AI HQ.
-              </p>
-              
-              <button 
-                onClick={() => onNavigate('/builder')} 
-                className="bg-white text-[#0F172A] px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300"
-              >
-                Create My First Listing Free
-              </button>
-              
-              {/* Trust Signals */}
+              <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight">Stop typing. Start scaling.</h2>
+              <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed">Join the thousands of professional resellers automating their inventory with Listify AI HQ.</p>
+              <button onClick={() => onNavigate('/builder')} className="bg-white text-[#0F172A] px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300">Create My First Listing Free</button>
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-slate-400 font-medium">
-                <span className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
-                  No credit card required
-                </span>
-                <span className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>
-                  Free 25 listings/mo
-                </span>
+                <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>No credit card required</span>
+                <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>Free 25 listings/mo</span>
               </div>
             </div>
           </div>
         </div>
       </section>
       
-      {/* Tailwind Config for Custom Animations */}
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-15px); }
-        }
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(-10px); }
-          50% { transform: translateY(0px); }
-        }
-        .animate-float { animation: float 5s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
         .perspective-1000 { perspective: 1000px; }
       `}</style>
 
