@@ -94,7 +94,9 @@ const PricingPage: React.FC = () => {
       
       {/* Hero Section */}
       <section className="pt-24 pb-20 px-4 text-center max-w-4xl mx-auto relative">
+        {/* Background Blob */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-blue-50/50 rounded-full blur-[100px] -z-10"></div>
+        
         <h1 className="text-5xl md:text-6xl font-bold text-[#0F172A] tracking-tight mb-6">
           Pricing for every stage of your <br className="hidden md:block" /> reselling journey.
         </h1>
@@ -107,14 +109,14 @@ const PricingPage: React.FC = () => {
       <section className="pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
           {plans.map((plan, idx) => {
-            // Logic for visual styles based on plan type
+            // Visual Logic
             const isPro = plan.popular;
             const isEnterprise = plan.name === "Power Seller";
             
             return (
               <div key={idx} className={`relative h-full ${isPro ? 'z-10 transform scale-105' : 'z-0'}`}>
                 
-                {/* Glow Effect for Pro */}
+                {/* Glow Effect for Premium Plan */}
                 {isPro && <div className="absolute -inset-[3px] bg-gradient-to-b from-cyan-300 via-blue-500 to-purple-600 rounded-[35px] blur-sm opacity-100"></div>}
                 
                 {/* Card Container */}
@@ -206,7 +208,7 @@ const PricingPage: React.FC = () => {
               <tr className="bg-slate-50 border-b border-slate-200">
                 <th className="p-8 text-sm font-bold text-slate-400 uppercase tracking-widest w-1/3">Feature</th>
                 <th className="p-8 text-sm font-bold text-white bg-[#0F172A] w-1/3 text-center border-x border-slate-700">Listify AI HQ</th>
-                <th className="p-8 text-sm font-bold text-slate-400 w-1/3 text-center">Standard Tools</th>
+                <th className="p-8 text-sm font-bold text-slate-400 w-1/3 text-center">Snap2List</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -216,7 +218,7 @@ const PricingPage: React.FC = () => {
                 ["SEO Focus", "High (Marketplace-specific)", "Low (Generic)"],
                 ["Mobile-Ready HTML", "Yes (Responsive designs)", "Limited"],
                 ["Listing Speed", "< 60 Seconds", "3–5 Minutes"],
-                ["Price per Listing", "Starts at $0.00", "Starts at $0.15"]
+                ["Price per Listing", "Starts at $0.00", "Starts at $0.12"]
               ].map((row, rIdx) => (
                 <tr key={rIdx} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="p-6 md:p-8 text-sm font-bold text-[#0F172A]">{row[0]}</td>
