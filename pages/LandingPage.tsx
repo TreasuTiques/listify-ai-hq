@@ -273,7 +273,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {[
-                  { feature: "AI Model Depth", listify: "GPT-4o Vision (Deep Analysis)", standard: "Basic OCR / Text Scan" },
+                  { feature: "AI Model Depth", listify: "Vision (Deep Analysis)", standard: "Basic OCR / Text Scan" },
                   { feature: "Listing Speed", listify: "10x Faster (Instant)", standard: "Manual Typing" },
                   { feature: "Platform Support", listify: "Shopify, eBay, Poshmark, Mercari", standard: "Single Platform Only" },
                   { feature: "SEO Optimization", listify: "Multi-Marketplace Keywords", standard: "None" },
