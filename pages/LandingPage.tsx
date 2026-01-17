@@ -9,7 +9,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
-  // PREVIOUSLY FIXED: Forced Colors Style Block for the Preview Window
+  // PREVIOUSLY FIXED: Forced Colors Style Block
   const rawHtml = `
 <div class="listing-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #000000; line-height: 1.6;">
   
@@ -345,10 +345,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* PRICING SECTION — THE PREMIUM UPGRADE */}
+      {/* PRICING SECTION — THE "IMAGE 2" REPLICA */}
       {/* ===================================================== */}
       <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
-        {/* Ambient Glows behind pricing */}
+        {/* Ambient Glows */}
         <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[120px] -z-10"></div>
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-100/50 rounded-full blur-[120px] -z-10"></div>
 
@@ -359,107 +359,116 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left relative z-10">
             
             {/* Starter */}
-            <div className="p-8 rounded-[32px] border border-slate-200 bg-white/60 backdrop-blur-md flex flex-col shadow-sm hover:shadow-xl transition-all duration-300">
-              <h3 className="text-lg font-bold text-[#0F172A] tracking-tight mb-2">Starter</h3>
-              <div className="text-4xl font-extrabold mb-4 text-[#0F172A]">$0<span className="text-base font-medium text-slate-400">/mo</span></div>
+            <div className="p-8 rounded-[32px] border border-blue-200 bg-white/60 backdrop-blur-md flex flex-col shadow-sm hover:shadow-lg transition-all duration-300 relative group">
+              <h3 className="text-xl font-bold text-[#0F172A] tracking-tight mb-2">Starter</h3>
+              <div className="text-5xl font-extrabold mb-4 text-[#0F172A] tracking-tight">$0<span className="text-lg font-medium text-slate-400">/mo</span></div>
               <p className="text-xs text-slate-500 mb-6 h-8">Perfect for casual sellers.</p>
               
-              {/* Platform Badges */}
-              <div className="bg-slate-100/50 rounded-xl p-3 mb-6">
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Platforms Included:</p>
+              {/* Platform Box */}
+              <div className="bg-slate-100 rounded-xl p-4 mb-6">
+                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Platforms Included:</p>
                  <div className="flex gap-2">
-                    <span className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-[10px] font-bold text-green-700" title="Shopify">🛍️</span>
-                    <span className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-700" title="eBay">eBay</span>
-                    <span className="w-6 h-6 rounded-full bg-pink-100 flex items-center justify-center text-[10px] font-bold text-pink-700" title="Poshmark">Posh</span>
+                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-lg" title="Shopify">🛍️</span>
+                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-[10px] font-bold text-blue-600" title="eBay">eBay</span>
+                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-[10px] font-bold text-pink-600" title="Poshmark">Posh</span>
                  </div>
               </div>
 
               <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-8">
-                <li className="flex items-center gap-3"><span className="text-green-500 font-bold">✓</span> 25 AI Listings / mo</li>
-                <li className="flex items-center gap-3"><span className="text-green-500 font-bold">✓</span> Basic AI Vision Analysis</li>
-                <li className="flex items-center gap-3"><span className="text-green-500 font-bold">✓</span> HTML & Plain Text Outputs</li>
-                <li className="flex items-center gap-3"><span className="text-green-500 font-bold">✓</span> Community Support</li>
+                {['25 AI Listings / mo', 'Basic AI Vision Analysis', 'HTML & Plain Text Outputs', 'Community Support'].map(item => (
+                   <li key={item} className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 text-white text-[10px] font-bold">✓</div>
+                      <span>{item}</span>
+                   </li>
+                ))}
               </ul>
-              <button className="w-full py-3.5 rounded-2xl border border-slate-200 bg-white font-bold hover:bg-slate-50 transition shadow-sm">Get Started Free</button>
+              <button className="w-full py-4 rounded-2xl border border-slate-300 bg-white font-bold hover:bg-slate-50 transition shadow-sm text-slate-700">Get Started Free</button>
             </div>
 
             {/* Growth Tier */}
-            <div className="p-8 rounded-[32px] border border-blue-200 bg-white/80 backdrop-blur-md flex flex-col shadow-md relative hover:-translate-y-1 transition-transform duration-300">
-              <h3 className="text-lg font-bold text-[#0F172A] tracking-tight mb-2">Growth</h3>
-              <div className="text-4xl font-extrabold mb-4 text-[#0F172A]">$24<span className="text-base font-medium text-slate-400">/mo</span></div>
+            <div className="p-8 rounded-[32px] border-2 border-blue-400 bg-white/80 backdrop-blur-md flex flex-col shadow-lg shadow-blue-100 hover:-translate-y-1 transition-transform duration-300 relative">
+              <h3 className="text-xl font-bold text-[#0F172A] tracking-tight mb-2">Growth</h3>
+              <div className="text-5xl font-extrabold mb-4 text-[#0F172A] tracking-tight">$24<span className="text-lg font-medium text-slate-400">/mo</span></div>
               <p className="text-xs text-slate-500 mb-6 h-8">For growing businesses.</p>
               
-              {/* Platform Badges */}
-              <div className="bg-blue-50/50 rounded-xl p-3 mb-6 border border-blue-100">
-                 <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-2">Platforms Included:</p>
+              {/* Platform Box */}
+              <div className="bg-slate-100 rounded-xl p-4 mb-6">
+                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Platforms Included:</p>
                  <div className="flex gap-2">
-                    <span className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-[10px] font-bold text-green-700">🛍️</span>
-                    <span className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-700">eBay</span>
-                    <span className="w-6 h-6 rounded-full bg-pink-100 flex items-center justify-center text-[10px] font-bold text-pink-700">Posh</span>
-                    <span className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-[10px] font-bold text-purple-700">M</span>
+                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-lg">🛍️</span>
+                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-[10px] font-bold text-blue-600">eBay</span>
+                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-[10px] font-bold text-pink-600">Posh</span>
+                    <span className="w-8 h-8 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-[10px] font-bold text-purple-600">M</span>
                  </div>
               </div>
 
               <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-8">
-                <li className="flex items-center gap-3"><span className="text-green-500 font-bold">✓</span> 400 AI Listings / mo</li>
-                <li className="flex items-center gap-3"><span className="text-green-500 font-bold">✓</span> Advanced AI Vision</li>
-                <li className="flex items-center gap-3"><span className="text-green-500 font-bold">✓</span> Multi-Marketplace SEO Keywords</li>
-                <li className="flex items-center gap-3"><span className="text-green-500 font-bold">✓</span> Bulk Export Tools</li>
-                <li className="flex items-center gap-3"><span className="text-green-500 font-bold">✓</span> Priority Email Support</li>
+                {['400 AI Listings / mo', 'Advanced AI Vision', 'Multi-Marketplace SEO Keywords', 'Bulk Export Tools', 'Priority Email Support'].map(item => (
+                   <li key={item} className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 text-white text-[10px] font-bold">✓</div>
+                      <span>{item}</span>
+                   </li>
+                ))}
               </ul>
-              <button className="w-full py-3.5 rounded-2xl border border-slate-200 bg-slate-50 font-bold hover:bg-slate-100 transition shadow-sm">Choose Growth</button>
+              <button className="w-full py-4 rounded-2xl border border-blue-200 bg-blue-50 font-bold text-blue-700 hover:bg-blue-100 transition shadow-sm">Choose Growth</button>
             </div>
 
-            {/* Premium Tier (THE WINNER) */}
-            <div className="p-8 rounded-[32px] border-2 border-blue-500 bg-white flex flex-col relative shadow-2xl hover:-translate-y-2 transition-transform duration-300 z-10">
-              <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">Most Popular</div>
-              <h3 className="text-lg font-bold text-[#0F172A] tracking-tight mb-2">Pro</h3>
-              <div className="text-4xl font-extrabold mb-4 text-[#0F172A]">$49<span className="text-base font-medium text-slate-400">/mo</span></div>
-              <p className="text-xs text-slate-500 mb-6 h-8">The complete power seller toolkit.</p>
-              
-              {/* Platform Badges */}
-              <div className="bg-slate-900 rounded-xl p-3 mb-6 shadow-inner">
-                 <p className="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2">All Supported Platforms</p>
-                 <div className="flex flex-wrap gap-2">
-                    <span className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-[10px] text-white">🛍️</span>
-                    <span className="w-6 h-6 rounded-full bg-gradient-to-tr from-yellow-400 to-orange-500 flex items-center justify-center text-[8px] font-bold text-white">Etsy</span>
-                    <span className="w-6 h-6 rounded-full bg-pink-600 flex items-center justify-center text-[10px] font-bold text-white">Posh</span>
-                    <span className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold text-white">M</span>
-                    <span className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center text-[10px] font-bold text-white">D</span>
-                    <span className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center text-[10px] font-bold text-white">Etsy</span>
-                 </div>
-              </div>
+            {/* Premium Tier (THE WINNER - FIXED GLOW) */}
+            <div className="relative group z-20 transform scale-105">
+               {/* The Glow Effect - IMPROVED */}
+               <div className="absolute -inset-[3px] bg-gradient-to-b from-cyan-300 via-blue-500 to-purple-600 rounded-[35px] blur-sm opacity-100"></div>
+               <div className="relative p-8 rounded-[32px] bg-white flex flex-col h-full">
+                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">Most Popular</div>
+                  
+                  <h3 className="text-xl font-bold text-[#0F172A] tracking-tight mb-2">Pro</h3>
+                  <div className="text-5xl font-extrabold mb-4 text-[#0F172A] tracking-tight">$49<span className="text-lg font-medium text-slate-400">/mo</span></div>
+                  <p className="text-xs text-slate-500 mb-6 h-8">The complete power seller toolkit.</p>
+                  
+                  {/* Platform Box (Dark Mode for Pro) */}
+                  <div className="bg-[#0F172A] rounded-xl p-4 mb-6 shadow-inner border border-slate-700">
+                     <p className="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-3">All Supported Platforms</p>
+                     <div className="flex flex-wrap gap-2">
+                        <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-lg">🛍️</span>
+                        <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-white">Etsy</span>
+                        <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-white">Posh</span>
+                        <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-white">M</span>
+                        <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-white">D</span>
+                     </div>
+                  </div>
 
-              <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-8">
-                <li className="flex items-center gap-3"><div className="bg-blue-100 p-1 rounded-full"><span className="text-blue-600 font-bold block w-2 h-2 rounded-full bg-blue-600"></span></div> 1,000 AI Listings / mo</li>
-                <li className="flex items-center gap-3"><div className="bg-blue-100 p-1 rounded-full"><span className="text-blue-600 font-bold block w-2 h-2 rounded-full bg-blue-600"></span></div> Premium AI Storytelling</li>
-                <li className="flex items-center gap-3"><div className="bg-blue-100 p-1 rounded-full"><span className="text-blue-600 font-bold block w-2 h-2 rounded-full bg-blue-600"></span></div> Cross-Channel Inventory Sync (Beta)</li>
-                <li className="flex items-center gap-3"><div className="bg-blue-100 p-1 rounded-full"><span className="text-blue-600 font-bold block w-2 h-2 rounded-full bg-blue-600"></span></div> Advanced Analytics Dashboard</li>
-                <li className="flex items-center gap-3"><div className="bg-blue-100 p-1 rounded-full"><span className="text-blue-600 font-bold block w-2 h-2 rounded-full bg-blue-600"></span></div> Dedicated Success Manager</li>
-              </ul>
-              <button className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold shadow-lg shadow-blue-200 hover:shadow-xl transition hover:-translate-y-0.5">Go Pro</button>
+                  <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-8">
+                    {['1,000 AI Listings / mo', 'Premium AI Storytelling', 'Cross-Channel Inventory Sync', 'Advanced Analytics Dashboard', 'Dedicated Success Manager'].map(item => (
+                       <li key={item} className="flex items-center gap-3">
+                          <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 text-white text-[10px] font-bold">✓</div>
+                          <span>{item}</span>
+                       </li>
+                    ))}
+                  </ul>
+                  <button className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold shadow-lg hover:shadow-cyan-500/25 transition transform hover:-translate-y-0.5">Go Pro</button>
+               </div>
             </div>
 
-            {/* Power Seller Tier */}
-            <div className="p-8 rounded-[32px] border border-slate-300 bg-slate-100 flex flex-col opacity-80 hover:opacity-100 transition-opacity">
-              <h3 className="text-lg font-bold text-[#0F172A] tracking-tight mb-2">Enterprise</h3>
-              <div className="text-4xl font-extrabold mb-4 text-[#0F172A]">$99<span className="text-base font-medium text-slate-400">/mo+</span></div>
+            {/* Power Seller Tier (Silver/Metal Look) */}
+            <div className="p-8 rounded-[32px] border-2 border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100 flex flex-col relative hover:shadow-xl transition-all duration-300">
+              <h3 className="text-xl font-bold text-[#0F172A] tracking-tight mb-2">Enterprise</h3>
+              <div className="text-5xl font-extrabold mb-4 text-[#0F172A] tracking-tight">$99<span className="text-lg font-medium text-slate-400">/mo+</span></div>
               <p className="text-xs text-slate-500 mb-6 h-8">Custom solutions for large teams.</p>
               
-              {/* Platform Badges */}
-              <div className="bg-slate-200 rounded-xl p-3 mb-6">
-                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Platforms:</p>
+              {/* Platform Box */}
+              <div className="bg-slate-200/50 border border-slate-200 rounded-xl p-4 mb-6">
+                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Platforms:</p>
                  <div className="text-xs font-bold text-slate-600">All + Custom Integrations</div>
               </div>
 
               <ul className="space-y-4 text-sm text-slate-600 flex-grow mb-8">
-                <li className="flex items-center gap-3"><span className="text-slate-400 font-bold">✓</span> Custom AI Listing Volume</li>
-                <li className="flex items-center gap-3"><span className="text-slate-400 font-bold">✓</span> API Access & Webhooks</li>
-                <li className="flex items-center gap-3"><span className="text-slate-400 font-bold">✓</span> White-Label Options</li>
-                <li className="flex items-center gap-3"><span className="text-slate-400 font-bold">✓</span> Custom AI Model Training</li>
-                <li className="flex items-center gap-3"><span className="text-slate-400 font-bold">✓</span> 24/7 Dedicated Support & SLA</li>
+                {['Custom AI Listing Volume', 'API Access & Webhooks', 'White-Label Options', 'Custom AI Model Training', '24/7 Dedicated Support'].map(item => (
+                   <li key={item} className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 text-white text-[10px] font-bold">✓</div>
+                      <span>{item}</span>
+                   </li>
+                ))}
               </ul>
-              <button className="w-full py-3.5 rounded-2xl border border-slate-300 bg-slate-200 font-bold hover:bg-slate-300 transition">Contact Sales</button>
+              <button className="w-full py-4 rounded-2xl border border-slate-300 bg-white font-bold hover:bg-slate-50 transition shadow-sm text-slate-700">Contact Sales</button>
             </div>
           </div>
         </div>
