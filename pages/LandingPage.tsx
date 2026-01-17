@@ -27,7 +27,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
-      {/* HERO SECTION — TIGHTER VERTICAL SPACING */}
+      {/* HERO SECTION */}
       {/* ===================================================== */}
       <section className="relative pt-12 sm:pt-16 pb-16 sm:pb-20 bg-[#F8FAFC] overflow-hidden">
         
@@ -36,13 +36,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/60 blur-[100px] rounded-full -mr-20 -mb-20 mix-blend-multiply opacity-80"></div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Reduced internal padding from lg:p-20 to lg:p-12 */}
           <div className="relative bg-white/40 backdrop-blur-md rounded-[48px] border border-white/60 shadow-[0_32px_80px_-20px_rgba(15,23,42,0.1)] p-8 sm:p-10 lg:p-12 overflow-hidden">
             
-            {/* Reduced gap from gap-12 to gap-2 */}
             <div className="flex flex-col items-center text-center gap-2">
               
-              {/* Top Content: Centered Text */}
+              {/* Top Content */}
               <div className="max-w-3xl mx-auto relative z-20 flex flex-col items-center">
                 
                 {/* THE CROWN BADGE */}
@@ -71,14 +69,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   Start Listing Free
                 </button>
                 
-                {/* Multi-Platform Trust Bar - UPDATED PREMIUM LOOK */}
+                {/* Multi-Platform Trust Bar */}
                 <div className="pt-8 border-t border-slate-200/60 w-full max-w-4xl mx-auto">
-                   {/* Premium Gradient Label */}
                    <p className="text-xs font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent uppercase tracking-[0.25em] mb-8">
                      Optimized for all major platforms
                    </p>
                    
-                   {/* Darker, Bolder Platform List with new additions */}
                    <div className="flex flex-wrap justify-center gap-x-8 gap-y-5 items-center text-slate-900 font-bold text-lg">
                       <span>Shopify</span>
                       <span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
@@ -118,24 +114,62 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* FEATURES — PLATFORM NEUTRAL */}
+      {/* FEATURES — PREMIUM CARDS UPGRADE */}
       {/* ===================================================== */}
-      <section className="py-12 sm:py-14 bg-white border-y border-slate-100">
+      <section className="py-24 bg-white border-b border-slate-100 relative overflow-hidden">
+        {/* Subtle background glow to connect sections */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-blue-50/50 blur-[120px] rounded-full -z-10"></div>
+
         <div className="max-w-7xl mx-auto px-4 text-left">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-[#0F172A] tracking-tight">Why Power Sellers Choose Listify</h2>
+            <p className="text-slate-500 mt-4 text-lg">We automated the boring parts so you can focus on sourcing.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: 'AI Product Vision', icon: '🧠', label: 'brain', text: 'Instantly identifies brand, model, and condition from a single photo.' },
-              { title: 'Multi-Channel SEO', icon: '🚀', label: 'rocket', text: 'Titles & keywords optimized for Google, eBay, and marketplace algorithms.' },
-              { title: 'Universal Format', icon: '🌎', label: 'globe', text: 'Get clean descriptions ready for Shopify, Amazon, or any selling platform.' },
-              { title: 'List 10x Faster', icon: '⚡', label: 'bolt', text: 'Stop manual data entry. Focus on sourcing and scaling your store.' }
-            ].map((f) => (
-              <div key={f.title} className="p-6 rounded-2xl border border-slate-100 shadow-sm hover:border-blue-100 transition-colors">
-                <div className="flex items-start gap-3">
-                  <span role="img" aria-label={f.label} className="text-2xl mt-0.5">{f.icon}</span>
-                  <div>
-                    <h4 className="font-bold text-[#0F172A]">{f.title}</h4>
-                    <p className="text-sm text-slate-500 mt-1">{f.text}</p>
-                  </div>
+              { 
+                title: 'AI Product Vision', 
+                icon: '🧠', 
+                text: 'Upload a photo and watch as our AI instantly detects brand, model, and condition details.',
+                color: 'from-blue-500 to-blue-600'
+              },
+              { 
+                title: 'Multi-Channel SEO', 
+                icon: '🚀', 
+                text: 'Generate keywords and titles optimized for Google Shopping, eBay Cassini, and Amazon A9.',
+                color: 'from-indigo-500 to-indigo-600'
+              },
+              { 
+                title: 'Universal Format', 
+                icon: '🌎', 
+                text: 'One click transforms your data into clean HTML for eBay or plain text for Poshmark.',
+                color: 'from-violet-500 to-violet-600'
+              },
+              { 
+                title: 'List 10x Faster', 
+                icon: '⚡', 
+                text: 'Skip the manual typing. Bulk process your inventory and scale your store overnight.',
+                color: 'from-blue-600 to-indigo-600'
+              }
+            ].map((f, i) => (
+              <div 
+                key={f.title} 
+                className="group relative bg-white p-8 rounded-[32px] border border-slate-100 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-10px_rgba(37,99,235,0.15)] hover:border-blue-100 transition-all duration-300 hover:-translate-y-2"
+              >
+                {/* Gradient Icon Container */}
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center text-2xl text-white shadow-lg shadow-blue-200/50 mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  {f.icon}
+                </div>
+                
+                <h3 className="text-xl font-bold text-[#0F172A] mb-3 group-hover:text-[#2563EB] transition-colors">{f.title}</h3>
+                <p className="text-slate-500 leading-relaxed text-sm">
+                  {f.text}
+                </p>
+                
+                {/* Subtle arrow that appears on hover */}
+                <div className="absolute bottom-8 right-8 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0 text-[#2563EB]">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </div>
               </div>
             ))}
