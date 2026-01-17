@@ -11,11 +11,16 @@ import VisionPage from './pages/VisionPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 
-// ✅ NEW: Chat Widget
+// ✅ NEW: Auth Pages
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+
+// ✅ Chat Widget
 import ChatWidget from './components/ChatWidget';
 
 const App: React.FC = () => {
-  const [currentPath, setCurrentPath] = useState<string>(window.location.hash || '/');
+  // Initialize path from hash or default to '/'
+  const [currentPath, setCurrentPath] = useState<string>(window.location.hash.replace('#', '') || '/');
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -32,6 +37,15 @@ const App: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
+  // 1. AUTH LAYOUT: If Login or Signup, render full screen without Navbar/Footer
+  if (currentPath === '/login') {
+    return <LoginPage onNavigate={navigate} />;
+  }
+  if (currentPath === '/signup') {
+    return <SignUpPage onNavigate={navigate} />;
+  }
+
+  // 2. MAIN LAYOUT: Helper function for the standard pages
   const renderContent = () => {
     switch (currentPath) {
       case '/builder':
@@ -55,8 +69,9 @@ const App: React.FC = () => {
     }
   };
 
+  // Standard Layout with Nav, Footer, and Chat
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen font-sans text-slate-900 bg-white">
       <Navbar onNavigate={navigate} />
 
       <main className="flex-grow">
@@ -65,7 +80,7 @@ const App: React.FC = () => {
 
       <Footer onNavigate={navigate} />
 
-      {/* ✅ Chat agent lives globally across all pages */}
+      {/* Chat agent lives globally on main pages */}
       <ChatWidget />
     </div>
   );
