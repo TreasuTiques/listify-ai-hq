@@ -2,25 +2,28 @@ import React, { useState } from 'react';
 
 const BuilderPage: React.FC = () => {
   // 1. STATE MANAGEMENT
-  const [activePlatform, setActivePlatform] = useState('ebay'); // 'ebay' | 'poshmark' | 'mercari' | 'depop'
+  const [activePlatform, setActivePlatform] = useState('ebay');
   const [isStorytelling, setIsStorytelling] = useState(false);
   const [title, setTitle] = useState('');
   const [brand, setBrand] = useState('');
   const [condition, setCondition] = useState('New with Tags');
 
-  // Platforms Config
+  // UPDATED: All 7 Major Platforms Included
   const platforms = [
     { id: 'ebay', label: 'eBay', color: 'bg-blue-600' },
     { id: 'poshmark', label: 'Poshmark', color: 'bg-red-700' },
     { id: 'mercari', label: 'Mercari', color: 'bg-purple-600' },
     { id: 'depop', label: 'Depop', color: 'bg-black' },
+    { id: 'etsy', label: 'Etsy', color: 'bg-orange-500' },
+    { id: 'shopify', label: 'Shopify', color: 'bg-emerald-500' },
+    { id: 'facebook', label: 'Facebook', color: 'bg-blue-800' },
   ];
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-24 pt-20 px-4 sm:px-6 lg:px-8">
       
       {/* Page Header */}
-      <div className="max-w-7xl mx-auto mb-8 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight flex items-center gap-3">
             <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
@@ -28,8 +31,13 @@ const BuilderPage: React.FC = () => {
           </h1>
           <p className="text-slate-500 mt-1">Upload photos to generate optimized listings instantly.</p>
         </div>
-        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          0 Photos Uploaded • Target: <span className="text-blue-600">{activePlatform.toUpperCase()}</span>
+        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider bg-white px-4 py-2 rounded-lg border border-slate-100 shadow-sm">
+          0 Photos Uploaded • Target: <span className={`font-bold ml-1 ${
+            activePlatform === 'ebay' ? 'text-blue-600' : 
+            activePlatform === 'poshmark' ? 'text-red-600' :
+            activePlatform === 'shopify' ? 'text-emerald-600' :
+            'text-slate-900'
+          }`}>{activePlatform.toUpperCase()}</span>
         </div>
       </div>
 
@@ -67,10 +75,10 @@ const BuilderPage: React.FC = () => {
         {/* RIGHT COLUMN: Listing Details */}
         <div className="lg:col-span-7 space-y-6">
           
-          {/* Platform Tabs (NEW) */}
+          {/* Platform Tabs (UPDATED) */}
           <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm p-8">
             
-            {/* 1. THE NEW PLATFORM SWITCHER */}
+            {/* The New Expanded Platform Switcher */}
             <div className="mb-8">
                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Target Marketplace</label>
                <div className="flex flex-wrap gap-2">
@@ -78,7 +86,7 @@ const BuilderPage: React.FC = () => {
                    <button
                      key={platform.id}
                      onClick={() => setActivePlatform(platform.id)}
-                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wide transition-all border ${
+                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all border ${
                        activePlatform === platform.id
                          ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-md transform scale-105'
                          : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
