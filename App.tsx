@@ -11,11 +11,14 @@ import VisionPage from './pages/VisionPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 
-// ✅ NEW: Auth Pages
+// Auth Pages
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 
-// ✅ Chat Widget
+// ✅ NEW: Dashboard Page Import
+import DashboardPage from './pages/DashboardPage';
+
+// Chat Widget
 import ChatWidget from './components/ChatWidget';
 
 const App: React.FC = () => {
@@ -48,6 +51,8 @@ const App: React.FC = () => {
   // 2. MAIN LAYOUT: Helper function for the standard pages
   const renderContent = () => {
     switch (currentPath) {
+      case '/dashboard': // ✅ NEW: Registered Dashboard Route
+        return <DashboardPage onNavigate={navigate} />;
       case '/builder':
         return <BuilderPage />;
       case '/pricing':
