@@ -1,430 +1,177 @@
-import React, { useState, useRef } from 'react';
-import { ListingFormValues, ListingStyle, GeneratedListing } from '../types';
-import { generateStandardListing, generatePremiumListing } from '../services/mockGenerator';
-
-// Platform types for the switcher
-type Platform = 'ebay' | 'poshmark' | 'mercari' | 'depop' | 'shopify' | 'etsy';
+import React, { useState } from 'react';
 
 const BuilderPage: React.FC = () => {
-  const [images, setImages] = useState<File[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [output, setOutput] = useState<GeneratedListing | null>(null);
-  
-  // NEW: Platform State
-  const [selectedPlatform, setSelectedPlatform] = useState<Platform>('ebay');
+  // 1. STATE MANAGEMENT
+  const [activePlatform, setActivePlatform] = useState('ebay'); // 'ebay' | 'poshmark' | 'mercari' | 'depop'
+  const [isStorytelling, setIsStorytelling] = useState(false);
+  const [title, setTitle] = useState('');
+  const [brand, setBrand] = useState('');
+  const [condition, setCondition] = useState('New with Tags');
 
-  const [form, setForm] = useState<ListingFormValues>({
-    title: '',
-    brand: '',
-    condition: 'Very Good',
-    conditionNotes: '',
-    specialFeatures: '',
-    targetBuyer: 'Collector',
-    price: '',
-    category: '',
-    listingStyle: ListingStyle.STANDARD
-  });
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setImages(prev => [...prev, ...newFiles]);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const droppedFiles = Array.from(e.dataTransfer.files);
-      setImages(prev => [...prev, ...droppedFiles]);
-    }
-  };
-
-  // --- THE "BRAIN" OF THE SIMULATION ---
-  // This simulates what the AI Back-end will do: Select different "Prompts" based on the platform.
-  const simulateAIOutput = (platform: Platform, formData: ListingFormValues): GeneratedListing => {
-    const baseTitle = formData.title || "Vintage Item";
-    
-    // 1. EBAY MODE (HTML, Tables, Specs)
-    if (platform === 'ebay') {
-       return {
-         titles: [
-           `🔥 ${baseTitle} - ${formData.condition} - ${formData.brand} - RARE`,
-           `${baseTitle} Genuine ${formData.brand} - Fast Shipping`,
-           `VTG ${baseTitle} - Tested & Working - ${formData.condition}`
-         ],
-         htmlDescription: `
-           <div style="font-family: Arial, sans-serif; max-width: 800px; margin: auto; border: 1px solid #ccc; padding: 20px;">
-             <h2 style="color: #003366; text-align: center;">${baseTitle}</h2>
-             <hr />
-             <p><strong>Brand:</strong> ${formData.brand}</p>
-             <p><strong>Condition:</strong> ${formData.condition} - ${formData.conditionNotes}</p>
-             <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0;">
-                <h3 style="margin-top:0;">Item Specifics</h3>
-                <ul style="list-style-type: square;">
-                   <li><strong>Authenticity:</strong> 100% Genuine ${formData.brand}</li>
-                   <li><strong>Special Features:</strong> ${formData.specialFeatures}</li>
-                   <li><strong>Shipping:</strong> Ships within 24 hours</li>
-                </ul>
-             </div>
-             <p style="font-size: 12px; color: #666; text-align: center;">Thank you for viewing our listing!</p>
-           </div>
-         `,
-         tags: ['ebay', 'vintage', 'authentic']
-       };
-    }
-
-    // 2. POSHMARK/DEPOP MODE (Emojis, Hashtags, No HTML)
-    if (platform === 'poshmark' || platform === 'depop') {
-       return {
-         titles: [
-           `✨ ${baseTitle} - ${formData.brand} ✨`,
-           `Rare ${baseTitle} in ${formData.condition} Condition 👗`,
-           `${formData.brand} ${baseTitle} - Super Cute!`
-         ],
-         htmlDescription: `
-           ✨ <strong>${baseTitle}</strong> ✨<br/><br/>
-           Make a statement with this amazing ${formData.brand} piece! It is in <strong>${formData.condition}</strong> condition.<br/><br/>
-           📝 <strong>Details:</strong><br/>
-           • Brand: ${formData.brand}<br/>
-           • Condition: ${formData.conditionNotes}<br/>
-           • Features: ${formData.specialFeatures}<br/><br/>
-           Grab it before it's gone! Offers welcome! 💖<br/><br/>
-           #${formData.brand.replace(/\s/g, '')} #vintage #style #fashion #ootd #${platform}
-         `,
-         tags: ['fashion', 'style', 'ootd']
-       };
-    }
-
-    // 3. SHOPIFY/AMAZON MODE (Clean, Professional, SEO)
-    if (platform === 'shopify' || platform === 'amazon') {
-       return {
-         titles: [
-           `${formData.brand} ${baseTitle} - Premium Edition`,
-           `${baseTitle} by ${formData.brand} - Authentic`,
-           `${formData.brand} ${baseTitle} (${formData.condition})`
-         ],
-         htmlDescription: `
-           <h2>Product Overview</h2>
-           <p>Experience the quality of the <strong>${baseTitle}</strong> from <strong>${formData.brand}</strong>. This item has been inspected and is rated as <strong>${formData.condition}</strong>.</p>
-           
-           <h3>Key Features</h3>
-           <ul>
-             <li><strong>Manufacturer:</strong> ${formData.brand}</li>
-             <li><strong>Status:</strong> ${formData.condition}</li>
-             <li><strong>Highlights:</strong> ${formData.specialFeatures}</li>
-           </ul>
-           
-           <p>${formData.conditionNotes}</p>
-         `,
-         tags: ['ecommerce', 'shop', 'online']
-       };
-    }
-
-    // Default Fallback
-    return generateStandardListing(formData);
-  };
-
-  const handleGenerate = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsGenerating(true);
-    
-    // Simulate AI Processing time
-    setTimeout(() => {
-      // Use our new "Smart" Simulator
-      const result = simulateAIOutput(selectedPlatform, form);
-      
-      setOutput(result);
-      setIsGenerating(false);
-      
-      // Scroll to bottom to see result
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }, 1500);
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
+  // Platforms Config
+  const platforms = [
+    { id: 'ebay', label: 'eBay', color: 'bg-blue-600' },
+    { id: 'poshmark', label: 'Poshmark', color: 'bg-red-700' },
+    { id: 'mercari', label: 'Mercari', color: 'bg-purple-600' },
+    { id: 'depop', label: 'Depop', color: 'bg-black' },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20">
+    <div className="min-h-screen bg-[#F8FAFC] pb-24 pt-20 px-4 sm:px-6 lg:px-8">
       
-      {/* HEADER BAR */}
-      <div className="bg-white border-b border-slate-200 sticky top-16 z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-[#0F172A] flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+      {/* Page Header */}
+      <div className="max-w-7xl mx-auto mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight flex items-center gap-3">
+            <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
             Listing Command Center
           </h1>
-          <div className="text-sm text-slate-500 font-medium">
-            {images.length} Photos Uploaded • Target: <span className="text-[#2563EB] capitalize font-bold">{selectedPlatform}</span>
-          </div>
+          <p className="text-slate-500 mt-1">Upload photos to generate optimized listings instantly.</p>
+        </div>
+        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          0 Photos Uploaded • Target: <span className="text-blue-600">{activePlatform.toUpperCase()}</span>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <form onSubmit={handleGenerate} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* LEFT COLUMN: Media Upload */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm p-6 relative overflow-hidden group">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Source Media</h3>
+              <span className="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded-md">AI Vision Ready</span>
+            </div>
+            
+            {/* Dropzone */}
+            <div className="border-2 border-dashed border-slate-200 rounded-2xl h-[400px] flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 hover:border-blue-400 transition-all cursor-pointer group-hover:shadow-inner">
+              <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+              <p className="text-sm font-bold text-slate-700">Drop Photos Here</p>
+              <p className="text-xs text-slate-400 mt-1">Supports JPG, PNG, HEIC</p>
+            </div>
+          </div>
+
+          {/* AI Status Card */}
+          <div className="bg-[#0F172A] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full blur-[60px] opacity-20"></div>
+            <h3 className="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2">AI Analysis</h3>
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-slate-500"></div>
+              <span className="text-sm text-slate-400 italic">Waiting for media...</span>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Listing Details */}
+        <div className="lg:col-span-7 space-y-6">
           
-          {/* LEFT COLUMN: MEDIA (Sticky) */}
-          <div className="lg:col-span-5 lg:sticky lg:top-36 space-y-6">
+          {/* Platform Tabs (NEW) */}
+          <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm p-8">
             
-            {/* Photo Uploader Card */}
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h2 className="font-bold text-[#0F172A] text-sm uppercase tracking-wide">Source Media</h2>
-                <span className="text-xs font-bold text-[#2563EB] bg-blue-50 px-2 py-1 rounded">AI Vision Ready</span>
+            {/* 1. THE NEW PLATFORM SWITCHER */}
+            <div className="mb-8">
+               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Target Marketplace</label>
+               <div className="flex flex-wrap gap-2">
+                 {platforms.map((platform) => (
+                   <button
+                     key={platform.id}
+                     onClick={() => setActivePlatform(platform.id)}
+                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wide transition-all border ${
+                       activePlatform === platform.id
+                         ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-md transform scale-105'
+                         : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                     }`}
+                   >
+                     {/* Platform Indicator Dot */}
+                     <span className={`w-2 h-2 rounded-full ${activePlatform === platform.id ? 'bg-white' : platform.color}`}></span>
+                     {platform.label}
+                   </button>
+                 ))}
+               </div>
+            </div>
+
+            {/* Title Input */}
+            <div className="mb-6">
+              <div className="flex justify-between mb-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Listing Title</label>
+                <span className={`text-xs font-bold ${title.length > 70 ? 'text-red-500' : 'text-slate-400'}`}>{title.length} / 80</span>
               </div>
-              
-              <div className="p-6">
-                <div 
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragOver={handleDragOver}
-                  onDragEnter={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  className={`aspect-[4/3] border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300 relative group overflow-hidden ${
-                    isDragging 
-                      ? 'border-[#2563EB] bg-blue-50/50' 
-                      : 'border-slate-200 bg-slate-50 hover:bg-white hover:border-[#2563EB]'
-                  }`}
+              <input 
+                type="text" 
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400"
+                placeholder="AI will generate this..."
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Brand</label>
+                <input 
+                  type="text" 
+                  value={brand}
+                  onChange={(e) => setBrand(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400"
+                  placeholder="Nike, Sony..."
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Condition</label>
+                <select 
+                  value={condition}
+                  onChange={(e) => setCondition(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all appearance-none cursor-pointer"
                 >
-                  <input 
-                    type="file" 
-                    multiple 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    onChange={handleImageChange}
-                    accept="image/*"
-                  />
-                  
-                  {images.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-2 w-full h-full p-2 overflow-y-auto">
-                      {images.map((img, i) => (
-                        <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200">
-                          <div className="absolute inset-0 bg-slate-800 flex items-center justify-center">
-                             <span className="text-xs text-white font-bold">{img.name.slice(0, 3)}..</span>
-                          </div>
-                        </div>
-                      ))}
-                      {/* Add Button */}
-                      <div className="border border-dashed border-slate-300 rounded-lg flex items-center justify-center hover:bg-slate-50">
-                         <span className="text-2xl text-slate-400">+</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 transition-colors ${isDragging ? 'bg-[#2563EB] text-white' : 'bg-white text-slate-400 shadow-sm'}`}>
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                      </div>
-                      <p className="text-sm font-bold text-slate-600">Drop Photos Here</p>
-                      <p className="text-xs text-slate-400 mt-1">Supports JPG, PNG, HEIC</p>
-                    </>
-                  )}
-                </div>
+                  <option>New with Tags</option>
+                  <option>New without Tags</option>
+                  <option>Pre-owned (Excellent)</option>
+                  <option>Pre-owned (Good)</option>
+                  <option>For Parts / Not Working</option>
+                </select>
               </div>
             </div>
 
-            {/* AI Analysis Status (Mock) */}
-            <div className="bg-[#1E293B] rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl -mr-10 -mt-10"></div>
-               <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">AI Analysis</h3>
-               <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full ${images.length > 0 ? 'bg-green-400 animate-pulse' : 'bg-slate-600'}`}></div>
-                  <span className="text-sm font-medium">{images.length > 0 ? 'Scanning visual features...' : 'Waiting for media...'}</span>
-               </div>
-            </div>
-          </div>
-
-
-          {/* RIGHT COLUMN: CONTROLS (Form) */}
-          <div className="lg:col-span-7 space-y-8">
-            
-            {/* PLATFORM SELECTOR TABS */}
-            <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap gap-1">
-               {['ebay', 'poshmark', 'mercari', 'depop', 'shopify', 'amazon'].map((p) => (
-                 <button
-                   key={p}
-                   type="button"
-                   onClick={() => setSelectedPlatform(p as Platform)}
-                   className={`flex-1 min-w-[80px] py-2.5 rounded-xl text-xs font-bold uppercase tracking-wide transition-all ${
-                     selectedPlatform === p 
-                       ? 'bg-[#0F172A] text-white shadow-md transform scale-105' 
-                       : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
-                   }`}
-                 >
-                   {p}
-                 </button>
-               ))}
+            <div className="mb-6">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Condition Notes</label>
+              <textarea 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-24 resize-none"
+                placeholder="e.g. Small scratch on lens, box has shelf wear..."
+              ></textarea>
             </div>
 
-            <div className="bg-white p-8 rounded-[32px] shadow-sm border border-slate-200/60 relative">
-               {/* Watermark for active platform */}
-               <div className="absolute top-8 right-8 text-6xl font-black text-slate-100 uppercase pointer-events-none select-none opacity-50">
-                  {selectedPlatform}
-               </div>
-
-               <div className="space-y-6 relative z-10">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Listing Title</label>
-                    <div className="relative">
-                      <input 
-                        type="text"
-                        placeholder="AI will generate this..."
-                        className="w-full pl-5 pr-20 py-4 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] font-medium text-[#0F172A]"
-                        value={form.title}
-                        onChange={e => setForm({...form, title: e.target.value})}
-                      />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                        {form.title.length} / 80
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-5">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Brand</label>
-                      <input 
-                        type="text"
-                        placeholder="Nike, Sony..."
-                        className="w-full px-5 py-3.5 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-                        value={form.brand}
-                        onChange={e => setForm({...form, brand: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Condition</label>
-                      <select 
-                        className="w-full px-5 py-3.5 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] appearance-none"
-                        value={form.condition}
-                        onChange={e => setForm({...form, condition: e.target.value})}
-                      >
-                        <option>New with Tags</option>
-                        <option>Pre-Owned (Excellent)</option>
-                        <option>Pre-Owned (Good)</option>
-                        <option>For Parts</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Condition Notes</label>
-                    <textarea 
-                      rows={3}
-                      placeholder="e.g. Small scratch on lens, box has shelf wear..."
-                      className="w-full px-5 py-3.5 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] resize-none"
-                      value={form.conditionNotes}
-                      onChange={e => setForm({...form, conditionNotes: e.target.value})}
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-widest">Specific Details (Optional)</label>
-                    <textarea 
-                      rows={2}
-                      placeholder="e.g. Includes original remote, power cord..."
-                      className="w-full px-5 py-3.5 bg-[#F8FAFC] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB] resize-none"
-                      value={form.specialFeatures}
-                      onChange={e => setForm({...form, specialFeatures: e.target.value})}
-                    />
-                  </div>
-
-                  {/* Toggle: Standard vs Premium */}
-                  <div className="pt-4 border-t border-slate-100">
-                    <label className="flex items-center justify-between cursor-pointer group">
-                       <div>
-                          <div className="text-sm font-bold text-[#0F172A]">Enable Premium Storytelling?</div>
-                          <div className="text-xs text-slate-500">Uses GPT-4o for richer descriptions.</div>
-                       </div>
-                       <div 
-                         onClick={() => setForm({...form, listingStyle: form.listingStyle === ListingStyle.STANDARD ? ListingStyle.PREMIUM : ListingStyle.STANDARD})}
-                         className={`w-14 h-8 rounded-full flex items-center px-1 transition-colors duration-300 ${form.listingStyle === ListingStyle.PREMIUM ? 'bg-[#2563EB]' : 'bg-slate-200'}`}
-                       >
-                          <div className={`w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 ${form.listingStyle === ListingStyle.PREMIUM ? 'translate-x-6' : 'translate-x-0'}`}></div>
-                       </div>
-                    </label>
-                  </div>
-               </div>
+            <div className="mb-8">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Specific Details (Optional)</label>
+              <input 
+                type="text" 
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400"
+                placeholder="e.g. Includes original remote, power cord..."
+              />
             </div>
 
-            {/* GENERATE BUTTON */}
-            <button 
-              type="submit"
-              disabled={isGenerating}
-              className="w-full bg-[#2563EB] text-white py-5 rounded-2xl text-lg font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 hover:shadow-2xl transition-all transform active:scale-[0.99] disabled:opacity-70 disabled:cursor-wait"
-            >
-              {isGenerating ? 'Analyzing visual data...' : `Generate ${selectedPlatform.charAt(0).toUpperCase() + selectedPlatform.slice(1)} Listing`}
+            {/* Storytelling Toggle */}
+            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 mb-8">
+              <div>
+                <div className="text-sm font-bold text-slate-900">Enable Premium Storytelling?</div>
+                <div className="text-xs text-slate-500">Uses GPT-4o for richer descriptions.</div>
+              </div>
+              <button 
+                onClick={() => setIsStorytelling(!isStorytelling)}
+                className={`w-12 h-6 rounded-full transition-colors relative ${isStorytelling ? 'bg-blue-600' : 'bg-slate-300'}`}
+              >
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${isStorytelling ? 'left-7' : 'left-1'}`}></div>
+              </button>
+            </div>
+
+            {/* Dynamic Action Button */}
+            <button className="w-full bg-[#2563EB] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:bg-blue-600 hover:-translate-y-1 active:scale-95 transition-all">
+              Generate {platforms.find(p => p.id === activePlatform)?.label} Listing
             </button>
+
           </div>
-        </form>
-
-        {/* OUTPUT SECTION */}
-        {output && (
-          <div className="mt-16 animate-in fade-in slide-in-from-bottom-10 duration-700">
-            <div className="flex items-center gap-4 mb-6">
-               <div className="h-px bg-slate-200 flex-1"></div>
-               <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">Results Ready</span>
-               <div className="h-px bg-slate-200 flex-1"></div>
-            </div>
-
-            <div className="bg-white rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden">
-               {/* Output Header */}
-               <div className="bg-[#0F172A] p-6 sm:p-8 flex justify-between items-center">
-                  <div>
-                     <h3 className="text-xl font-bold text-white">Ready to Publish</h3>
-                     <p className="text-slate-400 text-sm">Optimized for <span className="text-blue-400 capitalize font-bold">{selectedPlatform}</span></p>
-                  </div>
-                  <div className="flex gap-3">
-                     <button className="bg-white/10 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-white/20 transition">Copy All</button>
-                     <button className="bg-[#2563EB] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-600 transition shadow-lg">Push Live</button>
-                  </div>
-               </div>
-
-               <div className="grid grid-cols-1 lg:grid-cols-2">
-                  {/* Left: Preview */}
-                  <div className="p-8 border-r border-slate-100">
-                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Description Preview</h4>
-                     <div className="prose prose-sm prose-slate max-w-none h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                        <div dangerouslySetInnerHTML={{ __html: output.htmlDescription }} />
-                     </div>
-                  </div>
-
-                  {/* Right: Raw Data */}
-                  <div className="bg-slate-50 p-8">
-                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">SEO Titles</h4>
-                     <div className="space-y-3 mb-8">
-                        {output.titles.map((t, i) => (
-                           <div key={i} className="bg-white p-3 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:border-blue-400 cursor-pointer transition group flex justify-between gap-2" onClick={() => copyToClipboard(t)}>
-                              <span className="truncate">{t}</span>
-                              <span className="text-blue-500 opacity-0 group-hover:opacity-100 text-xs font-bold">COPY</span>
-                           </div>
-                        ))}
-                     </div>
-
-                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">HTML Source</h4>
-                     <div className="bg-[#1E293B] rounded-xl p-4 font-mono text-xs text-blue-300 h-[200px] overflow-y-auto">
-                        {output.htmlDescription}
-                     </div>
-                  </div>
-               </div>
-            </div>
-          </div>
-        )}
-
+        </div>
       </div>
     </div>
   );
