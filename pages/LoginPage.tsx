@@ -51,8 +51,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
           <div className="relative flex justify-center text-xs uppercase"><span className="bg-[#F8FAFC]/50 backdrop-blur px-2 text-slate-400 font-bold tracking-wider">Or continue with email</span></div>
         </div>
 
-        {/* Form */}
-        <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); onNavigate('/builder'); }}>
+        {/* Form - UPDATED TO NAVIGATE TO DASHBOARD */}
+        <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); onNavigate('/dashboard'); }}>
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Email Address</label>
             <input 
