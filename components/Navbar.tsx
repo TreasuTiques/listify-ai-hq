@@ -28,7 +28,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           
-          {/* 1. Logo Section (FIXED: Reverted to div to prevent nesting error) */}
+          {/* 1. Logo Section */}
           <div 
             className="flex items-center gap-2 cursor-pointer group" 
             onClick={() => onNavigate('/')}
@@ -48,7 +48,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
           </div>
 
           {/* 2. Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-5">
             
             {/* Platforms Dropdown */}
             <div className="relative group">
@@ -96,27 +96,26 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             {/* Analytics Link */}
             <button type="button" onClick={() => onNavigate('/analytics')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Analytics</button>
 
-            {/* Sourcing Calculator Icon */}
+            {/* ✅ UPDATED: Profit Scout (Green) */}
             <button 
               type="button"
               onClick={() => onNavigate('/sourcing')} 
-              className="text-slate-400 hover:text-blue-600 transition-colors p-1" 
-              title="Profit Calculator"
+              className="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 flex items-center gap-1.5" 
+              title="Calculate Profit"
             >
-               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+               Profit Scout
             </button>
 
-            {/* Listing Doctor (RED) */}
+            {/* Listing Doctor (Red) */}
             <button 
               type="button"
               onClick={() => onNavigate('/health')} 
-              className="text-sm font-bold text-red-600 hover:text-red-700 transition-colors bg-red-50 px-3 py-1 rounded-full border border-red-100 flex items-center gap-1"
+              className="text-sm font-bold text-red-600 hover:text-red-700 transition-colors bg-red-50 px-3 py-1 rounded-full border border-red-100 flex items-center gap-1.5"
             >
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               Listing Doctor
             </button>
-
-            <button type="button" onClick={() => onNavigate('/vision')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Vision</button>
           </nav>
 
           {/* 3. CTA & Mobile Toggle */}
@@ -168,18 +167,18 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
           {/* Mobile Analytics Link */}
           <button type="button" onClick={() => {onNavigate('/analytics'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Analytics</button>
 
-          {/* Mobile Sourcing Calculator Link */}
-          <button type="button" onClick={() => {onNavigate('/sourcing'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2 flex items-center gap-2">
-            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-            Sourcing Calculator
+          {/* ✅ UPDATED: Mobile Profit Scout Link */}
+          <button type="button" onClick={() => {onNavigate('/sourcing'); setIsMobileMenuOpen(false)}} className="text-left font-bold text-emerald-600 py-2 flex items-center gap-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+            Profit Scout
           </button>
 
           {/* Mobile Listing Doctor Link */}
           <button type="button" onClick={() => {onNavigate('/health'); setIsMobileMenuOpen(false)}} className="text-left font-bold text-red-600 py-2 flex items-center gap-2">
-            Listing Doctor <span className="text-[10px] bg-red-100 px-1.5 py-0.5 rounded ml-1">HOT</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            Listing Doctor
           </button>
 
-          <button type="button" onClick={() => {onNavigate('/vision'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Our Vision</button>
           <div className="h-px bg-slate-100 my-1"></div>
           <button type="button" onClick={() => {onNavigate('/login'); setIsMobileMenuOpen(false)}} className="text-left font-bold text-slate-600 py-2">Log in</button>
           <button type="button" onClick={() => {onNavigate('/signup'); setIsMobileMenuOpen(false)}} className="text-left font-bold text-[#2563EB] py-2">Start Listing Free</button>
