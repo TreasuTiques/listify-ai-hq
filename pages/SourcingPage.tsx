@@ -5,7 +5,9 @@ const SourcingPage: React.FC = () => {
   const [costPrice, setCostPrice] = useState<string>('');
   const [sellPrice, setSellPrice] = useState<string>('');
   const [shipping, setShipping] = useState<string>('0');
-  const [platform, setPlatform] = useState<'ebay' | 'posh' | 'mercari'>('ebay');
+  
+  // Updated Platform State to include new options
+  const [platform, setPlatform] = useState<'ebay' | 'posh' | 'mercari' | 'shopify' | 'etsy' | 'depop'>('ebay');
 
   // 2. Calculated Values
   const [profit, setProfit] = useState<number | null>(null);
@@ -19,17 +21,35 @@ const SourcingPage: React.FC = () => {
     const ship = parseFloat(shipping) || 0;
 
     if (sell > 0) {
-      // Fee Rates (Approximate)
-      let feeRate = 0.1325; // eBay: ~13.25% + $0.30
-      let flatFee = 0.30;
-      
-      if (platform === 'posh') {
-        feeRate = 0.20; // Poshmark: 20%
-        flatFee = 0; 
-        // Poshmark shipping is usually paid by buyer, but let's keep logic simple
-      } else if (platform === 'mercari') {
-        feeRate = 0.10; // Mercari: ~10% + payment processing
-        flatFee = 0.50;
+      // Fee Rates (Approximate Estimates for Speed)
+      let feeRate = 0;
+      let flatFee = 0;
+
+      switch (platform) {
+        case 'ebay':
+          feeRate = 0.1325; // ~13.25%
+          flatFee = 0.30;
+          break;
+        case 'posh':
+          feeRate = 0.20;   // 20% flat
+          flatFee = 0;
+          break;
+        case 'mercari':
+          feeRate = 0.10;   // ~10% service fee (+ payment proc usually, but simplified)
+          flatFee = 0.50;
+          break;
+        case 'shopify':
+          feeRate = 0.029;  // ~2.9% (Basic Shopify)
+          flatFee = 0.30;
+          break;
+        case 'etsy':
+          feeRate = 0.095;  // ~6.5% Trans + 3% Proc
+          flatFee = 0.45;   // $0.25 Proc + $0.20 Listing Fee
+          break;
+        case 'depop':
+          feeRate = 0.13;   // 10% Fee + ~3% Payment Proc
+          flatFee = 0.30;
+          break;
       }
 
       const estimatedFees = (sell * feeRate) + flatFee;
@@ -45,6 +65,16 @@ const SourcingPage: React.FC = () => {
     }
   }, [costPrice, sellPrice, shipping, platform]);
 
+  // Helper to handle platform button styling
+  const getButtonClass = (p: string, activeColor: string) => {
+    const isActive = platform === p;
+    return `flex-1 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm border ${
+      isActive 
+        ? `bg-white ${activeColor} border-slate-200 ring-2 ring-slate-50` 
+        : 'bg-slate-50 text-slate-400 border-transparent hover:bg-white hover:text-slate-600'
+    }`;
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-24 pt-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
@@ -58,25 +88,45 @@ const SourcingPage: React.FC = () => {
         {/* 1. INPUT CARD */}
         <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm p-6 mb-6">
           
-          {/* Platform Toggle */}
-          <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
+          {/* Platform Toggle Grid (2 Rows of 3) */}
+          <div className="grid grid-cols-3 gap-2 mb-6 p-1 bg-slate-100/50 rounded-2xl">
             <button 
               onClick={() => setPlatform('ebay')}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${platform === 'ebay' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              className={getButtonClass('ebay', 'text-blue-600')}
             >
               eBay
             </button>
             <button 
               onClick={() => setPlatform('posh')}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${platform === 'posh' ? 'bg-white text-red-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              className={getButtonClass('posh', 'text-red-700')}
             >
               Poshmark
             </button>
             <button 
               onClick={() => setPlatform('mercari')}
-              className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${platform === 'mercari' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              className={getButtonClass('mercari', 'text-purple-600')}
             >
               Mercari
+            </button>
+            
+            {/* Row 2 */}
+            <button 
+              onClick={() => setPlatform('shopify')}
+              className={getButtonClass('shopify', 'text-green-600')}
+            >
+              Shopify
+            </button>
+            <button 
+              onClick={() => setPlatform('etsy')}
+              className={getButtonClass('etsy', 'text-orange-600')}
+            >
+              Etsy
+            </button>
+            <button 
+              onClick={() => setPlatform('depop')}
+              className={getButtonClass('depop', 'text-black')}
+            >
+              Depop
             </button>
           </div>
 
