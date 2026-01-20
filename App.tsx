@@ -18,8 +18,10 @@ import SignUpPage from './pages/SignUpPage';
 // Dashboard Pages
 import DashboardPage from './pages/DashboardPage';
 import InventoryPage from './pages/InventoryPage';
-// ✅ NEW: Analytics Page Import
 import AnalyticsPage from './pages/AnalyticsPage';
+
+// ✅ NEW: Listing Doctor Page Import
+import StaleListingsPage from './pages/StaleListingsPage';
 
 // Chat Widget
 import ChatWidget from './components/ChatWidget';
@@ -58,8 +60,10 @@ const App: React.FC = () => {
         return <DashboardPage onNavigate={navigate} />;
       case '/inventory':
         return <InventoryPage onNavigate={navigate} />;
-      case '/analytics': // ✅ NEW: Registered Analytics Route
+      case '/analytics':
         return <AnalyticsPage />;
+      case '/health': // ✅ NEW: Registered Listing Doctor Route
+        return <StaleListingsPage />;
       case '/builder':
         return <BuilderPage />;
       case '/pricing':
