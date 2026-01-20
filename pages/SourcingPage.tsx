@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
 const SourcingPage: React.FC = () => {
-  // 1. State for the Calculator
+  // 1. State for the Calculator (Logic Unchanged)
   const [costPrice, setCostPrice] = useState<string>('');
   const [sellPrice, setSellPrice] = useState<string>('');
   const [shipping, setShipping] = useState<string>('0');
-  
-  // Updated Platform State to include new options
   const [platform, setPlatform] = useState<'ebay' | 'posh' | 'mercari' | 'shopify' | 'etsy' | 'depop'>('ebay');
 
   // 2. Calculated Values
@@ -14,40 +12,40 @@ const SourcingPage: React.FC = () => {
   const [roi, setRoi] = useState<number | null>(null);
   const [fees, setFees] = useState<number>(0);
 
-  // 3. The Math Engine
+  // 3. The Math Engine (Logic Unchanged)
   useEffect(() => {
     const cost = parseFloat(costPrice) || 0;
     const sell = parseFloat(sellPrice) || 0;
     const ship = parseFloat(shipping) || 0;
 
     if (sell > 0) {
-      // Fee Rates (Approximate Estimates for Speed)
+      // Fee Rates
       let feeRate = 0;
       let flatFee = 0;
 
       switch (platform) {
         case 'ebay':
-          feeRate = 0.1325; // ~13.25%
+          feeRate = 0.1325;
           flatFee = 0.30;
           break;
         case 'posh':
-          feeRate = 0.20;   // 20% flat
+          feeRate = 0.20;
           flatFee = 0;
           break;
         case 'mercari':
-          feeRate = 0.10;   // ~10% service fee (+ payment proc usually, but simplified)
+          feeRate = 0.10;
           flatFee = 0.50;
           break;
         case 'shopify':
-          feeRate = 0.029;  // ~2.9% (Basic Shopify)
+          feeRate = 0.029;
           flatFee = 0.30;
           break;
         case 'etsy':
-          feeRate = 0.095;  // ~6.5% Trans + 3% Proc
-          flatFee = 0.45;   // $0.25 Proc + $0.20 Listing Fee
+          feeRate = 0.095;
+          flatFee = 0.45;
           break;
         case 'depop':
-          feeRate = 0.13;   // 10% Fee + ~3% Payment Proc
+          feeRate = 0.13;
           flatFee = 0.30;
           break;
       }
@@ -65,112 +63,94 @@ const SourcingPage: React.FC = () => {
     }
   }, [costPrice, sellPrice, shipping, platform]);
 
-  // Helper to handle platform button styling
+  // Helper for beautiful button styles
   const getButtonClass = (p: string, activeColor: string) => {
     const isActive = platform === p;
-    return `flex-1 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm border ${
+    return `flex items-center justify-center py-3 rounded-xl text-xs font-bold transition-all duration-300 border ${
       isActive 
-        ? `bg-white ${activeColor} border-slate-200 ring-2 ring-slate-50` 
-        : 'bg-slate-50 text-slate-400 border-transparent hover:bg-white hover:text-slate-600'
+        ? `bg-white ${activeColor} border-slate-200 shadow-md transform scale-105` 
+        : 'bg-slate-50 text-slate-400 border-transparent hover:bg-white hover:text-slate-600 hover:shadow-sm'
     }`;
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-24 pt-24 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 pb-24 pt-24 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-md mx-auto">
         
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight">Sourcing Scout</h1>
-          <p className="text-slate-500 mt-1">Should you buy this item?</p>
+        <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider mb-3 border border-emerald-200/50">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Live Calculator
+          </div>
+          <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Profit Scout</h1>
+          <p className="text-slate-500 text-sm mt-1 font-medium">Instant ROI Analysis</p>
         </div>
 
         {/* 1. INPUT CARD */}
-        <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm p-6 mb-6">
+        <div className="bg-white/80 backdrop-blur-xl rounded-[32px] border border-white shadow-xl shadow-slate-200/50 p-6 mb-6 relative overflow-hidden">
           
-          {/* Platform Toggle Grid (2 Rows of 3) */}
-          <div className="grid grid-cols-3 gap-2 mb-6 p-1 bg-slate-100/50 rounded-2xl">
-            <button 
-              onClick={() => setPlatform('ebay')}
-              className={getButtonClass('ebay', 'text-blue-600')}
-            >
-              eBay
-            </button>
-            <button 
-              onClick={() => setPlatform('posh')}
-              className={getButtonClass('posh', 'text-red-700')}
-            >
-              Poshmark
-            </button>
-            <button 
-              onClick={() => setPlatform('mercari')}
-              className={getButtonClass('mercari', 'text-purple-600')}
-            >
-              Mercari
-            </button>
-            
-            {/* Row 2 */}
-            <button 
-              onClick={() => setPlatform('shopify')}
-              className={getButtonClass('shopify', 'text-green-600')}
-            >
-              Shopify
-            </button>
-            <button 
-              onClick={() => setPlatform('etsy')}
-              className={getButtonClass('etsy', 'text-orange-600')}
-            >
-              Etsy
-            </button>
-            <button 
-              onClick={() => setPlatform('depop')}
-              className={getButtonClass('depop', 'text-black')}
-            >
-              Depop
-            </button>
+          {/* Subtle top highlight */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 opacity-20"></div>
+
+          {/* Platform Toggle Grid */}
+          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Select Platform</label>
+          <div className="grid grid-cols-3 gap-2 mb-8 p-1.5 bg-slate-100/50 rounded-2xl border border-slate-100">
+            <button onClick={() => setPlatform('ebay')} className={getButtonClass('ebay', 'text-blue-600')}>eBay</button>
+            <button onClick={() => setPlatform('posh')} className={getButtonClass('posh', 'text-red-600')}>Poshmark</button>
+            <button onClick={() => setPlatform('mercari')} className={getButtonClass('mercari', 'text-purple-600')}>Mercari</button>
+            <button onClick={() => setPlatform('shopify')} className={getButtonClass('shopify', 'text-green-600')}>Shopify</button>
+            <button onClick={() => setPlatform('etsy')} className={getButtonClass('etsy', 'text-orange-600')}>Etsy</button>
+            <button onClick={() => setPlatform('depop')} className={getButtonClass('depop', 'text-slate-800')}>Depop</button>
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Asking Price (Cost)</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+          <div className="space-y-5">
+            {/* Cost Input */}
+            <div className="group">
+              <label className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                Item Cost
+                {costPrice && <span className="text-emerald-600 text-[10px] bg-emerald-50 px-1.5 rounded">Investment</span>}
+              </label>
+              <div className="relative transform transition-all duration-300 group-focus-within:scale-[1.02]">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">$</span>
                 <input 
                   type="number" 
                   inputMode="decimal"
                   value={costPrice}
                   onChange={(e) => setCostPrice(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-4 py-4 text-xl font-bold text-slate-900 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-4 text-xl font-bold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
                   placeholder="0.00"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Est. Sold Price</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+            {/* Sell Price Input */}
+            <div className="group">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Target Price</label>
+              <div className="relative transform transition-all duration-300 group-focus-within:scale-[1.02]">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">$</span>
                 <input 
                   type="number" 
                   inputMode="decimal"
                   value={sellPrice}
                   onChange={(e) => setSellPrice(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-4 py-4 text-xl font-bold text-slate-900 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-4 text-xl font-bold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
                   placeholder="0.00"
                 />
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Shipping Cost (Optional)</label>
+            {/* Shipping Input */}
+            <div className="group">
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Shipping (Optional)</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</span>
                 <input 
                   type="number" 
                   inputMode="decimal"
                   value={shipping}
                   onChange={(e) => setShipping(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-8 pr-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 text-lg font-bold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
                   placeholder="0.00"
                 />
               </div>
@@ -178,46 +158,49 @@ const SourcingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 2. RESULTS CARD (Dynamic Colors) */}
-        {profit !== null && (
-          <div className={`rounded-[24px] p-8 text-center shadow-lg transition-all duration-300 transform animate-in slide-in-from-bottom-4 ${
-            profit > 15 ? 'bg-[#0F172A] text-white' : 
-            profit > 0 ? 'bg-orange-500 text-white' : 
-            'bg-red-600 text-white'
+        {/* 2. RESULTS CARD (Dynamic Glow) */}
+        {profit !== null ? (
+          <div className={`relative overflow-hidden rounded-[32px] p-8 text-center shadow-2xl transition-all duration-500 transform animate-in slide-in-from-bottom-8 ${
+            profit > 0 ? 'bg-[#0F172A]' : 'bg-red-600'
           }`}>
-            <div className="text-xs font-bold uppercase tracking-widest opacity-80 mb-2">Net Profit</div>
-            <div className="text-5xl font-black tracking-tight mb-2">
-              ${profit.toFixed(2)}
-            </div>
+            {/* Background Glow */}
+            <div className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[80px] opacity-40 pointer-events-none ${
+              profit > 0 ? 'bg-emerald-500' : 'bg-red-900'
+            }`}></div>
             
-            <div className="flex justify-center items-center gap-4 text-sm font-medium opacity-90 mb-6">
-              <span>ROI: {roi?.toFixed(0)}%</span>
-              <span>•</span>
-              <span>Fees: -${fees.toFixed(2)}</span>
+            <div className="relative z-10">
+              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60 mb-1">Net Profit</div>
+              <div className="text-6xl font-black tracking-tighter text-white mb-2 drop-shadow-lg">
+                <span className="text-3xl align-top opacity-50 font-medium">$</span>
+                {profit.toFixed(2)}
+              </div>
+              
+              <div className="flex justify-center items-center gap-6 text-sm font-medium text-white/80 mb-6 bg-white/10 py-2 px-4 rounded-full inline-flex backdrop-blur-md border border-white/5">
+                <span className={roi && roi > 100 ? "text-emerald-300 font-bold" : ""}>ROI: {roi?.toFixed(0)}%</span>
+                <span className="w-1 h-1 rounded-full bg-white/30"></span>
+                <span>Fees: ${fees.toFixed(2)}</span>
+              </div>
+
+              {profit > 15 ? (
+                <div className="inline-flex items-center gap-2 bg-emerald-500 text-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg shadow-emerald-500/30 animate-pulse">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>
+                  Great Buy
+                </div>
+              ) : profit > 0 ? (
+                <div className="inline-flex items-center gap-2 bg-orange-500 text-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg shadow-orange-500/30">
+                  ⚠️ Decent Flip
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-2 bg-white/20 text-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider border border-white/20">
+                  ⛔ Bad Buy
+                </div>
+              )}
             </div>
-
-            {profit > 15 ? (
-              <div className="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>
-                Great Buy
-              </div>
-            ) : profit > 0 ? (
-              <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">
-                Caution
-              </div>
-            ) : (
-              <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">
-                Don't Buy
-              </div>
-            )}
           </div>
-        )}
-
-        {/* 3. Empty State / Tip */}
-        {profit === null && (
-          <div className="text-center p-8 bg-slate-50 rounded-[24px] border border-slate-200 border-dashed">
-            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-2xl">📱</div>
-            <p className="text-sm font-bold text-slate-400">Enter prices above to calculate profit.</p>
+        ) : (
+          /* 3. Empty State */
+          <div className="text-center p-8 opacity-50 animate-pulse">
+            <p className="text-sm font-medium text-slate-400">Enter prices above to calculate...</p>
           </div>
         )}
 
