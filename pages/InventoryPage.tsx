@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface InventoryPageProps {
   onNavigate: (path: string) => void;
 }
 
 const InventoryPage: React.FC<InventoryPageProps> = ({ onNavigate }) => {
+  // 1. New State for the Interaction
+  const [isNotified, setIsNotified] = useState(false);
+
   // Mock Data illustrating the FUTURE state
   const demoItems = [
     {
@@ -65,9 +68,6 @@ const InventoryPage: React.FC<InventoryPageProps> = ({ onNavigate }) => {
         {/* The "Teaser" Matrix */}
         <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden relative">
           
-          {/* Optional: Blur Overlay to emphasize "Coming Soon" (Remove if you want it clear) */}
-          {/* <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px] z-10 pointer-events-none"></div> */}
-
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 border-b border-slate-200">
@@ -114,15 +114,32 @@ const InventoryPage: React.FC<InventoryPageProps> = ({ onNavigate }) => {
             </table>
           </div>
 
-          {/* Call to Action Overlay */}
-          <div className="bg-slate-50 border-t border-slate-200 p-8 text-center">
+          {/* Call to Action Overlay with INTERACTIVITY */}
+          <div className="bg-slate-50 border-t border-slate-200 p-8 text-center transition-all duration-500">
             <h3 className="text-lg font-bold text-[#0F172A] mb-2">Want early access to Sync?</h3>
             <p className="text-slate-500 text-sm mb-6 max-w-lg mx-auto">
               We are rolling out automatic cross-listing and inventory management in Q1. 
               Active subscribers get priority access.
             </p>
-            <button className="bg-white border border-slate-300 text-slate-700 px-6 py-2.5 rounded-full font-bold text-sm shadow-sm hover:bg-slate-50 hover:border-slate-400 transition-all">
-              Notify Me When Live 🔔
+            
+            <button 
+              onClick={() => setIsNotified(true)}
+              disabled={isNotified}
+              className={`px-8 py-3 rounded-full font-bold text-sm shadow-sm transition-all duration-300 transform active:scale-95 ${
+                isNotified 
+                  ? 'bg-green-100 border border-green-200 text-green-700 cursor-default scale-105'
+                  : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-blue-400 hover:text-blue-600'
+              }`}
+            >
+              {isNotified ? (
+                <span className="flex items-center gap-2">
+                  You're on the list! ✅
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  Notify Me When Live 🔔
+                </span>
+              )}
             </button>
           </div>
         </div>
