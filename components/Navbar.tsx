@@ -1,6 +1,3 @@
-Amigo, here is the updated Navbar.tsx.
-I have added the "Analytics" link right next to "Inventory". I also added it to the mobile menu so it is accessible everywhere.
-components/Navbar.tsx
 import React, { useState, useEffect } from 'react';
 
 interface NavbarProps {
@@ -158,4 +155,3 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
 };
 
 export default Navbar;
-
