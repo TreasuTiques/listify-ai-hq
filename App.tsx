@@ -15,13 +15,16 @@ import TermsPage from './pages/TermsPage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 
-// Dashboard Pages
+// Dashboard & Utility Pages
 import DashboardPage from './pages/DashboardPage';
 import InventoryPage from './pages/InventoryPage';
 import AnalyticsPage from './pages/AnalyticsPage';
-
-// ✅ NEW: Listing Doctor Page Import
 import StaleListingsPage from './pages/StaleListingsPage';
+
+// ✅ NEW: Final Phase 1 Pages
+import SourcingPage from './pages/SourcingPage';
+import ContactPage from './pages/ContactPage';
+import BlogPage from './pages/BlogPage';
 
 // Chat Widget
 import ChatWidget from './components/ChatWidget';
@@ -56,20 +59,31 @@ const App: React.FC = () => {
   // 2. MAIN LAYOUT: Helper function for the standard pages
   const renderContent = () => {
     switch (currentPath) {
+      // Dashboard Suite
       case '/dashboard': 
         return <DashboardPage onNavigate={navigate} />;
       case '/inventory':
         return <InventoryPage onNavigate={navigate} />;
       case '/analytics':
         return <AnalyticsPage />;
-      case '/health': // ✅ NEW: Registered Listing Doctor Route
+      case '/health': 
         return <StaleListingsPage />;
+      
+      // Tools & Resources
       case '/builder':
         return <BuilderPage />;
+      case '/sourcing': // ✅ NEW: Sourcing Calculator
+        return <SourcingPage />;
       case '/pricing':
         return <PricingPage />;
+      case '/blog':     // ✅ NEW: Blog/Resources
+        return <BlogPage />;
+      case '/contact':  // ✅ NEW: Contact Support
+        return <ContactPage />;
       case '/success':
         return <SuccessHub />;
+      
+      // Footer & Info Pages
       case '/partnerships':
         return <PartnersPage />;
       case '/brand':
@@ -80,6 +94,7 @@ const App: React.FC = () => {
         return <PrivacyPage />;
       case '/terms':
         return <TermsPage />;
+        
       default:
         return <LandingPage onNavigate={navigate} />;
     }
