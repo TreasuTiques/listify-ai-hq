@@ -94,7 +94,16 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             {/* Analytics Link */}
             <button onClick={() => onNavigate('/analytics')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Analytics</button>
 
-            {/* ✅ NEW: Listing Doctor (RED) */}
+            {/* ✅ NEW: Sourcing Calculator Icon */}
+            <button 
+              onClick={() => onNavigate('/sourcing')} 
+              className="text-slate-400 hover:text-blue-600 transition-colors p-1" 
+              title="Profit Calculator"
+            >
+               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+            </button>
+
+            {/* Listing Doctor (RED) */}
             <button 
               onClick={() => onNavigate('/health')} 
               className="text-sm font-bold text-red-600 hover:text-red-700 transition-colors bg-red-50 px-3 py-1 rounded-full border border-red-100 flex items-center gap-1"
@@ -152,7 +161,13 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
           {/* Mobile Analytics Link */}
           <button onClick={() => {onNavigate('/analytics'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Analytics</button>
 
-          {/* ✅ NEW: Mobile Listing Doctor Link */}
+          {/* ✅ NEW: Mobile Sourcing Calculator Link */}
+          <button onClick={() => {onNavigate('/sourcing'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2 flex items-center gap-2">
+            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+            Sourcing Calculator
+          </button>
+
+          {/* Mobile Listing Doctor Link */}
           <button onClick={() => {onNavigate('/health'); setIsMobileMenuOpen(false)}} className="text-left font-bold text-red-600 py-2 flex items-center gap-2">
             Listing Doctor <span className="text-[10px] bg-red-100 px-1.5 py-0.5 rounded ml-1">HOT</span>
           </button>
