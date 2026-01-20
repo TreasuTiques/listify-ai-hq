@@ -28,10 +28,9 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           
-          {/* 1. Logo Section (Fixed: Changed from div to button for accessibility) */}
-          <button 
-            type="button"
-            className="flex items-center gap-2 cursor-pointer group focus:outline-none" 
+          {/* 1. Logo Section (FIXED: Reverted to div to prevent nesting error) */}
+          <div 
+            className="flex items-center gap-2 cursor-pointer group" 
             onClick={() => onNavigate('/')}
           >
             <div className="relative w-8 h-8 flex items-center justify-center bg-white rounded-lg border border-slate-200 shadow-sm group-hover:border-blue-200 transition-colors">
@@ -46,7 +45,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             <span className={`text-xl font-bold tracking-tight transition-colors ${isScrolled ? 'text-[#0F172A]' : 'text-[#0F172A]'}`}>
               Listify <span className="text-[#2563EB]">AI</span> HQ
             </span>
-          </button>
+          </div>
 
           {/* 2. Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
