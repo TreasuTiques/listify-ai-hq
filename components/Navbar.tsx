@@ -28,9 +28,10 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           
-          {/* 1. Logo Section */}
-          <div 
-            className="flex items-center gap-2 cursor-pointer group" 
+          {/* 1. Logo Section (Fixed: Changed from div to button for accessibility) */}
+          <button 
+            type="button"
+            className="flex items-center gap-2 cursor-pointer group focus:outline-none" 
             onClick={() => onNavigate('/')}
           >
             <div className="relative w-8 h-8 flex items-center justify-center bg-white rounded-lg border border-slate-200 shadow-sm group-hover:border-blue-200 transition-colors">
@@ -45,14 +46,14 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             <span className={`text-xl font-bold tracking-tight transition-colors ${isScrolled ? 'text-[#0F172A]' : 'text-[#0F172A]'}`}>
               Listify <span className="text-[#2563EB]">AI</span> HQ
             </span>
-          </div>
+          </button>
 
           {/* 2. Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
             
             {/* Platforms Dropdown */}
             <div className="relative group">
-              <button className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors py-2">
+              <button type="button" className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors py-2">
                 Platforms
                 <svg className="w-4 h-4 text-slate-400 group-hover:text-[#2563EB] group-hover:rotate-180 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
               </button>
@@ -70,6 +71,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
                   ].map((platform) => (
                     <button 
                       key={platform.name}
+                      type="button"
                       onClick={() => onNavigate('/signup')}
                       className="flex items-center gap-3 w-full px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-[#0F172A] rounded-lg transition-colors text-left"
                     >
@@ -81,10 +83,11 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
               </div>
             </div>
 
-            <button onClick={() => onNavigate('/pricing')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Pricing</button>
+            <button type="button" onClick={() => onNavigate('/pricing')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Pricing</button>
             
             {/* Inventory Link */}
             <button 
+              type="button"
               onClick={() => onNavigate('/inventory')} 
               className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors"
             >
@@ -92,10 +95,11 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             </button>
 
             {/* Analytics Link */}
-            <button onClick={() => onNavigate('/analytics')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Analytics</button>
+            <button type="button" onClick={() => onNavigate('/analytics')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Analytics</button>
 
             {/* Sourcing Calculator Icon */}
             <button 
+              type="button"
               onClick={() => onNavigate('/sourcing')} 
               className="text-slate-400 hover:text-blue-600 transition-colors p-1" 
               title="Profit Calculator"
@@ -105,6 +109,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
 
             {/* Listing Doctor (RED) */}
             <button 
+              type="button"
               onClick={() => onNavigate('/health')} 
               className="text-sm font-bold text-red-600 hover:text-red-700 transition-colors bg-red-50 px-3 py-1 rounded-full border border-red-100 flex items-center gap-1"
             >
@@ -112,12 +117,13 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
               Listing Doctor
             </button>
 
-            <button onClick={() => onNavigate('/vision')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Vision</button>
+            <button type="button" onClick={() => onNavigate('/vision')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Vision</button>
           </nav>
 
           {/* 3. CTA & Mobile Toggle */}
           <div className="flex items-center gap-3">
             <button 
+              type="button"
               onClick={() => onNavigate('/login')}
               className="hidden md:block px-6 py-2.5 rounded-full border border-slate-200 text-sm font-bold text-slate-700 bg-white hover:border-[#2563EB] hover:text-[#2563EB] hover:shadow-sm transition-all active:scale-95"
             >
@@ -125,6 +131,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             </button>
             
             <button 
+              type="button"
               onClick={() => onNavigate('/signup')}
               className="bg-[#0F172A] text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-blue-900/20 hover:bg-[#2563EB] transition-all hover:scale-105 active:scale-95"
             >
@@ -133,6 +140,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             
             {/* Mobile Hamburger */}
             <button 
+              type="button"
               className="md:hidden p-2 text-slate-600"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
@@ -147,35 +155,35 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
         <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-slate-100 shadow-xl p-4 flex flex-col gap-4 animate-in slide-in-from-top-2">
           <div className="flex flex-col gap-2 border-b border-slate-100 pb-4">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Platforms</span>
-            <button onClick={() => {onNavigate('/signup'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-1 pl-2 hover:text-[#2563EB]">eBay & Shopify</button>
-            <button onClick={() => {onNavigate('/signup'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-1 pl-2 hover:text-[#2563EB]">Poshmark & Mercari</button>
+            <button type="button" onClick={() => {onNavigate('/signup'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-1 pl-2 hover:text-[#2563EB]">eBay & Shopify</button>
+            <button type="button" onClick={() => {onNavigate('/signup'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-1 pl-2 hover:text-[#2563EB]">Poshmark & Mercari</button>
           </div>
           
-          <button onClick={() => {onNavigate('/pricing'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Pricing</button>
+          <button type="button" onClick={() => {onNavigate('/pricing'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Pricing</button>
           
           {/* Mobile Inventory Link */}
-          <button onClick={() => {onNavigate('/inventory'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2 flex items-center gap-2">
+          <button type="button" onClick={() => {onNavigate('/inventory'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2 flex items-center gap-2">
             Inventory <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded font-bold">Beta</span>
           </button>
 
           {/* Mobile Analytics Link */}
-          <button onClick={() => {onNavigate('/analytics'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Analytics</button>
+          <button type="button" onClick={() => {onNavigate('/analytics'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Analytics</button>
 
           {/* Mobile Sourcing Calculator Link */}
-          <button onClick={() => {onNavigate('/sourcing'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2 flex items-center gap-2">
+          <button type="button" onClick={() => {onNavigate('/sourcing'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2 flex items-center gap-2">
             <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
             Sourcing Calculator
           </button>
 
           {/* Mobile Listing Doctor Link */}
-          <button onClick={() => {onNavigate('/health'); setIsMobileMenuOpen(false)}} className="text-left font-bold text-red-600 py-2 flex items-center gap-2">
+          <button type="button" onClick={() => {onNavigate('/health'); setIsMobileMenuOpen(false)}} className="text-left font-bold text-red-600 py-2 flex items-center gap-2">
             Listing Doctor <span className="text-[10px] bg-red-100 px-1.5 py-0.5 rounded ml-1">HOT</span>
           </button>
 
-          <button onClick={() => {onNavigate('/vision'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Our Vision</button>
+          <button type="button" onClick={() => {onNavigate('/vision'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Our Vision</button>
           <div className="h-px bg-slate-100 my-1"></div>
-          <button onClick={() => {onNavigate('/login'); setIsMobileMenuOpen(false)}} className="text-left font-bold text-slate-600 py-2">Log in</button>
-          <button onClick={() => {onNavigate('/signup'); setIsMobileMenuOpen(false)}} className="text-left font-bold text-[#2563EB] py-2">Start Listing Free</button>
+          <button type="button" onClick={() => {onNavigate('/login'); setIsMobileMenuOpen(false)}} className="text-left font-bold text-slate-600 py-2">Log in</button>
+          <button type="button" onClick={() => {onNavigate('/signup'); setIsMobileMenuOpen(false)}} className="text-left font-bold text-[#2563EB] py-2">Start Listing Free</button>
         </div>
       )}
     </header>
