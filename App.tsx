@@ -15,8 +15,11 @@ import TermsPage from './pages/TermsPage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 
-// ✅ NEW: Dashboard Page Import
+// Dashboard Page
 import DashboardPage from './pages/DashboardPage';
+
+// ✅ NEW: Inventory Page Import
+import InventoryPage from './pages/InventoryPage';
 
 // Chat Widget
 import ChatWidget from './components/ChatWidget';
@@ -51,8 +54,10 @@ const App: React.FC = () => {
   // 2. MAIN LAYOUT: Helper function for the standard pages
   const renderContent = () => {
     switch (currentPath) {
-      case '/dashboard': // ✅ NEW: Registered Dashboard Route
+      case '/dashboard': 
         return <DashboardPage onNavigate={navigate} />;
+      case '/inventory': // ✅ NEW: Registered Inventory Route
+        return <InventoryPage onNavigate={navigate} />;
       case '/builder':
         return <BuilderPage />;
       case '/pricing':
