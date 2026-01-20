@@ -1,3 +1,6 @@
+Amigo, here is the updated Navbar.tsx.
+I have added the "Analytics" link right next to "Inventory". I also added it to the mobile menu so it is accessible everywhere.
+components/Navbar.tsx
 import React, { useState, useEffect } from 'react';
 
 interface NavbarProps {
@@ -83,13 +86,16 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
 
             <button onClick={() => onNavigate('/pricing')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Pricing</button>
             
-            {/* ✅ NEW: Inventory Link with Beta Badge */}
+            {/* Inventory Link */}
             <button 
               onClick={() => onNavigate('/inventory')} 
               className="flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors"
             >
               Inventory <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded font-bold">Beta</span>
             </button>
+
+            {/* ✅ NEW: Analytics Link */}
+            <button onClick={() => onNavigate('/analytics')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Analytics</button>
 
             <button onClick={() => onNavigate('/vision')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Our Vision</button>
             <button onClick={() => onNavigate('/success')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Success Hub</button>
@@ -133,10 +139,13 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
           
           <button onClick={() => {onNavigate('/pricing'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Pricing</button>
           
-          {/* ✅ Mobile Inventory Link */}
+          {/* Mobile Inventory Link */}
           <button onClick={() => {onNavigate('/inventory'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2 flex items-center gap-2">
             Inventory <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded font-bold">Beta</span>
           </button>
+
+          {/* ✅ NEW: Mobile Analytics Link */}
+          <button onClick={() => {onNavigate('/analytics'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Analytics</button>
 
           <button onClick={() => {onNavigate('/vision'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Our Vision</button>
           <div className="h-px bg-slate-100 my-1"></div>
@@ -149,3 +158,4 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
 };
 
 export default Navbar;
+
