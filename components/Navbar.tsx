@@ -48,7 +48,7 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
           </div>
 
           {/* 2. Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-6">
             
             {/* Platforms Dropdown */}
             <div className="relative group">
@@ -91,11 +91,19 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
               Inventory <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded font-bold">Beta</span>
             </button>
 
-            {/* ✅ NEW: Analytics Link */}
+            {/* Analytics Link */}
             <button onClick={() => onNavigate('/analytics')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Analytics</button>
 
-            <button onClick={() => onNavigate('/vision')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Our Vision</button>
-            <button onClick={() => onNavigate('/success')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Success Hub</button>
+            {/* ✅ NEW: Listing Doctor (RED) */}
+            <button 
+              onClick={() => onNavigate('/health')} 
+              className="text-sm font-bold text-red-600 hover:text-red-700 transition-colors bg-red-50 px-3 py-1 rounded-full border border-red-100 flex items-center gap-1"
+            >
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+              Listing Doctor
+            </button>
+
+            <button onClick={() => onNavigate('/vision')} className="text-sm font-medium text-slate-600 hover:text-[#2563EB] transition-colors">Vision</button>
           </nav>
 
           {/* 3. CTA & Mobile Toggle */}
@@ -141,8 +149,13 @@ const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             Inventory <span className="text-[10px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded font-bold">Beta</span>
           </button>
 
-          {/* ✅ NEW: Mobile Analytics Link */}
+          {/* Mobile Analytics Link */}
           <button onClick={() => {onNavigate('/analytics'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Analytics</button>
+
+          {/* ✅ NEW: Mobile Listing Doctor Link */}
+          <button onClick={() => {onNavigate('/health'); setIsMobileMenuOpen(false)}} className="text-left font-bold text-red-600 py-2 flex items-center gap-2">
+            Listing Doctor <span className="text-[10px] bg-red-100 px-1.5 py-0.5 rounded ml-1">HOT</span>
+          </button>
 
           <button onClick={() => {onNavigate('/vision'); setIsMobileMenuOpen(false)}} className="text-left font-medium text-slate-600 py-2">Our Vision</button>
           <div className="h-px bg-slate-100 my-1"></div>
