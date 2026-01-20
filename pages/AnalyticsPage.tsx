@@ -48,7 +48,7 @@ const AnalyticsPage: React.FC = () => {
           </div>
 
           {/* Net Profit (The most important one) */}
-          <div className="bg-[#0F172A] p-6 rounded-[24px] shadow-xl text-white relative overflow-hidden">
+          <div className="bg-[#0F172A] p-6 rounded-[24px] shadow-xl text-white relative overflow-hidden group cursor-pointer transition-transform hover:scale-[1.02]">
              {/* Background Glow */}
              <div className="absolute top-0 right-0 w-32 h-32 bg-green-500 rounded-full blur-[60px] opacity-20"></div>
             
@@ -59,9 +59,16 @@ const AnalyticsPage: React.FC = () => {
                   ↑ 24%
                 </span>
               </div>
-              <div className="text-slate-400 text-xs font-bold uppercase tracking-wider">Net Profit</div>
+              <div className="text-slate-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                Net Profit 
+                {/* Optional info icon for later */}
+                {/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 opacity-50 hover:opacity-100"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg> */}
+              </div>
               <div className="text-3xl font-bold text-white mt-1">$2,840.50</div>
-              <div className="text-xs text-slate-400 mt-2">After fees & COGS</div>
+              <div className="text-xs text-slate-400 mt-2 flex items-center justify-between">
+                <span>After fees & COGS</span>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-300 text-[10px] uppercase font-bold">View Details →</span>
+              </div>
             </div>
           </div>
 
@@ -80,7 +87,7 @@ const AnalyticsPage: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* 2. THE CHART (Visualizing Growth) */}
+          {/* 2. THE CHART (Updated with always-visible labels) */}
           <div className="lg:col-span-2 bg-white rounded-[24px] border border-slate-200 shadow-sm p-8">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-lg font-bold text-[#0F172A]">Profit Trend</h3>
@@ -88,15 +95,15 @@ const AnalyticsPage: React.FC = () => {
             </div>
             
             {/* CSS Bar Chart Simulation */}
-            <div className="h-64 flex items-end justify-between gap-2 sm:gap-4">
+            <div className="h-64 flex items-end justify-between gap-2 sm:gap-4 pt-6"> {/* Added pt-6 for label space */}
               {[35, 45, 30, 60, 55, 75, 50, 65, 85, 70, 90, 80].map((height, i) => (
                 <div key={i} className="w-full bg-slate-50 rounded-t-lg relative group h-full flex items-end">
                   <div 
                     style={{ height: `${height}%` }} 
-                    className="w-full bg-blue-500 rounded-t-md opacity-80 group-hover:opacity-100 group-hover:bg-blue-600 transition-all duration-300 relative"
+                    className="w-full bg-blue-500 rounded-t-md hover:bg-blue-600 transition-all duration-300 relative"
                   >
-                    {/* Tooltip */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-[#0F172A] text-white text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                    {/* ALWAYS VISIBLE LABEL (Updated) */}
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 text-[#0F172A] text-[10px] sm:text-xs font-bold whitespace-nowrap z-10">
                       ${height * 45}
                     </div>
                   </div>
