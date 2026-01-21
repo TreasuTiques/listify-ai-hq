@@ -21,7 +21,7 @@ import InventoryPage from './pages/InventoryPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import StaleListingsPage from './pages/StaleListingsPage';
 
-// ✅ NEW: Final Phase 1 Pages
+// ✅ NEW: Phase 1 Final Pages
 import SourcingPage from './pages/SourcingPage';
 import ContactPage from './pages/ContactPage';
 import BlogPage from './pages/BlogPage';
@@ -45,10 +45,10 @@ const App: React.FC = () => {
   const navigate = (path: string) => {
     window.location.hash = path;
     setCurrentPath(path);
-    window.scrollTo(0, 0);
+    window.scrollTo(0, 0); // Scroll to top on navigation
   };
 
-  // 1. AUTH LAYOUT: If Login or Signup, render full screen without Navbar/Footer
+  // 1. AUTH LAYOUT: Render full screen without Navbar/Footer
   if (currentPath === '/login') {
     return <LoginPage onNavigate={navigate} />;
   }
@@ -72,14 +72,14 @@ const App: React.FC = () => {
       // Tools & Resources
       case '/builder':
         return <BuilderPage />;
-      case '/sourcing': // ✅ NEW: Sourcing Calculator
-        return <SourcingPage />;
+      case '/sourcing': 
+        return <SourcingPage />; // The new Profit Scout
       case '/pricing':
         return <PricingPage />;
-      case '/blog':     // ✅ NEW: Blog/Resources
-        return <BlogPage />;
-      case '/contact':  // ✅ NEW: Contact Support
-        return <ContactPage />;
+      case '/blog':     
+        return <BlogPage />;     // The new Blog
+      case '/contact':  
+        return <ContactPage />;  // The new Contact Form
       case '/success':
         return <SuccessHub />;
       
