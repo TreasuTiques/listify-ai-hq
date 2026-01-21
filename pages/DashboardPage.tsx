@@ -1,16 +1,51 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../supabaseClient';
 
 interface DashboardPageProps {
   onNavigate: (path: string) => void;
 }
 
 const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
-  // SIMULATED STATE: This makes the buttons feel real without a backend yet
+  // 1. REAL AUTH STATE (The Security Layer)
+  const [user, setUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // 2. SIMULATED UI STATE (Placeholders until Phase 3)
   const [ebayConnected, setEbayConnected] = useState(false);
   const [poshmarkConnected, setPoshmarkConnected] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(''); // 'ebay' or 'poshmark'
+  const [isConnecting, setIsConnecting] = useState(''); 
   const [dripEnabled, setDripEnabled] = useState(false);
   const [itemsPerDay, setItemsPerDay] = useState(5);
+
+  // 3. SECURITY CHECK: Run this when the page loads
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          // If not logged in, kick them out!
+          onNavigate('/login');
+        } else {
+          // If logged in, save the user info
+          setUser(user);
+        }
+      } catch (error) {
+        console.error('Error checking user:', error);
+        onNavigate('/login');
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    checkUser();
+  }, [onNavigate]);
+
+  // 4. SIGN OUT FUNCTION
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    onNavigate('/login');
+  };
 
   const handleConnect = (platform: string) => {
     setIsConnecting(platform);
@@ -22,31 +57,53 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
     }, 2000);
   };
 
+  // 5. LOADING SPINNER (While checking ID)
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20 pt-24 px-4 sm:px-6 lg:px-8">
       
       <div className="max-w-7xl mx-auto">
         
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+        {/* Header - NOW PERSONALIZED */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 animate-in fade-in slide-in-from-top-4 duration-700">
           <div>
+            <div className="flex items-center gap-3 mb-1">
+              <span className="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Pro Account</span>
+              <span className="text-slate-400 text-xs">• {user?.email}</span>
+            </div>
             <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight">Command Center</h1>
             <p className="text-slate-500 mt-1">Manage your inventory and automation settings.</p>
           </div>
-          <button 
-            onClick={() => onNavigate('/builder')}
-            className="flex items-center gap-2 bg-[#2563EB] text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 transition-all hover:-translate-y-0.5 active:scale-95"
-          >
-            <span className="text-lg">+</span> Create New Listing
-          </button>
+          
+          <div className="flex gap-3">
+            <button 
+              onClick={handleSignOut}
+              className="px-4 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+            >
+              Sign Out
+            </button>
+            <button 
+              onClick={() => onNavigate('/builder')}
+              className="flex items-center gap-2 bg-[#0F172A] text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-slate-900/20 hover:bg-blue-600 transition-all hover:-translate-y-0.5 active:scale-95"
+            >
+              <span className="text-lg">+</span> Create New Listing
+            </button>
+          </div>
         </div>
 
-        {/* Stats Grid */}
+        {/* Stats Grid (Visual Placeholder for now) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           {[
-            { label: 'Drafts Ready', value: '12', icon: '📝', color: 'bg-blue-50 text-blue-600' },
-            { label: 'Listed this Week', value: '45', icon: '🚀', color: 'bg-green-50 text-green-600' },
-            { label: 'Est. Profit', value: '$840', icon: '💰', color: 'bg-emerald-50 text-emerald-600' },
+            { label: 'Drafts Ready', value: '0', icon: '📝', color: 'bg-blue-50 text-blue-600' },
+            { label: 'Listed this Week', value: '0', icon: '🚀', color: 'bg-green-50 text-green-600' },
+            { label: 'Est. Profit', value: '$0.00', icon: '💰', color: 'bg-emerald-50 text-emerald-600' },
           ].map((stat) => (
             <div key={stat.label} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${stat.color}`}>
@@ -79,7 +136,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                   <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-xl shadow-sm">🔵</div>
                   <div>
                     <div className="font-bold text-[#0F172A]">eBay Store</div>
-                    <div className="text-xs text-slate-500">{ebayConnected ? 'Connected as @VintageKing' : 'Not connected'}</div>
+                    <div className="text-xs text-slate-500">{ebayConnected ? 'Connected as @User' : 'Not connected'}</div>
                   </div>
                 </div>
                 <button 
@@ -119,7 +176,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* 2. DRIP SCHEDULER CARD (Retention Feature) */}
+          {/* 2. DRIP SCHEDULER CARD */}
           <div className="bg-[#0F172A] rounded-[24px] border border-slate-800 shadow-xl p-8 relative overflow-hidden text-white">
             {/* Glow Effect */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-20 pointer-events-none"></div>
@@ -131,7 +188,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                     ⚡ Drip Scheduler
                     <span className="bg-blue-600 text-[10px] uppercase px-2 py-0.5 rounded-full">Pro</span>
                   </h3>
-                  <p className="text-sm text-slate-400 mt-1">Automatically post drafts daily to beat the algorithm.</p>
+                  <p className="text-sm text-slate-400 mt-1">Automatically post drafts daily.</p>
                 </div>
                 
                 {/* Toggle Switch */}
@@ -162,7 +219,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 <div className="mt-6 bg-white/10 rounded-xl p-4 border border-white/5 flex items-start gap-3">
                   <div className="text-blue-400 mt-0.5">ℹ️</div>
                   <div className="text-xs text-slate-300 leading-relaxed">
-                    With <strong>{itemsPerDay} items</strong> posting daily, your current draft bank of <strong>12 items</strong> will last for <strong>2 days</strong>. 
+                    With <strong>{itemsPerDay} items</strong> posting daily, your current draft bank will last for <strong>0 days</strong>. 
                     <span className="block mt-2 text-blue-300 hover:underline cursor-pointer">Upload more photos to extend your streak →</span>
                   </div>
                 </div>
