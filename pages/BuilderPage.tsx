@@ -1,17 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
+import { generateListingFromImage } from '../services/ai';
 
 const BuilderPage: React.FC = () => {
   // 1. STATE MANAGEMENT
   const [activePlatform, setActivePlatform] = useState('ebay');
   const [isStorytelling, setIsStorytelling] = useState(false);
+  
+  // Form Fields
   const [title, setTitle] = useState('');
   const [brand, setBrand] = useState('');
   const [condition, setCondition] = useState('New with Tags');
-  const [description, setDescription] = useState(''); 
-  const [loading, setLoading] = useState(false);
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  
+  // UI States
+  const [loading, setLoading] = useState(false); // Saving state
+  const [analyzing, setAnalyzing] = useState(false); // AI Analysis state
   const [user, setUser] = useState<any>(null);
-  const [showSuccess, setShowSuccess] = useState(false); // ✨ NEW: For the premium popup
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check for User on Load
   useEffect(() => {
@@ -32,13 +42,54 @@ const BuilderPage: React.FC = () => {
     { id: 'facebook', label: 'Facebook', color: 'bg-blue-800' },
   ];
 
-  // 2. THE SAVE FUNCTION
+  // 2. AI MAGIC: Handle Image Upload
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
+    let file: File | null = null;
+
+    // Handle Drop vs Click
+    if ((e as React.DragEvent).dataTransfer) {
+      e.preventDefault();
+      file = (e as React.DragEvent).dataTransfer.files[0];
+    } else if ((e as React.ChangeEvent<HTMLInputElement>).target.files) {
+      file = (e as React.ChangeEvent<HTMLInputElement>).target.files![0];
+    }
+
+    if (!file) return;
+
+    // Show Preview
+    const reader = new FileReader();
+    reader.onload = (e) => setImagePreview(e.target?.result as string);
+    reader.readAsDataURL(file);
+
+    // CALL THE BRAIN 🧠
+    setAnalyzing(true);
+    try {
+      const result = await generateListingFromImage(file, activePlatform);
+      
+      // Auto-Fill Form
+      setTitle(result.title || '');
+      setBrand(result.brand || '');
+      setDescription(result.description || '');
+      setCondition(result.condition || 'Pre-owned');
+      setPrice(result.estimated_price || '');
+      
+    } catch (error) {
+      console.error("AI Error:", error);
+      alert("AI could not analyze image. Try another one!");
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  // Drag & Drop Handlers
+  const onDragOver = (e: React.DragEvent) => e.preventDefault();
+  
+  // 3. THE SAVE FUNCTION
   const handleGenerateAndSave = async () => {
     if (!user) {
       alert("Please log in to save listings!");
       return;
     }
-
     if (!title) {
       alert("Please enter a title first.");
       return;
@@ -47,7 +98,6 @@ const BuilderPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // A. Insert into Supabase
       const { error } = await supabase
         .from('listings')
         .insert([
@@ -64,10 +114,7 @@ const BuilderPage: React.FC = () => {
 
       if (error) throw error;
 
-      // B. ✨ SHOW PREMIUM SUCCESS ✨
       setShowSuccess(true);
-      
-      // Wait 1.5 seconds, then go to dashboard
       setTimeout(() => {
         window.location.hash = '/dashboard'; 
       }, 1500);
@@ -83,7 +130,7 @@ const BuilderPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative">
       
-      {/* ✨ PREMIUM SUCCESS NOTIFICATION ✨ */}
+      {/* SUCCESS POPUP */}
       {showSuccess && (
         <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-500">
           <div className="bg-[#0F172A] text-white px-8 py-4 rounded-2xl shadow-2xl shadow-blue-900/20 flex items-center gap-4 border border-slate-700">
@@ -98,7 +145,7 @@ const BuilderPage: React.FC = () => {
         </div>
       )}
 
-      {/* Page Header */}
+      {/* HEADER */}
       <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight flex items-center gap-3">
@@ -108,18 +155,15 @@ const BuilderPage: React.FC = () => {
           <p className="text-slate-500 mt-1">Upload photos to generate optimized listings instantly.</p>
         </div>
         <div className="text-xs font-bold text-slate-400 uppercase tracking-wider bg-white px-4 py-2 rounded-lg border border-slate-100 shadow-sm">
-          0 Photos Uploaded • Target: <span className={`font-bold ml-1 ${
-            activePlatform === 'ebay' ? 'text-blue-600' : 
-            activePlatform === 'poshmark' ? 'text-red-600' :
-            activePlatform === 'shopify' ? 'text-emerald-600' :
-            'text-slate-900'
+          {imagePreview ? '1' : '0'} Photos Uploaded • Target: <span className={`font-bold ml-1 ${
+            activePlatform === 'ebay' ? 'text-blue-600' : 'text-slate-900'
           }`}>{activePlatform.toUpperCase()}</span>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* LEFT COLUMN: Media Upload */}
+        {/* LEFT: DROP ZONE */}
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm p-6 relative overflow-hidden group">
             <div className="flex justify-between items-center mb-4">
@@ -127,12 +171,44 @@ const BuilderPage: React.FC = () => {
               <span className="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded-md">AI Vision Ready</span>
             </div>
             
-            <div className="border-2 border-dashed border-slate-200 rounded-2xl h-[400px] flex flex-col items-center justify-center bg-slate-50/50 hover:bg-slate-50 hover:border-blue-400 transition-all cursor-pointer group-hover:shadow-inner">
-              <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-              </div>
-              <p className="text-sm font-bold text-slate-700">Drop Photos Here</p>
-              <p className="text-xs text-slate-400 mt-1">Supports JPG, PNG, HEIC</p>
+            {/* HIDDEN INPUT */}
+            <input 
+              type="file" 
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              className="hidden" 
+              accept="image/*"
+            />
+
+            {/* CLICKABLE DROP AREA */}
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={onDragOver}
+              onDrop={handleFileUpload}
+              className={`border-2 border-dashed rounded-2xl h-[400px] flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${
+                analyzing ? 'border-blue-500 bg-blue-50' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-blue-400'
+              }`}
+            >
+              {imagePreview ? (
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded-xl" />
+              ) : (
+                <>
+                  <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  </div>
+                  <p className="text-sm font-bold text-slate-700">Drop Photos Here</p>
+                  <p className="text-xs text-slate-400 mt-1">Supports JPG, PNG, HEIC</p>
+                </>
+              )}
+
+              {/* LOADING OVERLAY */}
+              {analyzing && (
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                  <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <p className="font-bold text-blue-700 animate-pulse">Analyzing Item...</p>
+                  <p className="text-xs text-blue-500">Writing description...</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -140,17 +216,19 @@ const BuilderPage: React.FC = () => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full blur-[60px] opacity-20"></div>
             <h3 className="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2">AI Analysis</h3>
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-slate-500"></div>
-              <span className="text-sm text-slate-400 italic">Waiting for media...</span>
+              <div className={`w-2 h-2 rounded-full ${analyzing ? 'bg-green-400 animate-ping' : 'bg-slate-500'}`}></div>
+              <span className="text-sm text-slate-400 italic">
+                {analyzing ? "Gemini is thinking..." : "Waiting for media..."}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Listing Details */}
+        {/* RIGHT: FORM */}
         <div className="lg:col-span-7 space-y-6">
           <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm p-8">
             
-            {/* Platform Switcher */}
+            {/* PLATFORMS */}
             <div className="mb-8">
                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Target Marketplace</label>
                <div className="flex flex-wrap gap-2">
@@ -171,7 +249,7 @@ const BuilderPage: React.FC = () => {
                </div>
             </div>
 
-            {/* Title Input */}
+            {/* TITLE */}
             <div className="mb-6">
               <div className="flex justify-between mb-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Listing Title</label>
@@ -182,7 +260,7 @@ const BuilderPage: React.FC = () => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400"
-                placeholder="Type a title to test saving..."
+                placeholder="Upload a photo to generate title..."
               />
             </div>
 
@@ -213,43 +291,36 @@ const BuilderPage: React.FC = () => {
               </div>
             </div>
 
+            {/* PRICE ESTIMATE */}
+            <div className="mb-6">
+               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">AI Estimated Price</label>
+               <input 
+                  type="text" 
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="w-full bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-3 font-bold focus:outline-none focus:border-emerald-500 transition-all placeholder:text-emerald-300"
+                  placeholder="$0.00"
+                />
+            </div>
+
+            {/* DESCRIPTION */}
             <div className="mb-6">
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Description / Notes</label>
               <textarea 
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-24 resize-none"
-                placeholder="e.g. Small scratch on lens, box has shelf wear..."
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-32 resize-none"
+                placeholder="AI will write this for you..."
               ></textarea>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 mb-8">
-              <div>
-                <div className="text-sm font-bold text-slate-900">Enable Premium Storytelling?</div>
-                <div className="text-xs text-slate-500">Uses GPT-4o for richer descriptions.</div>
-              </div>
-              <button 
-                onClick={() => setIsStorytelling(!isStorytelling)}
-                className={`w-12 h-6 rounded-full transition-colors relative ${isStorytelling ? 'bg-blue-600' : 'bg-slate-300'}`}
-              >
-                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${isStorytelling ? 'left-7' : 'left-1'}`}></div>
-              </button>
-            </div>
-
-            {/* Dynamic Action Button */}
+            {/* ACTION BUTTON */}
             <button 
               onClick={handleGenerateAndSave}
-              disabled={loading}
-              className="w-full bg-[#2563EB] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:bg-blue-600 hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2"
+              disabled={loading || analyzing}
+              className="w-full bg-[#2563EB] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:bg-blue-600 hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? (
-                <>
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                  Saving...
-                </>
-              ) : (
-                `Save ${platforms.find(p => p.id === activePlatform)?.label} Listing`
-              )}
+              {loading ? "Saving..." : analyzing ? "AI Working..." : `Save ${platforms.find(p => p.id === activePlatform)?.label} Listing`}
             </button>
 
           </div>
