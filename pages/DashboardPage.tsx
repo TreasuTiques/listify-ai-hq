@@ -6,58 +6,72 @@ interface DashboardPageProps {
 }
 
 const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
-  // 1. REAL AUTH STATE (The Security Layer)
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  
+  // Real Stats State
+  const [stats, setStats] = useState({
+    drafts: 0,
+    active: 0,
+    profit: 0
+  });
 
-  // 2. SIMULATED UI STATE (Placeholders until Phase 3)
-  const [ebayConnected, setEbayConnected] = useState(false);
-  const [poshmarkConnected, setPoshmarkConnected] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(''); 
+  // UI States (Toggles)
   const [dripEnabled, setDripEnabled] = useState(false);
   const [itemsPerDay, setItemsPerDay] = useState(5);
+  const [ebayConnected, setEbayConnected] = useState(false);
+  const [poshmarkConnected, setPoshmarkConnected] = useState(false);
 
-  // 3. SECURITY CHECK: Run this when the page loads
+  // 1. LOAD USER & DATA
   useEffect(() => {
-    const checkUser = async () => {
+    const loadDashboard = async () => {
       try {
+        // A. Get User
         const { data: { user } } = await supabase.auth.getUser();
         
         if (!user) {
-          // If not logged in, kick them out!
           onNavigate('/login');
-        } else {
-          // If logged in, save the user info
-          setUser(user);
+          return;
         }
+        setUser(user);
+
+        // B. Get Real Listing Counts
+        // Count drafts
+        const { count: draftCount } = await supabase
+          .from('listings')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('status', 'draft');
+
+        // Count active (just in case we have some later)
+        const { count: activeCount } = await supabase
+          .from('listings')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('status', 'active');
+
+        setStats({
+          drafts: draftCount || 0,
+          active: activeCount || 0,
+          profit: 0 // We will calculate this when we add prices later
+        });
+
       } catch (error) {
-        console.error('Error checking user:', error);
-        onNavigate('/login');
+        console.error('Error loading dashboard:', error);
       } finally {
         setAuthLoading(false);
       }
     };
 
-    checkUser();
+    loadDashboard();
   }, [onNavigate]);
 
-  // 4. SIGN OUT FUNCTION
+  // 2. SIGN OUT
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     onNavigate('/login');
   };
 
-  const handleConnect = (platform: string) => {
-    setIsConnecting(platform);
-    // Simulate API delay
-    setTimeout(() => {
-      if (platform === 'ebay') setEbayConnected(true);
-      if (platform === 'poshmark') setPoshmarkConnected(true);
-      setIsConnecting('');
-    }, 2000);
-  };
-
-  // 5. LOADING SPINNER (While checking ID)
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
@@ -71,7 +85,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       
       <div className="max-w-7xl mx-auto">
         
-        {/* Header - NOW PERSONALIZED */}
+        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 animate-in fade-in slide-in-from-top-4 duration-700">
           <div>
             <div className="flex items-center gap-3 mb-1">
@@ -98,28 +112,51 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Stats Grid (Visual Placeholder for now) */}
+        {/* REAL STATS GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          {[
-            { label: 'Drafts Ready', value: '0', icon: '📝', color: 'bg-blue-50 text-blue-600' },
-            { label: 'Listed this Week', value: '0', icon: '🚀', color: 'bg-green-50 text-green-600' },
-            { label: 'Est. Profit', value: '$0.00', icon: '💰', color: 'bg-emerald-50 text-emerald-600' },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${stat.color}`}>
-                {stat.icon}
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-[#0F172A]">{stat.value}</div>
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">{stat.label}</div>
-              </div>
+          
+          {/* Drafts Card */}
+          <div 
+            onClick={() => onNavigate('/inventory')} 
+            className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 cursor-pointer hover:border-blue-300 transition-all"
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl bg-blue-50 text-blue-600">
+              📝
             </div>
-          ))}
+            <div>
+              {/* THIS NUMBER IS NOW REAL */}
+              <div className="text-2xl font-bold text-[#0F172A]">{stats.drafts}</div>
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Drafts Ready</div>
+            </div>
+          </div>
+
+          {/* Listed Card */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl bg-green-50 text-green-600">
+              🚀
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-[#0F172A]">{stats.active}</div>
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Listings</div>
+            </div>
+          </div>
+
+          {/* Profit Card */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl bg-emerald-50 text-emerald-600">
+              💰
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-[#0F172A]">${stats.profit}</div>
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Est. Profit</div>
+            </div>
+          </div>
         </div>
 
+        {/* Integration & Drip Tools */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
-          {/* 1. STORE INTEGRATIONS CARD */}
+          {/* Store Integrations */}
           <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm p-8">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -130,29 +167,17 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </div>
 
             <div className="space-y-4">
-              {/* eBay Integration */}
               <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/50">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-xl shadow-sm">🔵</div>
                   <div>
                     <div className="font-bold text-[#0F172A]">eBay Store</div>
-                    <div className="text-xs text-slate-500">{ebayConnected ? 'Connected as @User' : 'Not connected'}</div>
+                    <div className="text-xs text-slate-500">{ebayConnected ? 'Connected' : 'Not connected'}</div>
                   </div>
                 </div>
-                <button 
-                  onClick={() => !ebayConnected && handleConnect('ebay')}
-                  disabled={ebayConnected || isConnecting === 'ebay'}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                    ebayConnected 
-                    ? 'bg-green-100 text-green-700 border border-green-200 cursor-default'
-                    : 'bg-white border border-slate-300 text-slate-700 hover:border-blue-500 hover:text-blue-600'
-                  }`}
-                >
-                  {isConnecting === 'ebay' ? 'Connecting...' : ebayConnected ? 'Active ✓' : 'Connect'}
-                </button>
+                <button className="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold hover:border-blue-500 hover:text-blue-600 transition-colors">Connect</button>
               </div>
 
-              {/* Poshmark Integration */}
               <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-slate-50/50">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-xl shadow-sm">🔴</div>
@@ -161,24 +186,13 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                     <div className="text-xs text-slate-500">{poshmarkConnected ? 'Connected' : 'Not connected'}</div>
                   </div>
                 </div>
-                <button 
-                  onClick={() => !poshmarkConnected && handleConnect('poshmark')}
-                  disabled={poshmarkConnected || isConnecting === 'poshmark'}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                    poshmarkConnected 
-                    ? 'bg-green-100 text-green-700 border border-green-200 cursor-default'
-                    : 'bg-white border border-slate-300 text-slate-700 hover:border-pink-500 hover:text-pink-600'
-                  }`}
-                >
-                  {isConnecting === 'poshmark' ? 'Connecting...' : poshmarkConnected ? 'Active ✓' : 'Connect'}
-                </button>
+                <button className="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold hover:border-pink-500 hover:text-pink-600 transition-colors">Connect</button>
               </div>
             </div>
           </div>
 
-          {/* 2. DRIP SCHEDULER CARD */}
+          {/* Drip Scheduler */}
           <div className="bg-[#0F172A] rounded-[24px] border border-slate-800 shadow-xl p-8 relative overflow-hidden text-white">
-            {/* Glow Effect */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-20 pointer-events-none"></div>
             
             <div className="relative z-10">
@@ -190,8 +204,6 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                   </h3>
                   <p className="text-sm text-slate-400 mt-1">Automatically post drafts daily.</p>
                 </div>
-                
-                {/* Toggle Switch */}
                 <button 
                   onClick={() => setDripEnabled(!dripEnabled)}
                   className={`w-12 h-6 rounded-full transition-colors relative ${dripEnabled ? 'bg-green-500' : 'bg-slate-600'}`}
@@ -200,27 +212,20 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 </button>
               </div>
 
-              {/* Slider UI */}
               <div className={`transition-opacity duration-300 ${dripEnabled ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
                 <div className="flex justify-between items-end mb-4">
                   <span className="text-sm font-bold text-slate-300 uppercase tracking-wider">Listing Velocity</span>
                   <div className="text-3xl font-bold text-white">{itemsPerDay} <span className="text-sm text-slate-400 font-normal">items / day</span></div>
                 </div>
-                
                 <input 
-                  type="range" 
-                  min="1" 
-                  max="20" 
-                  value={itemsPerDay} 
+                  type="range" min="1" max="20" value={itemsPerDay} 
                   onChange={(e) => setItemsPerDay(parseInt(e.target.value))}
                   className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400"
                 />
-                
                 <div className="mt-6 bg-white/10 rounded-xl p-4 border border-white/5 flex items-start gap-3">
                   <div className="text-blue-400 mt-0.5">ℹ️</div>
                   <div className="text-xs text-slate-300 leading-relaxed">
-                    With <strong>{itemsPerDay} items</strong> posting daily, your current draft bank will last for <strong>0 days</strong>. 
-                    <span className="block mt-2 text-blue-300 hover:underline cursor-pointer">Upload more photos to extend your streak →</span>
+                    You have <strong>{stats.drafts} drafts</strong> available. At this speed, your queue will last for <strong>{(stats.drafts / itemsPerDay).toFixed(1)} days</strong>.
                   </div>
                 </div>
               </div>
