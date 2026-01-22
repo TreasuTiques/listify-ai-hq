@@ -1,17 +1,18 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// 1. Get the Key (Securely from Vercel)
+// 1. Get the Key from Vercel
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 if (!API_KEY) {
-  console.error("⚠️ Missing VITE_GEMINI_API_KEY. AI features will not work.");
+  console.error("⚠️ Missing VITE_GEMINI_API_KEY.");
 }
 
-const genAI = new GoogleGenerativeAI(API_KEY);
+// 2. Initialize
+const genAI = new GoogleGenerativeAI(API_KEY || "missing-key");
 
 export async function generateListingFromImage(imageFile: File, platform: string = 'ebay') {
   try {
-    // 🕵️‍♂️ FIX: We switched from 'flash' to 'pro' for better compatibility
+    // 🕵️‍♂️ FIX: Switching to 'gemini-1.5-pro' which is more widely supported
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
     // B. Convert image
@@ -45,9 +46,9 @@ export async function generateListingFromImage(imageFile: File, platform: string
     return JSON.parse(cleanText);
 
   } catch (error: any) {
-    console.error("AI Generation Error:", error);
-    // If it fails again, we will see the generic error, but 'pro' should fix the 404.
-    throw new Error("Failed to generate listing. Please try again.");
+    // Keep the Truth Serum active so we can see if it worked!
+    alert("🤖 GOOGLE SAYS: " + error.message);
+    throw error;
   }
 }
 
