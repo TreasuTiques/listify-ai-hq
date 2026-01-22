@@ -1,10 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// 1. Initialize Gemini
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+// ⚠️ DIAGNOSTIC MODE: Key is hardcoded for testing
+// (Later we will move this back to Vercel variables for safety)
+const API_KEY = "AIzaSyAS1TXOaVxmdM_g0aDPUWZAMfeCs3FYVn4";
 
 if (!API_KEY) {
-  console.error("⚠️ Missing VITE_GEMINI_API_KEY. AI features will not work.");
+  console.error("⚠️ Missing API Key.");
 }
 
 const genAI = new GoogleGenerativeAI(API_KEY);
