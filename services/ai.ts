@@ -12,8 +12,9 @@ const genAI = new GoogleGenerativeAI(API_KEY || "missing-key");
 
 export async function generateListingFromImage(imageFile: File, platform: string = 'ebay') {
   try {
-    // 🕵️‍♂️ FIX: Switching to 'gemini-1.5-pro' which is more widely supported
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    // 🕵️‍♂️ FIX: Using the specific version number 'gemini-1.5-flash-001'
+    // This is the most stable, guaranteed-to-exist model version.
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
 
     // B. Convert image
     const imageData = await fileToGenerativePart(imageFile);
@@ -46,7 +47,7 @@ export async function generateListingFromImage(imageFile: File, platform: string
     return JSON.parse(cleanText);
 
   } catch (error: any) {
-    // Keep the Truth Serum active so we can see if it worked!
+    // Keep the Truth Serum active!
     alert("🤖 GOOGLE SAYS: " + error.message);
     throw error;
   }
