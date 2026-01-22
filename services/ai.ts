@@ -1,11 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// ⚠️ DIAGNOSTIC MODE: Key is hardcoded for testing
-// (Later we will move this back to Vercel variables for safety)
-const API_KEY = "AIzaSyAS1TXOaVxmdM_g0aDPUWZAMfeCs3FYVn4";
+// ✅ SECURE MODE: This pulls the key from Vercel's secret vault
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 if (!API_KEY) {
-  console.error("⚠️ Missing API Key.");
+  console.error("⚠️ Missing VITE_GEMINI_API_KEY. AI features will not work.");
 }
 
 const genAI = new GoogleGenerativeAI(API_KEY);
@@ -19,7 +18,7 @@ export async function generateListingFromImage(imageFile: File, platform: string
     // B. Convert image to format Gemini understands
     const imageData = await fileToGenerativePart(imageFile);
 
-    // C. The "Prompt" - This is where we tell the AI what to do
+    // C. The "Prompt"
     const prompt = `
       You are an expert reseller on ${platform}. 
       Look at this image of a product and generate a high-converting listing.
@@ -52,17 +51,13 @@ export async function generateListingFromImage(imageFile: File, platform: string
   }
 }
 
-// Helper: Convert File to Base64
 async function fileToGenerativePart(file: File) {
   return new Promise<any>((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64Data = (reader.result as string).split(',')[1];
       resolve({
-        inlineData: {
-          data: base64Data,
-          mimeType: file.type,
-        },
+        inlineData: { data: base64Data, mimeType: file.type },
       });
     };
     reader.onerror = reject;
