@@ -1,22 +1,18 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// 1. Get the Key
+// 1. Get the Key (Securely from Vercel)
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-// 2. Initialize (Be careful if key is missing)
-const genAI = new GoogleGenerativeAI(API_KEY || "missing-key");
+if (!API_KEY) {
+  console.error("⚠️ Missing VITE_GEMINI_API_KEY. AI features will not work.");
+}
+
+const genAI = new GoogleGenerativeAI(API_KEY);
 
 export async function generateListingFromImage(imageFile: File, platform: string = 'ebay') {
-  
-  // 🕵️‍♂️ TEST 1: IS THE KEY LOADED?
-  if (!API_KEY) {
-    alert("🚨 CRITICAL ERROR: The API Key is MISSING from the browser! Vercel did not pass the variable correctly.");
-    throw new Error("Missing API Key");
-  }
-
   try {
-    // A. Prepare the model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // 🕵️‍♂️ FIX: We switched from 'flash' to 'pro' for better compatibility
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
     // B. Convert image
     const imageData = await fileToGenerativePart(imageFile);
@@ -49,10 +45,9 @@ export async function generateListingFromImage(imageFile: File, platform: string
     return JSON.parse(cleanText);
 
   } catch (error: any) {
-    // 🕵️‍♂️ TEST 2: WHAT IS THE REAL ERROR?
-    // This will pop up the EXACT reason Google is failing
-    alert("🤖 GOOGLE SAYS: " + error.message);
-    throw error;
+    console.error("AI Generation Error:", error);
+    // If it fails again, we will see the generic error, but 'pro' should fix the 404.
+    throw new Error("Failed to generate listing. Please try again.");
   }
 }
 
