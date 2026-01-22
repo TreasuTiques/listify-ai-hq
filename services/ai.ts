@@ -1,24 +1,27 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// ✅ SECURE MODE: This pulls the key from Vercel's secret vault
+// 1. Get the Key
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-if (!API_KEY) {
-  console.error("⚠️ Missing VITE_GEMINI_API_KEY. AI features will not work.");
-}
+// 2. Initialize (Be careful if key is missing)
+const genAI = new GoogleGenerativeAI(API_KEY || "missing-key");
 
-const genAI = new GoogleGenerativeAI(API_KEY);
-
-// 2. The Master Function
 export async function generateListingFromImage(imageFile: File, platform: string = 'ebay') {
+  
+  // 🕵️‍♂️ TEST 1: IS THE KEY LOADED?
+  if (!API_KEY) {
+    alert("🚨 CRITICAL ERROR: The API Key is MISSING from the browser! Vercel did not pass the variable correctly.");
+    throw new Error("Missing API Key");
+  }
+
   try {
     // A. Prepare the model
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // B. Convert image to format Gemini understands
+    // B. Convert image
     const imageData = await fileToGenerativePart(imageFile);
 
-    // C. The "Prompt"
+    // C. The Prompt
     const prompt = `
       You are an expert reseller on ${platform}. 
       Look at this image of a product and generate a high-converting listing.
@@ -41,13 +44,15 @@ export async function generateListingFromImage(imageFile: File, platform: string
     const response = await result.response;
     const text = response.text();
 
-    // E. Clean and Parse the result
+    // E. Parse
     const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(cleanText);
 
-  } catch (error) {
-    console.error("AI Generation Error:", error);
-    throw new Error("Failed to generate listing. Please try again.");
+  } catch (error: any) {
+    // 🕵️‍♂️ TEST 2: WHAT IS THE REAL ERROR?
+    // This will pop up the EXACT reason Google is failing
+    alert("🤖 GOOGLE SAYS: " + error.message);
+    throw error;
   }
 }
 
