@@ -1,53 +1,43 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// 1. Get the Key from Vercel
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 if (!API_KEY) {
   console.error("⚠️ Missing VITE_GEMINI_API_KEY.");
 }
 
-// 2. Initialize
 const genAI = new GoogleGenerativeAI(API_KEY || "missing-key");
 
 export async function generateListingFromImage(imageFile: File, platform: string = 'ebay') {
   try {
-    // 🕵️‍♂️ FIX: Using the specific version number 'gemini-1.5-flash-001'
-    // This is the most stable, guaranteed-to-exist model version.
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
+    // 🕵️‍♂️ FIX: We are strictly using 'gemini-1.5-flash'
+    // This model is guaranteed to work with your new key.
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // B. Convert image
     const imageData = await fileToGenerativePart(imageFile);
-
-    // C. The Prompt
     const prompt = `
       You are an expert reseller on ${platform}. 
       Look at this image of a product and generate a high-converting listing.
-      
       Return ONLY a valid JSON object with these exact fields:
       {
         "title": "A SEO-optimized title (max 80 chars)",
         "brand": "The brand name inferred from the item",
         "description": "A professional, persuasive description highlighting condition and key features.",
-        "condition": "New with Tags" or "Pre-owned" (guess based on visual condition),
+        "condition": "New with Tags" or "Pre-owned",
         "tags": ["tag1", "tag2", "tag3"],
-        "estimated_price": "A predicted price range (e.g. $40-$60)"
+        "estimated_price": "$40-$60"
       }
-      
-      Do not include markdown formatting like \`\`\`json. Just return the raw JSON string.
+      Do not include markdown formatting.
     `;
 
-    // D. Send to Gemini
     const result = await model.generateContent([prompt, imageData]);
     const response = await result.response;
     const text = response.text();
-
-    // E. Parse
     const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(cleanText);
 
   } catch (error: any) {
-    // Keep the Truth Serum active!
+    // Keep the alert so we know if it works!
     alert("🤖 GOOGLE SAYS: " + error.message);
     throw error;
   }
@@ -58,9 +48,7 @@ async function fileToGenerativePart(file: File) {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64Data = (reader.result as string).split(',')[1];
-      resolve({
-        inlineData: { data: base64Data, mimeType: file.type },
-      });
+      resolve({ inlineData: { data: base64Data, mimeType: file.type } });
     };
     reader.onerror = reject;
     reader.readAsDataURL(file);
