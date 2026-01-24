@@ -21,8 +21,8 @@ import InventoryPage from './pages/InventoryPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import StaleListingsPage from './pages/StaleListingsPage';
 
-// ✅ NEW: Phase 1 Final Pages
-import SourcingPage from './pages/SourcingPage';
+// ✅ UPDATED: Connected the real Profit Scout page!
+import ProfitScoutPage from './pages/ProfitScoutPage'; 
 import ContactPage from './pages/ContactPage';
 import BlogPage from './pages/BlogPage';
 
@@ -72,14 +72,18 @@ const App: React.FC = () => {
       // Tools & Resources
       case '/builder':
         return <BuilderPage />;
+      
+      // 🕵️‍♂️ PROFIT SCOUT CONNECTION
+      // The Navbar sends you to '/sourcing', so we render ProfitScoutPage here.
       case '/sourcing': 
-        return <SourcingPage />; // The new Profit Scout
+        return <ProfitScoutPage />; 
+
       case '/pricing':
         return <PricingPage />;
       case '/blog':     
-        return <BlogPage />;     // The new Blog
+        return <BlogPage />;     
       case '/contact':  
-        return <ContactPage />;  // The new Contact Form
+        return <ContactPage />;  
       case '/success':
         return <SuccessHub />;
       
