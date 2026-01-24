@@ -9,7 +9,7 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 export async function generateListingFromImage(imageFile: File, platform: string = 'ebay') {
   try {
     // We are using the standard Flash model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
 
     const imageData = await fileToGenerativePart(imageFile);
     const prompt = `
