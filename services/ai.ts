@@ -1,6 +1,6 @@
 // 🕵️‍♂️ DIAGNOSTIC MODE: LIST AVAILABLE MODELS
 // REPLACE THE KEY BELOW WITH YOUR ACTUAL KEY ENDING IN ...VxIw
-const API_KEY = "PASTE_YOUR_KEY_HERE"; 
+const API_KEY = "AIzaSyCOqDV_x3N1kBoYqisVPBTAZy0EhzaVxIw"; 
 
 export async function generateListingFromImage(imageFile: File, platform: string = 'ebay') {
   try {
