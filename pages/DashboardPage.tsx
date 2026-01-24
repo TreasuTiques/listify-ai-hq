@@ -36,14 +36,14 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         setUser(user);
 
         // B. Get Real Listing Counts
-        // Count drafts
+        // Count drafts (This connects to the 'listings' table we just built)
         const { count: draftCount } = await supabase
           .from('listings')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id)
           .eq('status', 'draft');
 
-        // Count active (just in case we have some later)
+        // Count active listings
         const { count: activeCount } = await supabase
           .from('listings')
           .select('*', { count: 'exact', head: true })
@@ -53,7 +53,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         setStats({
           drafts: draftCount || 0,
           active: activeCount || 0,
-          profit: 0 // We will calculate this when we add prices later
+          profit: 0 // TODO: We will build a helper function later to calculate profit from price ranges
         });
 
       } catch (error) {
@@ -124,7 +124,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               📝
             </div>
             <div>
-              {/* THIS NUMBER IS NOW REAL */}
+              {/* THIS NUMBER IS NOW REAL FROM SUPABASE */}
               <div className="text-2xl font-bold text-[#0F172A]">{stats.drafts}</div>
               <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Drafts Ready</div>
             </div>
