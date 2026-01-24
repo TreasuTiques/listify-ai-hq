@@ -1,17 +1,17 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// 🛡️ SECURE MODE: Back to using the hidden variable
+// 🛡️ SECURE MODE: Read from Vercel Environment Variables
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 if (!API_KEY) {
-  console.error("⚠️ Missing VITE_GEMINI_API_KEY.");
+  console.error("⚠️ Missing VITE_GEMINI_API_KEY. Check Vercel Settings.");
 }
 
 const genAI = new GoogleGenerativeAI(API_KEY || "missing-key");
 
 export async function generateListingFromImage(imageFile: File, platform: string = 'ebay') {
   try {
-    // 🏆 THE WINNER: We are keeping the model that actually works for you!
+    // 🏆 THE WINNER: Keeping the futuristic model that works for you!
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const imageData = await fileToGenerativePart(imageFile);
@@ -37,8 +37,10 @@ export async function generateListingFromImage(imageFile: File, platform: string
     return JSON.parse(cleanText);
 
   } catch (error: any) {
-    alert("🤖 ERROR: " + error.message);
-    throw error;
+    console.error("AI Generation Error:", error);
+    // 🧹 CLEANUP: We removed the ugly "Google Says" alert for the public version.
+    // Instead, we throw a clean error that the UI can handle gracefully.
+    throw new Error("Failed to generate listing. Please try again.");
   }
 }
 
