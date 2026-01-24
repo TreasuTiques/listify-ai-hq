@@ -1,15 +1,17 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// ⚠️ KEEP YOUR HARDCODED KEY HERE FOR THE TEST
-// REPLACE THE TEXT BELOW WITH YOUR KEY ENDING IN ...VxIw
-const API_KEY = "AIzaSyCOqDV_x3N1kBoYqisVPBTAZy0EhzaVxIw"; 
+// 🛡️ SECURE MODE: Back to using the hidden variable
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
-const genAI = new GoogleGenerativeAI(API_KEY);
+if (!API_KEY) {
+  console.error("⚠️ Missing VITE_GEMINI_API_KEY.");
+}
+
+const genAI = new GoogleGenerativeAI(API_KEY || "missing-key");
 
 export async function generateListingFromImage(imageFile: File, platform: string = 'ebay') {
   try {
-    // 🏆 FIX: We are using a model that ACTUALLY EXISTS on your list!
-    // gemini-2.5-flash is the winner.
+    // 🏆 THE WINNER: We are keeping the model that actually works for you!
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const imageData = await fileToGenerativePart(imageFile);
