@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import { generateListingFromImage } from '../services/ai';
-import { saveListingToInventory } from '../services/inventory'; // 🔌 CONNECTED THE SAFE
+import { saveListingToInventory } from '../services/inventory'; 
 
 const BuilderPage: React.FC = () => {
   // 1. STATE MANAGEMENT
   const [activePlatform, setActivePlatform] = useState('ebay');
-  const [isStorytelling, setIsStorytelling] = useState(false);
   
   // Form Fields
   const [title, setTitle] = useState('');
@@ -14,11 +13,14 @@ const BuilderPage: React.FC = () => {
   const [condition, setCondition] = useState('New with Tags');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [tags, setTags] = useState<string[]>([]); // 🏷️ New: Capture AI Tags
+  const [tags, setTags] = useState<string[]>([]);
+  
+  // 📸 NEW: File Memory
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); 
   
   // UI States
-  const [loading, setLoading] = useState(false); // Saving state
-  const [analyzing, setAnalyzing] = useState(false); // AI Analysis state
+  const [loading, setLoading] = useState(false); 
+  const [analyzing, setAnalyzing] = useState(false); 
   const [user, setUser] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -48,7 +50,6 @@ const BuilderPage: React.FC = () => {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
     let file: File | null = null;
 
-    // Handle Drop vs Click
     if ((e as React.DragEvent).dataTransfer) {
       e.preventDefault();
       file = (e as React.DragEvent).dataTransfer.files[0];
@@ -57,6 +58,9 @@ const BuilderPage: React.FC = () => {
     }
 
     if (!file) return;
+
+    // ✅ SAVE THE FILE TO STATE (So we can upload it later)
+    setSelectedFile(file);
 
     // Show Preview
     const reader = new FileReader();
@@ -68,13 +72,12 @@ const BuilderPage: React.FC = () => {
     try {
       const result = await generateListingFromImage(file, activePlatform);
       
-      // Auto-Fill Form
       setTitle(result.title || '');
       setBrand(result.brand || '');
       setDescription(result.description || '');
       setCondition(result.condition || 'New with Tags');
       setPrice(result.estimated_price || '');
-      setTags(result.tags || []); // 🏷️ Capture the tags invisibly
+      setTags(result.tags || []);
       
     } catch (error) {
       console.error("AI Error:", error);
@@ -84,10 +87,9 @@ const BuilderPage: React.FC = () => {
     }
   };
 
-  // Drag & Drop Handlers
   const onDragOver = (e: React.DragEvent) => e.preventDefault();
   
-  // 3. THE SAVE FUNCTION (UPDATED)
+  // 3. THE SAVE FUNCTION (Now with Image Upload!)
   const handleGenerateAndSave = async () => {
     if (!user) {
       alert("Please log in to save listings!");
@@ -101,7 +103,6 @@ const BuilderPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // 📦 Prepare the data package
       const listingData = {
         title,
         brand,
@@ -112,14 +113,12 @@ const BuilderPage: React.FC = () => {
         platform: activePlatform
       };
 
-      // 🚀 Send to the Safe (Inventory Service)
-      // Note: We pass 'null' for image_url for now. We will add Image Storage next!
-      await saveListingToInventory(listingData, null);
+      // 🚀 PASS THE FILE TO THE INVENTORY SERVICE
+      await saveListingToInventory(listingData, selectedFile);
 
-      // Success Animation
       setShowSuccess(true);
       setTimeout(() => {
-        window.location.hash = '/dashboard'; 
+        window.location.hash = '/inventory'; // Redirect to Inventory to see the photo!
       }, 1500);
 
     } catch (error: any) {
@@ -142,7 +141,7 @@ const BuilderPage: React.FC = () => {
             </div>
             <div>
               <h4 className="font-bold text-lg">Listing Saved!</h4>
-              <p className="text-slate-400 text-xs font-medium">Redirecting to Command Center...</p>
+              <p className="text-slate-400 text-xs font-medium">Redirecting to Inventory...</p>
             </div>
           </div>
         </div>
@@ -174,7 +173,6 @@ const BuilderPage: React.FC = () => {
               <span className="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded-md">AI Vision Ready</span>
             </div>
             
-            {/* HIDDEN INPUT */}
             <input 
               type="file" 
               ref={fileInputRef}
@@ -183,7 +181,6 @@ const BuilderPage: React.FC = () => {
               accept="image/*"
             />
 
-            {/* CLICKABLE DROP AREA */}
             <div 
               onClick={() => fileInputRef.current?.click()}
               onDragOver={onDragOver}
@@ -204,7 +201,6 @@ const BuilderPage: React.FC = () => {
                 </>
               )}
 
-              {/* LOADING OVERLAY */}
               {analyzing && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
                   <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -212,17 +208,6 @@ const BuilderPage: React.FC = () => {
                   <p className="text-xs text-blue-500">Writing description...</p>
                 </div>
               )}
-            </div>
-          </div>
-
-          <div className="bg-[#0F172A] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full blur-[60px] opacity-20"></div>
-            <h3 className="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-2">AI Analysis</h3>
-            <div className="flex items-center gap-3">
-              <div className={`w-2 h-2 rounded-full ${analyzing ? 'bg-green-400 animate-ping' : 'bg-slate-500'}`}></div>
-              <span className="text-sm text-slate-400 italic">
-                {analyzing ? "Gemini is thinking..." : "Waiting for media..."}
-              </span>
             </div>
           </div>
         </div>
@@ -323,7 +308,7 @@ const BuilderPage: React.FC = () => {
               disabled={loading || analyzing}
               className="w-full bg-[#2563EB] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:bg-blue-600 hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? "Saving..." : analyzing ? "AI Working..." : `Save ${platforms.find(p => p.id === activePlatform)?.label} Listing`}
+              {loading ? "Uploading & Saving..." : analyzing ? "AI Working..." : `Save ${platforms.find(p => p.id === activePlatform)?.label} Listing`}
             </button>
 
           </div>
