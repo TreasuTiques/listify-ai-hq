@@ -1,41 +1,96 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../supabaseClient';
 
-// Initialize Supabase
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-export async function saveListingToInventory(listingData: any, imageUrl: string | null) {
+/**
+ * 1. UPLOAD IMAGE TO SUPABASE STORAGE 📸
+ */
+export async function uploadImage(file: File): Promise<string | null> {
   try {
-    // 1. Check if user is logged in
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Please log in to save items.");
+    // Create a simple, safe file name
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.floor(Math.random() * 1000)}.${fileExt}`;
+    
+    // 🚨 DEBUG: Alert if we start uploading
+    // alert(`Starting upload for: ${fileName}`); 
 
-    // 2. Prepare the data
-    const payload = {
-      user_id: user.id,
-      title: listingData.title,
-      brand: listingData.brand,
-      description: listingData.description,
-      condition: listingData.condition,
-      estimated_price: listingData.estimated_price,
-      tags: listingData.tags || [],
-      platform: 'ebay',
-      status: 'draft',
-      image_url: imageUrl
-    };
+    // Upload to 'listing-images' bucket
+    const { data, error: uploadError } = await supabase.storage
+      .from('listing-images')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
-    // 3. Insert into the 'listings' table
-    const { data, error } = await supabase
-      .from('listings')
-      .insert([payload])
-      .select();
+    if (uploadError) {
+      // 🚨 THIS WILL TELL US THE ERROR
+      alert(`UPLOAD FAILED: ${uploadError.message}`);
+      throw uploadError;
+    }
 
-    if (error) throw error;
-    return data;
+    // Get the Public URL
+    const { data: publicUrlData } = supabase.storage
+      .from('listing-images')
+      .getPublicUrl(fileName);
+
+    return publicUrlData.publicUrl;
 
   } catch (error: any) {
-    console.error("Supabase Error:", error);
-    throw new Error(error.message || "Failed to save listing.");
+    console.error('Error uploading image:', error);
+    return null;
+  }
+}
+
+/**
+ * 2. SAVE LISTING TO DATABASE 💾
+ */
+export async function saveListingToInventory(listingData: any, imageFile: File | null) {
+  try {
+    // A. Get Current User
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      alert("Error: You must be logged in to save listings.");
+      throw new Error("User not logged in");
+    }
+
+    // B. Upload Image (If exists)
+    let imageUrl = null;
+    if (imageFile) {
+      imageUrl = await uploadImage(imageFile);
+      
+      // If upload failed (returned null), warn the user but continue
+      if (!imageUrl) {
+        alert("Warning: Image upload failed, saving listing without image.");
+      }
+    } else {
+      console.log("No image file provided to saveListingToInventory");
+    }
+
+    // C. Save to DB
+    const { error } = await supabase
+      .from('listings')
+      .insert([
+        {
+          user_id: user.id,
+          title: listingData.title,
+          brand: listingData.brand,
+          description: listingData.description,
+          condition: listingData.condition,
+          price: listingData.estimated_price,
+          status: 'draft',
+          platform: listingData.platform || 'ebay',
+          image_url: imageUrl, 
+          tags: listingData.tags || [] 
+        }
+      ]);
+
+    if (error) {
+      alert(`DATABASE ERROR: ${error.message}`);
+      throw error;
+    }
+
+    return { success: true };
+
+  } catch (error: any) {
+    console.error('Inventory Error:', error);
+    throw error;
   }
 }
