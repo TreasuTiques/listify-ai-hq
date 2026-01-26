@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
 /* ---------------- TYPES ---------------- */
-type Page = "homepage" | "builder" | "pricing";
 type Msg = { role: "user" | "assistant"; content: string };
 
 /* ---------------- ANALYTICS ---------------- */
@@ -16,7 +15,8 @@ function track(event: string, props: Record<string, any> = {}) {
 /* ---------------- NAVIGATION ---------------- */
 function navigateTo(dest: "builder" | "pricing") {
   track("navigate", { dest });
-  window.location.href = dest === "builder" ? "/#/builder" : "/#/pricing";
+  // Handle hash routing if using HashRouter, or standard link
+  window.location.hash = dest === "builder" ? "/builder" : "/pricing";
 }
 
 /* ---------------- COMPONENT ---------------- */
@@ -46,7 +46,7 @@ export default function ChatWidget() {
     setIsLoading(true);
 
     try {
-      // 2. Call your new API Brain
+      // 2. Call your API Brain
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -56,10 +56,18 @@ export default function ChatWidget() {
         }),
       });
 
+      // ✅ FIX: Robust error handling from screenshot
       const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(`Chat request failed: ${response.status}`);
+      }
+
+      // Safely get the reply
+      const reply = typeof data?.reply === "string" ? data.reply : "I'm having trouble connecting.";
+
       // 3. Add AI Reply
-      const aiMsg: Msg = { role: "assistant", content: data.reply || "I'm having trouble connecting." };
+      const aiMsg: Msg = { role: "assistant", content: reply };
       setMessages((prev) => [...prev, aiMsg]);
 
     } catch (error) {
@@ -81,7 +89,7 @@ export default function ChatWidget() {
       )}
 
       {open && (
-        <div className="w-[380px] h-[550px] bg-white border rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+        <div className="w-[380px] h-[550px] bg-white border rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
           {/* Header */}
           <div className="bg-blue-600 p-4 flex justify-between items-center text-white">
             <div className="flex items-center gap-2">
@@ -123,7 +131,7 @@ export default function ChatWidget() {
             )}
           </div>
 
-          {/* CTA Buttons (Always visible at bottom) */}
+          {/* CTA Buttons */}
           <div className="px-4 pt-2 flex gap-2">
              <button onClick={() => navigateTo("builder")} className="flex-1 bg-blue-100 text-blue-700 py-2 rounded-lg text-sm font-bold hover:bg-blue-200 transition">
                📸 Try one item
