@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
   try {
     // 2. Setup Gemini
-    // 🔑 FIX: Check for BOTH naming conventions so it finds your key!
+    // Check for the key in both potential places
     const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -17,6 +17,12 @@ export default async function handler(req, res) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     
+    // 🔑 CHANGE: Switch to 'gemini-pro'. It is the most reliable model for backend chat.
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    // 3. Get message and history
+    const { message, history } = req.body;
+
     // 4. Define Persona
     const systemPrompt = `
       You are "Reseller Buddy", a smart, energetic AI assistant for eBay sellers. 
@@ -25,15 +31,6 @@ export default async function handler(req, res) {
       TONE: Casual, encouraging, reseller lingo (death pile, comps).
       RULES: Keep answers short. Always guide them to click "Try one item".
     `;
-
-    // We use 1.5-flash as it is the current stable standard for Chat.
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash", 
-      systemInstruction: systemPrompt 
-    });
-
-    // 3. Get message and history
-    const { message, history } = req.body;
 
     // 5. Sanitize History
     const sanitizedHistory = Array.isArray(history)
@@ -46,8 +43,14 @@ export default async function handler(req, res) {
       : [];
 
     // 6. Start Chat
+    // 🔑 FIX: We inject the System Prompt as the FIRST message in history.
+    // This works on ALL versions of the Gemini SDK (old and new).
     const chat = model.startChat({
-      history: sanitizedHistory,
+      history: [
+        { role: "user", parts: [{ text: systemPrompt }] },
+        { role: "model", parts: [{ text: "Got it! I'm ready to help you list items." }] },
+        ...sanitizedHistory, 
+      ],
     });
 
     // 7. Safety Check
