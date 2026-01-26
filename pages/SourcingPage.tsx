@@ -1,53 +1,63 @@
 import React, { useState, useEffect } from 'react';
+import { scoutProduct } from '../services/ai'; // ✅ Import the Brain
 
 const SourcingPage: React.FC = () => {
-  // 1. State for the Calculator (Logic Unchanged)
+  // 1. SCOUT STATE (The AI Part)
+  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [scoutResult, setScoutResult] = useState<any>(null);
+
+  // 2. CALCULATOR STATE (Your existing logic)
   const [costPrice, setCostPrice] = useState<string>('');
   const [sellPrice, setSellPrice] = useState<string>('');
   const [shipping, setShipping] = useState<string>('0');
   const [platform, setPlatform] = useState<'ebay' | 'posh' | 'mercari' | 'shopify' | 'etsy' | 'depop'>('ebay');
 
-  // 2. Calculated Values
+  // 3. RESULTS STATE
   const [profit, setProfit] = useState<number | null>(null);
   const [roi, setRoi] = useState<number | null>(null);
   const [fees, setFees] = useState<number>(0);
 
-  // 3. The Math Engine (Logic Unchanged)
+  // 🤖 AI SCOUT HANDLER
+  const handleScout = async () => {
+    if (!query) return;
+    setLoading(true);
+    setScoutResult(null); // Reset previous result
+    
+    try {
+      // Call the AI
+      const data = await scoutProduct(query);
+      setScoutResult(data);
+
+      // ✨ AUTO-FILL THE CALCULATOR ✨
+      // Take the average estimated price and put it in the "Target Price" box
+      const avgPrice = (data.minPrice + data.maxPrice) / 2;
+      setSellPrice(avgPrice.toFixed(2));
+
+    } catch (error) {
+      alert("The Scout couldn't reach the market. Try again!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🧮 CALCULATOR ENGINE (Logic Unchanged)
   useEffect(() => {
     const cost = parseFloat(costPrice) || 0;
     const sell = parseFloat(sellPrice) || 0;
     const ship = parseFloat(shipping) || 0;
 
     if (sell > 0) {
-      // Fee Rates
       let feeRate = 0;
       let flatFee = 0;
 
       switch (platform) {
-        case 'ebay':
-          feeRate = 0.1325;
-          flatFee = 0.30;
-          break;
-        case 'posh':
-          feeRate = 0.20;
-          flatFee = 0;
-          break;
-        case 'mercari':
-          feeRate = 0.10;
-          flatFee = 0.50;
-          break;
-        case 'shopify':
-          feeRate = 0.029;
-          flatFee = 0.30;
-          break;
-        case 'etsy':
-          feeRate = 0.095;
-          flatFee = 0.45;
-          break;
-        case 'depop':
-          feeRate = 0.13;
-          flatFee = 0.30;
-          break;
+        case 'ebay': feeRate = 0.1325; flatFee = 0.30; break;
+        case 'posh': feeRate = 0.20; flatFee = 0; break;
+        case 'mercari': feeRate = 0.10; flatFee = 0.50; break;
+        case 'shopify': feeRate = 0.029; flatFee = 0.30; break;
+        case 'etsy': feeRate = 0.095; flatFee = 0.45; break;
+        case 'depop': feeRate = 0.13; flatFee = 0.30; break;
       }
 
       const estimatedFees = (sell * feeRate) + flatFee;
@@ -63,7 +73,6 @@ const SourcingPage: React.FC = () => {
     }
   }, [costPrice, sellPrice, shipping, platform]);
 
-  // Helper for beautiful button styles
   const getButtonClass = (p: string, activeColor: string) => {
     const isActive = platform === p;
     return `flex items-center justify-center py-3 rounded-xl text-xs font-bold transition-all duration-300 border ${
@@ -77,23 +86,70 @@ const SourcingPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 pb-24 pt-24 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="max-w-md mx-auto">
         
-        {/* Header */}
+        {/* HEADER */}
         <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider mb-3 border border-emerald-200/50">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            Live Calculator
+            AI Market Scanner
           </div>
           <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Profit Scout</h1>
-          <p className="text-slate-500 text-sm mt-1 font-medium">Instant ROI Analysis</p>
+          <p className="text-slate-500 text-sm mt-1 font-medium">Scan items & check profitability</p>
         </div>
 
-        {/* 1. INPUT CARD */}
-        <div className="bg-white/80 backdrop-blur-xl rounded-[32px] border border-white shadow-xl shadow-slate-200/50 p-6 mb-6 relative overflow-hidden">
-          
-          {/* Subtle top highlight */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 opacity-20"></div>
+        {/* 🔭 1. AI SEARCH BAR */}
+        <div className="bg-white rounded-2xl shadow-lg shadow-blue-900/5 border border-slate-200 p-2 flex gap-2 mb-6 transform transition-all hover:scale-[1.01]">
+          <input 
+            type="text" 
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleScout()}
+            placeholder="What did you find? (e.g. Nike Air Max)"
+            className="flex-grow bg-transparent px-4 py-3 font-bold text-slate-900 placeholder:text-slate-300 focus:outline-none"
+          />
+          <button 
+            onClick={handleScout}
+            disabled={loading || !query}
+            className="bg-[#0F172A] text-white px-6 rounded-xl font-bold hover:bg-slate-800 disabled:opacity-50 transition-all flex items-center gap-2"
+          >
+            {loading ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <span>🔭 Scan</span>
+            )}
+          </button>
+        </div>
 
-          {/* Platform Toggle Grid */}
+        {/* 📉 2. AI RESULT CARD */}
+        {scoutResult && (
+          <div className="bg-white rounded-[24px] p-6 shadow-xl border border-slate-100 text-center relative overflow-hidden mb-6 animate-in slide-in-from-top-4 duration-500">
+             <div className={`absolute top-0 left-0 w-full h-1.5 ${scoutResult.verdict === 'BUY' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+             
+             <div className="flex justify-between items-start mb-4">
+                <div className="text-left">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Verdict</div>
+                  <div className={`text-3xl font-black tracking-tight ${scoutResult.verdict === 'BUY' ? 'text-green-500' : 'text-red-500'}`}>
+                    {scoutResult.verdict}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Est. Value</div>
+                  <div className="text-xl font-black text-[#0F172A]">${scoutResult.minPrice}-${scoutResult.maxPrice}</div>
+                </div>
+             </div>
+             
+             <p className="text-sm font-medium text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed">
+               "{scoutResult.reason}"
+             </p>
+             
+             <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between items-center text-xs font-bold text-slate-400">
+                <span>Demand: <span className={scoutResult.demand === 'High' ? 'text-orange-500' : 'text-slate-600'}>{scoutResult.demand} 🔥</span></span>
+                <span className="text-emerald-600">Price Auto-Filled ↓</span>
+             </div>
+          </div>
+        )}
+
+        {/* 3. CALCULATOR INPUTS */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-[32px] border border-white shadow-xl shadow-slate-200/50 p-6 mb-6 relative overflow-hidden">
           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Select Platform</label>
           <div className="grid grid-cols-3 gap-2 mb-8 p-1.5 bg-slate-100/50 rounded-2xl border border-slate-100">
             <button onClick={() => setPlatform('ebay')} className={getButtonClass('ebay', 'text-blue-600')}>eBay</button>
@@ -134,7 +190,7 @@ const SourcingPage: React.FC = () => {
                   inputMode="decimal"
                   value={sellPrice}
                   onChange={(e) => setSellPrice(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-4 text-xl font-bold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
+                  className="w-full bg-emerald-50 border border-emerald-200 rounded-2xl pl-10 pr-4 py-4 text-xl font-bold text-emerald-900 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-inner placeholder:text-emerald-300"
                   placeholder="0.00"
                 />
               </div>
@@ -158,12 +214,11 @@ const SourcingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* 2. RESULTS CARD (Dynamic Glow) */}
+        {/* 4. RESULTS CARD */}
         {profit !== null ? (
           <div className={`relative overflow-hidden rounded-[32px] p-8 text-center shadow-2xl transition-all duration-500 transform animate-in slide-in-from-bottom-8 ${
             profit > 0 ? 'bg-[#0F172A]' : 'bg-red-600'
           }`}>
-            {/* Background Glow */}
             <div className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[80px] opacity-40 pointer-events-none ${
               profit > 0 ? 'bg-emerald-500' : 'bg-red-900'
             }`}></div>
@@ -198,7 +253,6 @@ const SourcingPage: React.FC = () => {
             </div>
           </div>
         ) : (
-          /* 3. Empty State */
           <div className="text-center p-8 opacity-50 animate-pulse">
             <p className="text-sm font-medium text-slate-400">Enter prices above to calculate...</p>
           </div>
