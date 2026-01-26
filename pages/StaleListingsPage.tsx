@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
-import { optimizeListing } from '../services/ai'; // ✅ Import the new function
+import { optimizeListing } from '../services/ai';
 
 const StaleListingsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [issues, setIssues] = useState<any[]>([]);
   const [healthScore, setHealthScore] = useState(100);
+  
+  // External Link State
   const [externalUrl, setExternalUrl] = useState('');
   const [externalLinks, setExternalLinks] = useState<string[]>([]);
   
@@ -13,6 +15,12 @@ const StaleListingsPage: React.FC = () => {
   const [optimizingId, setOptimizingId] = useState<string | null>(null);
   const [optimizationResult, setOptimizationResult] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+
+  // 🌍 EXTERNAL ANALYSIS STATE (New!)
+  const [externalAnalysis, setExternalAnalysis] = useState<any>(null); // To store data for external analysis
+  const [showExternalInput, setShowExternalInput] = useState(false);
+  const [extTitleInput, setExtTitleInput] = useState('');
+  const [extDescInput, setExtDescInput] = useState('');
 
   useEffect(() => {
     runDiagnosis();
@@ -33,7 +41,7 @@ const StaleListingsPage: React.FC = () => {
       const detectedIssues: any[] = [];
       let totalPenalty = 0;
 
-      // 🩺 ANALYZE INTERNAL LISTINGS
+      // 🩺 1. ANALYZE INTERNAL LISTINGS
       listings?.forEach(item => {
         const itemIssues: string[] = [];
         let itemScore = 100;
@@ -43,7 +51,6 @@ const StaleListingsPage: React.FC = () => {
         if (!item.description || item.description.length < 50) { itemIssues.push('Description thin'); itemScore -= 15; }
         if (!item.price) { itemIssues.push('No Price'); itemScore -= 10; }
 
-        // Assign Grade
         let grade = 'A';
         if (itemScore < 60) grade = 'F';
         else if (itemScore < 70) grade = 'D';
@@ -61,23 +68,23 @@ const StaleListingsPage: React.FC = () => {
         totalPenalty += (100 - itemScore);
       });
 
-      // 🩺 ANALYZE EXTERNAL LINKS
+      // 🩺 2. ANALYZE EXTERNAL LINKS (Placeholder Grade until Analyzed)
       externalLinks.forEach((link, index) => {
         detectedIssues.push({
           id: `ext-${index}`,
           title: link,
           type: 'external',
-          diagnosis: ['External Listing - Check Traffic'],
-          score: 50,
-          grade: '?'
+          diagnosis: ['External Link', 'Needs Analysis'],
+          score: 0, 
+          grade: '?' // Waiting for input
         });
-        totalPenalty += 10;
+        totalPenalty += 10; 
       });
 
       const avgScore = Math.max(0, 100 - (totalPenalty / (detectedIssues.length || 1)));
       setHealthScore(Math.round(avgScore));
       
-      // Sort: Worst grades first
+      // Sort: Internal issues first, then External
       setIssues(detectedIssues.sort((a, b) => a.score - b.score));
 
     } catch (error) {
@@ -93,25 +100,62 @@ const StaleListingsPage: React.FC = () => {
     setExternalUrl('');
   };
 
-  // ✨ TRIGGER AI OPTIMIZATION
+  // ✨ TRIGGER AI OPTIMIZATION (Internal)
   const handleOptimize = async (item: any) => {
     setOptimizingId(item.id);
     try {
       const optimized = await optimizeListing(item.title, item.description, item.platform || 'eBay');
       setOptimizationResult({
         original: item,
-        optimized: optimized
+        optimized: optimized,
+        isExternal: false
       });
     } catch (error) {
-      alert("AI Brain Freeze! Could not optimize right now.");
+      alert("AI Brain Freeze! Could not optimize.");
     } finally {
       setOptimizingId(null);
     }
   };
 
-  // 💾 SAVE OPTIMIZATION
+  // 🌍 HANDLE EXTERNAL ANALYZE CLICK
+  const startExternalAnalysis = (item: any) => {
+    setExternalAnalysis(item);
+    setShowExternalInput(true);
+    setExtTitleInput('');
+    setExtDescInput('');
+  };
+
+  // 🧠 RUN AI ON EXTERNAL INPUT
+  const runExternalOptimization = async () => {
+    if (!extTitleInput) return;
+    setShowExternalInput(false);
+    setOptimizingId(externalAnalysis.id);
+
+    try {
+      // 1. Run the AI Optimization
+      const optimized = await optimizeListing(extTitleInput, extDescInput, 'eBay');
+      
+      // 2. Show the Result (Simulating a "fake" original item to compare against)
+      setOptimizationResult({
+        original: {
+          title: extTitleInput,
+          description: extDescInput || "No description provided.",
+          grade: '?', // We don't grade the input, we just optimize it
+          type: 'external'
+        },
+        optimized: optimized,
+        isExternal: true
+      });
+    } catch (error) {
+      alert("Error analyzing external data.");
+    } finally {
+      setOptimizingId(null);
+    }
+  };
+
+  // 💾 SAVE OPTIMIZATION (Internal Only)
   const applyOptimization = async () => {
-    if (!optimizationResult) return;
+    if (!optimizationResult || optimizationResult.isExternal) return;
     setSaving(true);
     
     try {
@@ -124,11 +168,8 @@ const StaleListingsPage: React.FC = () => {
         .eq('id', optimizationResult.original.id);
 
       if (error) throw error;
-
-      // Close and Refresh
       setOptimizationResult(null);
       runDiagnosis(); 
-
     } catch (error: any) {
       alert("Error saving: " + error.message);
     } finally {
@@ -136,14 +177,53 @@ const StaleListingsPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">Loading...</div>;
-  }
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20 pt-24 px-4 sm:px-6 lg:px-8">
       
-      {/* ✨ OPTIMIZATION MODAL ✨ */}
+      {/* 🌍 EXTERNAL INPUT MODAL */}
+      {showExternalInput && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-6">
+            <h3 className="text-xl font-bold text-slate-900 mb-4">Analyze External Listing</h3>
+            <p className="text-sm text-slate-500 mb-6">
+              Since we cannot read eBay directly yet, please paste the Title and Description from the link to analyze it.
+            </p>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Current Title</label>
+                <input 
+                  className="w-full border p-3 rounded-lg bg-slate-50" 
+                  value={extTitleInput}
+                  onChange={e => setExtTitleInput(e.target.value)}
+                  placeholder="Paste eBay Title..."
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Current Description</label>
+                <textarea 
+                  className="w-full border p-3 rounded-lg bg-slate-50 h-32" 
+                  value={extDescInput}
+                  onChange={e => setExtDescInput(e.target.value)}
+                  placeholder="Paste Description..."
+                />
+              </div>
+              <button 
+                onClick={runExternalOptimization}
+                disabled={!extTitleInput}
+                className="w-full bg-purple-600 text-white font-bold py-3 rounded-xl hover:bg-purple-700 transition-all"
+              >
+                ✨ Analyze & Optimize
+              </button>
+              <button onClick={() => setShowExternalInput(false)} className="w-full text-slate-400 font-bold py-2 mt-2">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✨ OPTIMIZATION RESULT MODAL */}
       {optimizationResult && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
           <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -187,14 +267,27 @@ const StaleListingsPage: React.FC = () => {
             </div>
 
             <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setOptimizationResult(null)} className="px-6 py-3 font-bold text-slate-500 hover:bg-slate-200 rounded-xl transition-colors">Discard</button>
-              <button 
-                onClick={applyOptimization}
-                disabled={saving}
-                className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 hover:-translate-y-1 transition-all flex items-center gap-2"
-              >
-                {saving ? "Applying..." : "✅ Apply Improvements"}
-              </button>
+              <button onClick={() => setOptimizationResult(null)} className="px-6 py-3 font-bold text-slate-500 hover:bg-slate-200 rounded-xl transition-colors">Close</button>
+              
+              {!optimizationResult.isExternal ? (
+                <button 
+                  onClick={applyOptimization}
+                  disabled={saving}
+                  className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 hover:-translate-y-1 transition-all flex items-center gap-2"
+                >
+                  {saving ? "Applying..." : "✅ Apply Improvements"}
+                </button>
+              ) : (
+                <button 
+                  onClick={() => {
+                     navigator.clipboard.writeText(`${optimizationResult.optimized.optimizedTitle}\n\n${optimizationResult.optimized.optimizedDescription}`);
+                     alert("Copied to clipboard!");
+                  }}
+                  className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition-all"
+                >
+                  📋 Copy for eBay
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -213,7 +306,7 @@ const StaleListingsPage: React.FC = () => {
         </div>
 
         {/* 🔗 EXTERNAL LINK INPUT */}
-        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 mb-12 flex gap-3">
+        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 mb-12 flex flex-col md:flex-row gap-3">
              <input 
                type="text" 
                value={externalUrl}
@@ -222,7 +315,7 @@ const StaleListingsPage: React.FC = () => {
                className="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium focus:outline-none focus:border-blue-500"
              />
              <button onClick={handleAddLink} disabled={!externalUrl} className="bg-slate-900 text-white font-bold px-6 py-3 rounded-xl hover:bg-slate-800 disabled:opacity-50">
-               + Track
+               + Track Listing
              </button>
         </div>
 
@@ -232,20 +325,23 @@ const StaleListingsPage: React.FC = () => {
             <div key={index} className="bg-white rounded-[20px] p-1 border border-slate-200 shadow-sm hover:shadow-md transition-all group">
               <div className="flex flex-col md:flex-row items-center gap-6 p-5">
                 
-                {/* GRADE CIRCLE */}
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black shrink-0 ${
-                  item.grade === 'A' ? 'bg-emerald-100 text-emerald-600' :
-                  item.grade === 'B' ? 'bg-blue-100 text-blue-600' :
-                  item.grade === 'C' ? 'bg-yellow-100 text-yellow-600' :
-                  item.grade === '?' ? 'bg-slate-100 text-slate-400' :
-                  'bg-red-100 text-red-600'
-                }`}>
-                  {item.grade}
+                {/* GRADE CIRCLE WITH LABEL */}
+                <div className="flex flex-col items-center shrink-0">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Grade</span>
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black ${
+                    item.grade === 'A' ? 'bg-emerald-100 text-emerald-600' :
+                    item.grade === 'B' ? 'bg-blue-100 text-blue-600' :
+                    item.grade === 'C' ? 'bg-yellow-100 text-yellow-600' :
+                    item.grade === '?' ? 'bg-slate-100 text-slate-400' :
+                    'bg-red-100 text-red-600'
+                  }`}>
+                    {item.grade}
+                  </div>
                 </div>
 
                 {/* INFO */}
-                <div className="flex-grow text-center md:text-left">
-                  <h4 className="font-bold text-[#0F172A] mb-1">{item.title || "Untitled Draft"}</h4>
+                <div className="flex-grow text-center md:text-left overflow-hidden">
+                  <h4 className="font-bold text-[#0F172A] mb-1 truncate">{item.title || "Untitled Draft"}</h4>
                   <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-2">
                     {item.diagnosis.map((diag: string, i: number) => (
                       <span key={i} className="text-[10px] font-bold uppercase tracking-wide text-red-500 bg-red-50 px-2 py-1 rounded-md">
@@ -256,8 +352,9 @@ const StaleListingsPage: React.FC = () => {
                 </div>
 
                 {/* ACTIONS */}
-                <div className="flex gap-2">
-                  {item.type === 'internal' && item.grade !== 'A' && (
+                <div className="flex gap-2 shrink-0">
+                  {/* Internal Item Actions */}
+                  {item.type === 'internal' && (
                     <button 
                       onClick={() => handleOptimize(item)}
                       disabled={optimizingId === item.id}
@@ -270,10 +367,25 @@ const StaleListingsPage: React.FC = () => {
                       )}
                     </button>
                   )}
+                  
+                  {/* External Item Actions */}
                   {item.type === 'external' && (
-                     <a href={item.title} target="_blank" rel="noreferrer" className="px-5 py-3 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-colors text-sm">
-                       View Link
-                     </a>
+                    <>
+                      <button 
+                         onClick={() => startExternalAnalysis(item)}
+                         className="px-5 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors text-sm flex items-center gap-2"
+                      >
+                         <span>✨</span> Analyze
+                      </button>
+                      <a 
+                        href={item.title} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="px-4 py-3 border border-slate-200 text-slate-400 font-bold rounded-xl hover:bg-slate-50 hover:text-slate-600 transition-colors"
+                      >
+                        ↗
+                      </a>
+                    </>
                   )}
                 </div>
               </div>
