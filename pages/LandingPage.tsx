@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import ChatWidget from './components/ChatWidget';
+// We are defining the Header/Footer inline to ensure the specific links 
+// and badges (Profit Scout/Listing Doctor) render correctly without errors.
 
 interface LandingPageProps {
   onNavigate: (path: string) => void;
@@ -12,7 +11,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
-  // Pricing Data - Expanded Features & Ready for Landing Page
+  // Pricing Data
   const plans = [
     {
       name: "Starter",
@@ -79,56 +78,37 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     }
   ];
 
-  // FIXED: Forced Colors Style Block
   const rawHtml = `
 <div class="listing-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #000000; line-height: 1.6;">
-  
   <style>
     .listing-container h1, .listing-container h2, .listing-container h3, .listing-container strong { color: #003366 !important; }
     .listing-container p, .listing-container li, .listing-container span { color: #111827 !important; }
     .listing-container table td { color: #000000 !important; }
   </style>
-
   <div style="text-align: center; border-bottom: 2px solid #0053A0; padding-bottom: 20px; margin-bottom: 30px;">
     <h1 style="font-size: 28px; font-weight: bold; margin: 0;">Canon AE-1 Program 35mm SLR Camera</h1>
     <h2 style="font-size: 18px; font-weight: normal; margin: 10px 0 0 0; color: #333 !important;">with Canon FD 50mm f/1.8 Lens | Tested & Working</h2>
   </div>
-
   <p style="font-size: 16px; margin-bottom: 25px;">
     <strong>Capture the golden age of photography.</strong> The Canon AE-1 Program isn't just a camera; it's a legend. Introduced in 1981, this camera offers the perfect balance of manual control for purists and "Program" automation for spontaneous shooting. Whether you are a film student or a seasoned collector, the tactile click of the shutter and the bright viewfinder will remind you why film is timeless.
   </p>
-
   <div style="background-color: #F8F9FA; border-radius: 8px; padding: 20px; margin-bottom: 30px; border: 1px solid #E9ECEF;">
     <h3 style="margin-top: 0; font-size: 18px; border-bottom: 1px solid #CED4DA; padding-bottom: 10px; font-weight: bold;">Technical Specifications</h3>
-    
     <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
       <tr>
-        <td style="padding: 5px 0; width: 50%; vertical-align: top;">
-          <strong>Type:</strong> 35mm SLR
-        </td>
-        <td style="padding: 5px 0; width: 50%; vertical-align: top;">
-          <strong>Mount:</strong> Canon FD
-        </td>
+        <td style="padding: 5px 0; width: 50%; vertical-align: top;"><strong>Type:</strong> 35mm SLR</td>
+        <td style="padding: 5px 0; width: 50%; vertical-align: top;"><strong>Mount:</strong> Canon FD</td>
       </tr>
       <tr>
-        <td style="padding: 5px 0; vertical-align: top;">
-          <strong>Shutter:</strong> 2s - 1/1000s + Bulb
-        </td>
-        <td style="padding: 5px 0; vertical-align: top;">
-          <strong>ISO Range:</strong> 12 - 3200
-        </td>
+        <td style="padding: 5px 0; vertical-align: top;"><strong>Shutter:</strong> 2s - 1/1000s + Bulb</td>
+        <td style="padding: 5px 0; vertical-align: top;"><strong>ISO Range:</strong> 12 - 3200</td>
       </tr>
       <tr>
-        <td style="padding: 5px 0; vertical-align: top;">
-          <strong>Metering:</strong> TTL Center-Weighted
-        </td>
-        <td style="padding: 5px 0; vertical-align: top;">
-          <strong>Battery:</strong> 4LR44 (Included)
-        </td>
+        <td style="padding: 5px 0; vertical-align: top;"><strong>Metering:</strong> TTL Center-Weighted</td>
+        <td style="padding: 5px 0; vertical-align: top;"><strong>Battery:</strong> 4LR44 (Included)</td>
       </tr>
     </table>
   </div>
-
   <div style="margin-bottom: 30px;">
     <h3 style="font-size: 18px; margin-bottom: 15px; font-weight: bold;">Condition Report: Excellent (A)</h3>
     <p style="margin-bottom: 15px;">This camera has been professionally inspected and tested.</p>
@@ -139,7 +119,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       <li style="margin-bottom: 8px;">✅ <strong>Cosmetics:</strong> Minimal signs of wear. Chrome finish is bright and clean.</li>
     </ul>
   </div>
-
   <div style="background-color: #EFF6FF; color: #1E40AF !important; padding: 15px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 14px; border: 1px solid #DBEAFE;">
     📦 Fast Shipping: Orders ship within 24 hours via USPS Priority Mail with Tracking.
   </div>
@@ -157,14 +136,58 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
-      {/* NAVBAR COMPONENT */}
+      {/* HEADER / NAVBAR (Fixed & Inline) */}
       {/* ===================================================== */}
-      <Navbar onNavigate={onNavigate} />
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 h-20 flex items-center">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full flex justify-between items-center">
+          
+          {/* Logo & Nav Links */}
+          <div className="flex items-center gap-6 xl:gap-8">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => onNavigate('/')}>
+              <div className="w-9 h-9 bg-[#0F172A] rounded-lg flex items-center justify-center text-white shadow-sm">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+              </div>
+              <span className="text-xl font-bold text-[#0F172A] tracking-tight">Listify <span className="text-[#2563EB]">AI HQ</span></span>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center gap-5 xl:gap-7">
+              <button className="text-sm font-semibold text-slate-600 hover:text-[#0F172A] flex items-center gap-1 transition-colors">
+                Platforms <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+              <button className="text-sm font-semibold text-slate-600 hover:text-[#0F172A] transition-colors">Pricing</button>
+              <button className="text-sm font-semibold text-slate-600 hover:text-[#0F172A] flex items-center gap-1.5 transition-colors">
+                Inventory <span className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Beta</span>
+              </button>
+              <button className="text-sm font-semibold text-slate-600 hover:text-[#0F172A] transition-colors">Analytics</button>
+              
+              {/* Highlighted Tools - Green & Red Badges */}
+              <button className="text-sm font-bold text-green-600 bg-green-50 border border-green-100 px-3 py-1.5 rounded-md hover:bg-green-100 transition-colors flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Profit Scout
+              </button>
+              <button className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 px-3 py-1.5 rounded-md hover:bg-red-100 transition-colors flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                Listing Doctor
+              </button>
+            </div>
+          </div>
+
+          {/* Right Actions */}
+          <div className="flex items-center gap-5">
+            <button onClick={() => onNavigate('/login')} className="text-sm font-bold text-slate-700 hover:text-[#0F172A] transition-colors">Log in</button>
+            {/* FIXED: Black Button to match screenshot */}
+            <button onClick={() => onNavigate('/signup')} className="bg-[#0F172A] text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-slate-800 transition-all shadow-md hover:shadow-lg">
+              Start Listing
+            </button>
+          </div>
+        </div>
+      </nav>
 
       {/* ===================================================== */}
       {/* HERO SECTION */}
       {/* ===================================================== */}
-      <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
+      <section className="relative pt-32 sm:pt-44 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-80 animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/60 blur-[100px] rounded-full -mr-20 -mb-20 mix-blend-multiply opacity-80"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -210,6 +233,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 </div>
               </div>
               <div className="relative perspective-1000 w-full flex justify-center items-center z-10 -mt-8 lg:-mt-16">
+                {/* ORIGINAL HERO IMAGE RESTORED */}
                 <img 
                   src="/hero-dashboard.png" 
                   alt="Listify AI Dashboard Interface" 
@@ -419,7 +443,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* PRICING SECTION — RESTORED PREMIUM DESIGN */}
+      {/* PRICING SECTION */}
       {/* ===================================================== */}
       <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[120px] -z-10"></div>
@@ -453,7 +477,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                       <p className="text-xs text-slate-500 font-medium h-8 leading-relaxed">{plan.summary}</p>
                     </div>
                     
-                    {/* Platform Box */}
                     <div className={`rounded-xl p-4 mb-8 ${isPro ? 'bg-[#0F172A] border border-slate-700' : 'bg-slate-100 border border-slate-200'}`}>
                       <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${isPro ? 'text-blue-300' : 'text-slate-500'}`}>Platforms Included:</p>
                       <div className="flex flex-wrap gap-2">
@@ -480,7 +503,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                     </ul>
                     
                     <div className="mt-auto">
-                      {/* FIXED: Now points to /signup */}
                       <button 
                         onClick={() => onNavigate('/signup')}
                         className={`w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-md ${
@@ -510,7 +532,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             <div className="relative z-10">
               <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight">Stop typing. Start scaling.</h2>
               <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed">Join the thousands of professional resellers automating their inventory with Listify AI HQ.</p>
-              {/* FIXED: Point to /signup */}
               <button 
                 onClick={() => onNavigate('/signup')} 
                 className="bg-white text-[#0F172A] px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300"
@@ -525,31 +546,89 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </section>
+
+      {/* ===================================================== */}
+      {/* FOOTER (Fixed & Inline) */}
+      {/* ===================================================== */}
+      <footer className="bg-white border-t border-slate-200 pt-16 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+            
+            {/* Column 1: Brand */}
+            <div className="col-span-2 md:col-span-1 pr-8">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-8 h-8 bg-[#0F172A] rounded-lg flex items-center justify-center text-white">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                </div>
+                <span className="text-lg font-bold text-[#0F172A] tracking-tight">Listify <span className="text-[#2563EB]">AI HQ</span></span>
+              </div>
+              <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                The all-in-one AI command center for serious resellers. Scale your business faster.
+              </p>
+              <div className="flex gap-4">
+                 <span className="text-slate-400 hover:text-[#2563EB] cursor-pointer transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>
+                 <span className="text-slate-400 hover:text-[#2563EB] cursor-pointer transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></span>
+                 <span className="text-slate-400 hover:text-[#2563EB] cursor-pointer transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></span>
+                 <span className="text-slate-400 hover:text-[#2563EB] cursor-pointer transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></span>
+              </div>
+            </div>
+
+            {/* Column 2: Product */}
+            <div>
+              <h4 className="font-bold text-[#0F172A] mb-6 text-sm">Product</h4>
+              <ul className="space-y-4 text-sm text-slate-500 font-medium">
+                <li className="hover:text-[#2563EB] cursor-pointer">Listing Generator</li>
+                <li className="hover:text-[#2563EB] cursor-pointer">Inventory Sync</li>
+                <li className="hover:text-[#2563EB] cursor-pointer">Analytics</li>
+                <li className="hover:text-[#2563EB] cursor-pointer">Profit Scout</li>
+                <li className="hover:text-[#2563EB] cursor-pointer">Pricing</li>
+              </ul>
+            </div>
+
+            {/* Column 3: Resources */}
+            <div>
+              <h4 className="font-bold text-[#0F172A] mb-6 text-sm">Resources</h4>
+              <ul className="space-y-4 text-sm text-slate-500 font-medium">
+                <li className="hover:text-[#2563EB] cursor-pointer">Blog & Guides</li>
+                <li className="hover:text-[#2563EB] cursor-pointer">Our Vision</li>
+                <li className="hover:text-[#2563EB] cursor-pointer">Success Stories</li>
+                <li className="hover:text-[#2563EB] cursor-pointer">Partners</li>
+              </ul>
+            </div>
+
+            {/* Column 4: Support */}
+            <div>
+              <h4 className="font-bold text-[#0F172A] mb-6 text-sm">Support</h4>
+              <ul className="space-y-4 text-sm text-slate-500 font-medium">
+                <li className="hover:text-[#2563EB] cursor-pointer">Contact Us</li>
+                <li className="hover:text-[#2563EB] cursor-pointer">Privacy Policy</li>
+                <li className="hover:text-[#2563EB] cursor-pointer">Terms of Service</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-slate-400 text-xs font-medium">© 2026 Listify AI HQ. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
       
-      {/* ===================================================== */}
-      {/* FOOTER COMPONENT */}
-      {/* ===================================================== */}
-      <Footer />
+      {/* FIXED: Chat with Buddy Widget (Bottom Right) */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg shadow-blue-500/30 flex items-center gap-2 transition-transform hover:scale-105 active:scale-95">
+          <span>Chat with Buddy</span>
+        </button>
+      </div>
 
-      {/* ===================================================== */}
-      {/* CHAT WIDGET COMPONENT */}
-      {/* ===================================================== */}
-      <ChatWidget />
-
-      {/* Tailwind Config for Custom Animations */}
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-15px); }
         }
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(-10px); }
-          50% { transform: translateY(0px); }
-        }
         .animate-float { animation: float 5s ease-in-out infinite; }
         .perspective-1000 { perspective: 1000px; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
       `}</style>
-
     </div>
   );
 };
