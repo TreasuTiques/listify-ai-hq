@@ -8,9 +8,16 @@ export default async function handler(req, res) {
 
   try {
     // 2. Setup Gemini
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    // 🔑 FIX: Check for BOTH naming conventions so it finds your key!
+    const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("API Key not found. Please check Vercel Environment Variables.");
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
     
-    // 4. Define Persona (System Instruction)
+    // 4. Define Persona
     const systemPrompt = `
       You are "Reseller Buddy", a smart, energetic AI assistant for eBay sellers. 
       Your goal is to help users list items faster using "Listify AI".
@@ -19,8 +26,7 @@ export default async function handler(req, res) {
       RULES: Keep answers short. Always guide them to click "Try one item".
     `;
 
-    // 🔑 CHANGE: Use the modern 'flash' model (matches your working Listing Generator)
-    // We pass the persona as 'systemInstruction' which is the new standard.
+    // We use 1.5-flash as it is the current stable standard for Chat.
     const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-flash", 
       systemInstruction: systemPrompt 
@@ -30,7 +36,6 @@ export default async function handler(req, res) {
     const { message, history } = req.body;
 
     // 5. Sanitize History
-    // This ensures the AI remembers previous messages without crashing on bad data
     const sanitizedHistory = Array.isArray(history)
       ? history
           .filter((entry) => entry && typeof entry.content === "string")
@@ -58,7 +63,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error("AI Error:", error);
-    // 🔑 DEBUG: Send the REAL error details so we can see exactly what's wrong
     return res.status(500).json({ 
       error: error.message || "Unknown AI Error", 
       details: error.toString() 
