@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-// We are defining the Header/Footer inline to ensure the specific links 
-// and badges (Profit Scout/Listing Doctor) render correctly without errors.
+
+// We define the Navbar and Footer INSIDE this file to prevent import errors.
+// This ensures your page works perfectly without needing multiple files.
 
 interface LandingPageProps {
   onNavigate: (path: string) => void;
@@ -10,6 +11,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [activeTab, setActiveTab] = useState<'preview' | 'html'>('preview');
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
+
+  // Helper function to handle smooth scrolling to sections
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   // Pricing Data
   const plans = [
@@ -136,47 +145,46 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
-      {/* HEADER / NAVBAR (Fixed & Inline) */}
+      {/* NAVBAR */}
       {/* ===================================================== */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 h-20 flex items-center">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full flex justify-between items-center">
           
-          {/* Logo & Nav Links */}
           <div className="flex items-center gap-6 xl:gap-8">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => onNavigate('/')}>
+            {/* Logo - Scrolls to Top */}
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
               <div className="w-9 h-9 bg-[#0F172A] rounded-lg flex items-center justify-center text-white shadow-sm">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
               </div>
               <span className="text-xl font-bold text-[#0F172A] tracking-tight">Listify <span className="text-[#2563EB]">AI HQ</span></span>
             </div>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation - WIRED UP TO SCROLL */}
             <div className="hidden lg:flex items-center gap-5 xl:gap-7">
-              <button className="text-sm font-semibold text-slate-600 hover:text-[#0F172A] flex items-center gap-1 transition-colors">
+              <button onClick={() => scrollToSection('features')} className="text-sm font-semibold text-slate-600 hover:text-[#0F172A] flex items-center gap-1 transition-colors">
                 Platforms <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg>
               </button>
-              <button className="text-sm font-semibold text-slate-600 hover:text-[#0F172A] transition-colors">Pricing</button>
-              <button className="text-sm font-semibold text-slate-600 hover:text-[#0F172A] flex items-center gap-1.5 transition-colors">
+              <button onClick={() => scrollToSection('pricing')} className="text-sm font-semibold text-slate-600 hover:text-[#0F172A] transition-colors">Pricing</button>
+              
+              {/* These feature links scroll to the 'features' section for now */}
+              <button onClick={() => scrollToSection('features')} className="text-sm font-semibold text-slate-600 hover:text-[#0F172A] flex items-center gap-1.5 transition-colors">
                 Inventory <span className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Beta</span>
               </button>
-              <button className="text-sm font-semibold text-slate-600 hover:text-[#0F172A] transition-colors">Analytics</button>
+              <button onClick={() => scrollToSection('features')} className="text-sm font-semibold text-slate-600 hover:text-[#0F172A] transition-colors">Analytics</button>
               
-              {/* Highlighted Tools - Green & Red Badges */}
-              <button className="text-sm font-bold text-green-600 bg-green-50 border border-green-100 px-3 py-1.5 rounded-md hover:bg-green-100 transition-colors flex items-center gap-2">
+              <button onClick={() => scrollToSection('features')} className="text-sm font-bold text-green-600 bg-green-50 border border-green-100 px-3 py-1.5 rounded-md hover:bg-green-100 transition-colors flex items-center gap-2">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                 Profit Scout
               </button>
-              <button className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 px-3 py-1.5 rounded-md hover:bg-red-100 transition-colors flex items-center gap-2">
+              <button onClick={() => scrollToSection('features')} className="text-sm font-bold text-red-600 bg-red-50 border border-red-100 px-3 py-1.5 rounded-md hover:bg-red-100 transition-colors flex items-center gap-2">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                 Listing Doctor
               </button>
             </div>
           </div>
 
-          {/* Right Actions */}
           <div className="flex items-center gap-5">
             <button onClick={() => onNavigate('/login')} className="text-sm font-bold text-slate-700 hover:text-[#0F172A] transition-colors">Log in</button>
-            {/* FIXED: Black Button to match screenshot */}
             <button onClick={() => onNavigate('/signup')} className="bg-[#0F172A] text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-slate-800 transition-all shadow-md hover:shadow-lg">
               Start Listing
             </button>
@@ -187,7 +195,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* ===================================================== */}
       {/* HERO SECTION */}
       {/* ===================================================== */}
-      <section className="relative pt-32 sm:pt-44 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
+      <section id="hero" className="relative pt-32 sm:pt-44 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-80 animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/60 blur-[100px] rounded-full -mr-20 -mb-20 mix-blend-multiply opacity-80"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -209,7 +217,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   The ultimate AI engine for E-commerce. Upload one photo and get 
                   SEO-optimized titles, descriptions, and specs for Shopify, Amazon, eBay, and more.
                 </p>
-                {/* FIXED: Point to /signup */}
                 <button 
                   onClick={() => onNavigate('/signup')}
                   className="bg-[#2563EB] text-white px-10 py-5 rounded-3xl text-lg font-bold shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition-all hover:-translate-y-1 active:scale-95 mb-10"
@@ -233,7 +240,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 </div>
               </div>
               <div className="relative perspective-1000 w-full flex justify-center items-center z-10 -mt-8 lg:-mt-16">
-                {/* ORIGINAL HERO IMAGE RESTORED */}
                 <img 
                   src="/hero-dashboard.png" 
                   alt="Listify AI Dashboard Interface" 
@@ -252,7 +258,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* ===================================================== */}
       {/* FEATURES */}
       {/* ===================================================== */}
-      <section className="py-12 sm:py-16 bg-white border-b border-slate-100 relative overflow-hidden">
+      <section id="features" className="py-12 sm:py-16 bg-white border-b border-slate-100 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-blue-50/50 blur-[120px] rounded-full -z-10"></div>
         <div className="max-w-7xl mx-auto px-4 text-left">
           <div className="text-center mb-10">
@@ -445,7 +451,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       {/* ===================================================== */}
       {/* PRICING SECTION */}
       {/* ===================================================== */}
-      <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
+      <section id="pricing" className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[120px] -z-10"></div>
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-100/50 rounded-full blur-[120px] -z-10"></div>
 
@@ -548,7 +554,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* FOOTER (Fixed & Inline) */}
+      {/* FOOTER */}
       {/* ===================================================== */}
       <footer className="bg-white border-t border-slate-200 pt-16 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -556,7 +562,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             
             {/* Column 1: Brand */}
             <div className="col-span-2 md:col-span-1 pr-8">
-              <div className="flex items-center gap-2 mb-6">
+              <div className="flex items-center gap-2 mb-6 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                 <div className="w-8 h-8 bg-[#0F172A] rounded-lg flex items-center justify-center text-white">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                 </div>
@@ -577,11 +583,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             <div>
               <h4 className="font-bold text-[#0F172A] mb-6 text-sm">Product</h4>
               <ul className="space-y-4 text-sm text-slate-500 font-medium">
-                <li className="hover:text-[#2563EB] cursor-pointer">Listing Generator</li>
-                <li className="hover:text-[#2563EB] cursor-pointer">Inventory Sync</li>
-                <li className="hover:text-[#2563EB] cursor-pointer">Analytics</li>
-                <li className="hover:text-[#2563EB] cursor-pointer">Profit Scout</li>
-                <li className="hover:text-[#2563EB] cursor-pointer">Pricing</li>
+                <li onClick={() => scrollToSection('features')} className="hover:text-[#2563EB] cursor-pointer">Listing Generator</li>
+                <li onClick={() => scrollToSection('features')} className="hover:text-[#2563EB] cursor-pointer">Inventory Sync</li>
+                <li onClick={() => scrollToSection('features')} className="hover:text-[#2563EB] cursor-pointer">Analytics</li>
+                <li onClick={() => scrollToSection('features')} className="hover:text-[#2563EB] cursor-pointer">Profit Scout</li>
+                <li onClick={() => scrollToSection('pricing')} className="hover:text-[#2563EB] cursor-pointer">Pricing</li>
               </ul>
             </div>
 
@@ -589,6 +595,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             <div>
               <h4 className="font-bold text-[#0F172A] mb-6 text-sm">Resources</h4>
               <ul className="space-y-4 text-sm text-slate-500 font-medium">
+                {/* These are placeholders to prevent 404s until you build these pages */}
                 <li className="hover:text-[#2563EB] cursor-pointer">Blog & Guides</li>
                 <li className="hover:text-[#2563EB] cursor-pointer">Our Vision</li>
                 <li className="hover:text-[#2563EB] cursor-pointer">Success Stories</li>
@@ -600,7 +607,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             <div>
               <h4 className="font-bold text-[#0F172A] mb-6 text-sm">Support</h4>
               <ul className="space-y-4 text-sm text-slate-500 font-medium">
-                <li className="hover:text-[#2563EB] cursor-pointer">Contact Us</li>
+                <li onClick={() => window.location.href = 'mailto:support@listifyaihq.com'} className="hover:text-[#2563EB] cursor-pointer">Contact Us</li>
                 <li className="hover:text-[#2563EB] cursor-pointer">Privacy Policy</li>
                 <li className="hover:text-[#2563EB] cursor-pointer">Terms of Service</li>
               </ul>
