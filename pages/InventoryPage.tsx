@@ -1,40 +1,63 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
+import ListingDetailModal from '../components/ListingDetailModal'; // ✅ Import the new Modal
 
 const InventoryPage: React.FC<any> = ({ onNavigate }) => {
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  
+  // 🔍 MODAL STATE
+  const [selectedListing, setSelectedListing] = useState<any>(null);
 
   // 1. Fetch Data
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          onNavigate('/login');
-          return;
-        }
-        setUser(user);
-
-        const { data, error } = await supabase
-          .from('listings')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        setListings(data || []);
-
-      } catch (error) {
-        console.error('Error loading inventory:', error);
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        onNavigate('/login');
+        return;
       }
-    };
 
+      const { data, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setListings(data || []);
+
+    } catch (error) {
+      console.error('Error loading inventory:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [onNavigate]);
+
+  // 🗑️ DELETE FUNCTION
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this listing?")) return;
+
+    try {
+      const { error } = await supabase
+        .from('listings')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      // Close modal and refresh list
+      setSelectedListing(null);
+      fetchData(); 
+
+    } catch (error: any) {
+      alert("Error deleting: " + error.message);
+    }
+  };
 
   if (loading) {
     return (
@@ -46,6 +69,16 @@ const InventoryPage: React.FC<any> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] pb-20 pt-24 px-4 sm:px-6 lg:px-8">
+      
+      {/* ✅ RENDER THE MODAL IF OPEN */}
+      {selectedListing && (
+        <ListingDetailModal 
+          listing={selectedListing} 
+          onClose={() => setSelectedListing(null)} 
+          onDelete={handleDelete}
+        />
+      )}
+
       <div className="max-w-7xl mx-auto">
         
         {/* Header */}
@@ -76,7 +109,7 @@ const InventoryPage: React.FC<any> = ({ onNavigate }) => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/50 text-xs uppercase tracking-wider text-slate-500 font-bold">
-                    <th className="px-6 py-4">Image</th> {/* 📸 NEW COLUMN */}
+                    <th className="px-6 py-4">Image</th>
                     <th className="px-6 py-4">Title</th>
                     <th className="px-6 py-4">Brand</th>
                     <th className="px-6 py-4">Platform</th>
@@ -88,7 +121,7 @@ const InventoryPage: React.FC<any> = ({ onNavigate }) => {
                   {listings.map((item) => (
                     <tr key={item.id} className="hover:bg-slate-50/80 transition-colors group">
                       
-                      {/* 📸 IMAGE CELL */}
+                      {/* IMAGE CELL */}
                       <td className="px-6 py-4 w-24">
                         <div className="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden relative">
                           {item.image_url ? (
@@ -123,7 +156,13 @@ const InventoryPage: React.FC<any> = ({ onNavigate }) => {
                          </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button className="text-slate-400 hover:text-blue-600 font-bold text-sm transition-colors">View</button>
+                        {/* ✅ OPEN MODAL ON CLICK */}
+                        <button 
+                          onClick={() => setSelectedListing(item)}
+                          className="text-slate-400 hover:text-blue-600 font-bold text-sm transition-colors"
+                        >
+                          View
+                        </button>
                       </td>
                     </tr>
                   ))}
