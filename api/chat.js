@@ -8,7 +8,7 @@ export default async function handler(req, res) {
 
   try {
     // 2. Setup Gemini
-    // Check for the key in both potential places
+    // We check both key names to be 100% sure we find it.
     const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -17,8 +17,9 @@ export default async function handler(req, res) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     
-    // 🔑 CHANGE: Switch to 'gemini-pro'. It is the most reliable model for backend chat.
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // 🔑 CHANGE: We switch to 'gemini-2.0-flash' because we KNOW this model works 
+    // for your Listing Generator.
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // 3. Get message and history
     const { message, history } = req.body;
@@ -43,8 +44,7 @@ export default async function handler(req, res) {
       : [];
 
     // 6. Start Chat
-    // 🔑 FIX: We inject the System Prompt as the FIRST message in history.
-    // This works on ALL versions of the Gemini SDK (old and new).
+    // We inject the System Prompt into the history to ensure compatibility
     const chat = model.startChat({
       history: [
         { role: "user", parts: [{ text: systemPrompt }] },
