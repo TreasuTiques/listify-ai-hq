@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import Footer from '../components/Footer';          // ✅ Restore Footer
-import ChatWidget from '../components/ChatWidget';  // ✅ Restore Buddy
+import ChatWidget from '../components/ChatWidget'; // ✅ Buddy is back!
 
 interface LandingPageProps {
   onNavigate: (path: string) => void;
@@ -10,6 +9,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [activeTab, setActiveTab] = useState<'preview' | 'html'>('preview');
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
+
+  // 📜 SCROLL FUNCTION (Fixes dead links)
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   // Pricing Data
   const plans = [
@@ -65,9 +72,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900 flex flex-col min-h-screen">
       
       {/* ===================================================== */}
-      {/* ✅ RESTORED HEADER / NAVBAR */}
+      {/* ✅ HEADER / NAVBAR (Fixed & Integrated) */}
       {/* ===================================================== */}
-      <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-slate-200 z-50">
+      <nav className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-slate-200 z-50 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
@@ -76,12 +83,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               <span className="text-xl font-black text-[#0F172A] tracking-tight">Listify AI HQ</span>
             </div>
 
-            {/* Desktop Links */}
-            <div className="hidden md:flex items-center gap-6 text-sm font-bold text-slate-500">
-               <button onClick={() => onNavigate('/signup')} className="hover:text-blue-600 transition-colors">Pricing</button>
-               <button onClick={() => onNavigate('/signup')} className="hover:text-blue-600 transition-colors flex items-center gap-1">Inventory <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-full">BETA</span></button>
-               <button onClick={() => onNavigate('/signup')} className="hover:text-blue-600 transition-colors">Analytics</button>
-               <button onClick={() => onNavigate('/signup')} className="hover:text-red-500 transition-colors text-red-500 bg-red-50 px-3 py-1.5 rounded-full">● Listing Doctor</button>
+            {/* Desktop Links (Now Working!) */}
+            <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-500">
+               <button onClick={() => scrollToSection('features')} className="hover:text-blue-600 transition-colors">Features</button>
+               <button onClick={() => scrollToSection('pricing')} className="hover:text-blue-600 transition-colors">Pricing</button>
+               <button onClick={() => onNavigate('/login')} className="hover:text-blue-600 transition-colors flex items-center gap-1">Inventory <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-full">BETA</span></button>
             </div>
 
             {/* Action Buttons */}
@@ -94,7 +100,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               </button>
               <button 
                 onClick={() => onNavigate('/signup')}
-                className="bg-[#0F172A] text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl"
+                className="bg-[#0F172A] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
               >
                 Start Listing
               </button>
@@ -103,77 +109,82 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </nav>
 
-      {/* Main Content Wrapper (Push down for fixed header) */}
+      {/* Main Content Wrapper */}
       <main className="flex-grow pt-20">
 
         {/* HERO SECTION */}
-        <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
+        <section className="relative pt-16 sm:pt-24 pb-12 sm:pb-20 bg-[#F8FAFC] overflow-hidden">
           <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-80 animate-pulse"></div>
           <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/60 blur-[100px] rounded-full -mr-20 -mb-20 mix-blend-multiply opacity-80"></div>
+          
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="relative bg-white/40 backdrop-blur-md rounded-[48px] border border-white/60 shadow-[0_32px_80px_-20px_rgba(15,23,42,0.1)] p-8 sm:p-10 lg:p-12 overflow-hidden">
-              <div className="flex flex-col items-center text-center gap-2">
-                <div className="max-w-3xl mx-auto relative z-20 flex flex-col items-center">
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-blue-200 shadow-sm text-[#2563EB] text-[11px] font-bold uppercase tracking-widest mb-6 backdrop-blur-sm">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-                    </span>
-                    Trusted by 7-Figure Sellers Worldwide
-                  </div>
-                  <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#0F172A] tracking-tight leading-[1.1] mb-6">
-                    Generate High-Converting Product Listings —{' '}
-                    <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Instantly</span>
-                  </h1>
-                  <p className="text-lg sm:text-xl text-slate-500 max-w-lg leading-relaxed mb-8 mx-auto">
-                    The ultimate AI engine for E-commerce. Upload one photo and get 
-                    SEO-optimized titles, descriptions, and specs for Shopify, Amazon, eBay, and more.
-                  </p>
-                  <button 
-                    onClick={() => onNavigate('/signup')}
-                    className="bg-[#2563EB] text-white px-10 py-5 rounded-3xl text-lg font-bold shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition-all hover:-translate-y-1 active:scale-95 mb-10"
-                  >
-                    Start Listing Free
-                  </button>
-                  <div className="pt-8 border-t border-slate-200/60 w-full max-w-4xl mx-auto">
-                     <p className="text-xs font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent uppercase tracking-[0.25em] mb-8">
-                       Optimized for all major platforms
-                     </p>
-                     <div className="flex flex-wrap justify-center gap-x-8 gap-y-5 items-center text-slate-900 font-bold text-lg">
-                        <span>Shopify</span><span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
-                        <span>Amazon</span><span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
-                        <span>eBay</span><span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
-                        <span>Etsy</span><span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
-                        <span>Poshmark</span><span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
-                        <span>Mercari</span><span className="w-1.5 h-1.5 bg-blue-200 rounded-full"></span>
-                        <span>Depop</span>
-                     </div>
-                  </div>
-                </div>
+            <div className="flex flex-col items-center text-center">
+              
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-blue-200 shadow-sm text-[#2563EB] text-[11px] font-bold uppercase tracking-widest mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+                </span>
+                Trusted by 7-Figure Sellers Worldwide
               </div>
+
+              <h1 className="text-5xl sm:text-7xl font-black text-[#0F172A] tracking-tight leading-[1.1] mb-6 max-w-4xl">
+                Generate High-Converting Product Listings —{' '}
+                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Instantly</span>
+              </h1>
+              
+              <p className="text-xl text-slate-500 max-w-2xl leading-relaxed mb-10 mx-auto">
+                The ultimate AI engine for E-commerce. Upload one photo and get 
+                SEO-optimized titles, descriptions, and specs for Shopify, Amazon, eBay, and more.
+              </p>
+              
+              <button 
+                onClick={() => onNavigate('/signup')}
+                className="bg-[#2563EB] text-white px-10 py-5 rounded-full text-lg font-bold shadow-xl shadow-blue-600/20 hover:bg-blue-700 transition-all hover:-translate-y-1 active:scale-95 mb-16"
+              >
+                Start Listing Free
+              </button>
+
+              {/* ✅ FIXED IMAGE: Uses a real URL now, so it won't be broken! */}
+              <div className="relative w-full max-w-[1000px] rounded-2xl overflow-hidden shadow-2xl border border-slate-200/60 bg-white">
+                 <div className="absolute top-0 left-0 w-full h-8 bg-slate-50 border-b border-slate-100 flex items-center px-4 gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                    <div className="w-3 h-3 rounded-full bg-amber-400"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                 </div>
+                 {/* This image mimics your dashboard UI */}
+                 <img 
+                  src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop" 
+                  alt="Listify AI Dashboard Interface" 
+                  className="w-full h-auto object-cover opacity-90"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC] via-transparent to-transparent"></div>
+              </div>
+
             </div>
           </div>
         </section>
 
-        {/* FEATURES */}
-        <section className="py-12 sm:py-16 bg-white border-b border-slate-100 relative overflow-hidden">
+        {/* FEATURES (ID Added for scrolling) */}
+        <section id="features" className="py-20 bg-white relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 text-left">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-[#0F172A] tracking-tight">Why Power Sellers Choose Listify</h2>
-              <p className="text-slate-500 mt-4 text-lg">We automated the boring parts so you can focus on sourcing.</p>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-black text-[#0F172A] tracking-tight">Why Power Sellers Choose Listify</h2>
+              <p className="text-slate-500 mt-4 text-xl">We automated the boring parts so you can focus on sourcing.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
                 { title: 'AI Product Vision', icon: '🧠', text: 'Upload a photo and watch as our AI instantly detects brand, model, and condition details.', color: 'from-blue-500 to-blue-600' },
                 { title: 'Multi-Channel SEO', icon: '🚀', text: 'Generate keywords and titles optimized for Google Shopping, eBay Cassini, and Amazon A9.', color: 'from-indigo-500 to-indigo-600' },
                 { title: 'Universal Format', icon: '🌎', text: 'One click transforms your data into clean HTML for eBay or plain text for Poshmark.', color: 'from-violet-500 to-violet-600' },
                 { title: 'List 10x Faster', icon: '⚡', text: 'Skip the manual typing. Bulk process your inventory and scale your store overnight.', color: 'from-blue-600 to-indigo-600' }
               ].map((f) => (
-                <div key={f.title} className="group relative bg-white p-8 rounded-[32px] border border-slate-100 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_-10px_rgba(37,99,235,0.15)] hover:border-blue-100 transition-all duration-300 hover:-translate-y-2">
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center text-2xl text-white shadow-lg shadow-blue-200/50 mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <div key={f.title} className="group bg-slate-50 p-8 rounded-[32px] border border-slate-100 hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center text-2xl text-white shadow-lg mb-6`}>
                     {f.icon}
                   </div>
-                  <h3 className="text-xl font-bold text-[#0F172A] mb-3 group-hover:text-[#2563EB] transition-colors">{f.title}</h3>
+                  <h3 className="text-xl font-bold text-[#0F172A] mb-3">{f.title}</h3>
                   <p className="text-slate-500 leading-relaxed text-sm">{f.text}</p>
                 </div>
               ))}
@@ -188,6 +199,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               <h2 className="text-3xl font-bold text-white tracking-tight">AI That Sees Details You Miss</h2>
               <p className="text-slate-400 mt-4 text-lg">Our vision engine identifies defects, model numbers, and value—instantly.</p>
             </div>
+            {/* The slider works because it uses Unsplash images, not local ones */}
             <div className="relative rounded-[24px] overflow-hidden border border-slate-700 shadow-2xl h-[500px] group">
               <div className="absolute inset-0">
                  <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover opacity-60 mix-blend-luminosity" alt="Analyzed" />
@@ -217,8 +229,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           </div>
         </section>
 
-        {/* PRICING */}
-        <section className="py-24 px-4 bg-slate-50 border-t border-slate-200">
+        {/* PRICING (ID Added for scrolling) */}
+        <section id="pricing" className="py-24 px-4 bg-slate-50 border-t border-slate-200">
           <div className="max-w-7xl mx-auto text-center">
             <h2 className="text-4xl sm:text-5xl font-bold text-[#0F172A] mb-4">Pricing for every business size.</h2>
             <p className="text-slate-500 mb-16 text-lg max-w-2xl mx-auto">Choose the plan that fits your business stage.</p>
@@ -265,10 +277,60 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </section>
       </main>
 
-      {/* ✅ RESTORED FOOTER */}
-      <Footer onNavigate={onNavigate} />
+      {/* ===================================================== */}
+      {/* ✅ RESTORED FOOTER (Built-in Logic) */}
+      {/* ===================================================== */}
+      <footer className="bg-slate-50 border-t border-slate-200 pt-16 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-6 h-6 bg-[#0F172A] rounded-lg flex items-center justify-center text-white font-bold text-sm">L</div>
+                <span className="font-bold text-[#0F172A]">Listify AI HQ</span>
+              </div>
+              <p className="text-sm text-slate-500 mb-4">The all-in-one command center for serious resellers. Scale your business faster.</p>
+              <div className="flex gap-4">
+                {/* Social Placeholders */}
+                <div className="w-8 h-8 rounded-full bg-slate-200"></div>
+                <div className="w-8 h-8 rounded-full bg-slate-200"></div>
+                <div className="w-8 h-8 rounded-full bg-slate-200"></div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-[#0F172A] mb-4">Product</h4>
+              <ul className="space-y-2 text-sm text-slate-500">
+                <li><button onClick={() => scrollToSection('features')} className="hover:text-blue-600">Features</button></li>
+                <li><button onClick={() => scrollToSection('pricing')} className="hover:text-blue-600">Pricing</button></li>
+                <li><button onClick={() => onNavigate('/login')} className="hover:text-blue-600">Login</button></li>
+                <li><button onClick={() => onNavigate('/signup')} className="hover:text-blue-600">Sign Up</button></li>
+              </ul>
+            </div>
 
-      {/* ✅ RESTORED BUDDY */}
+            <div>
+              <h4 className="font-bold text-[#0F172A] mb-4">Resources</h4>
+              <ul className="space-y-2 text-sm text-slate-500">
+                <li><button onClick={() => window.open('https://google.com', '_blank')} className="hover:text-blue-600">Blog</button></li>
+                <li><button onClick={() => window.open('https://google.com', '_blank')} className="hover:text-blue-600">Community</button></li>
+                <li><button onClick={() => window.open('https://google.com', '_blank')} className="hover:text-blue-600">Help Center</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-[#0F172A] mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm text-slate-500">
+                <li><button onClick={() => onNavigate('/privacy')} className="hover:text-blue-600">Privacy Policy</button></li>
+                <li><button onClick={() => onNavigate('/terms')} className="hover:text-blue-600">Terms of Service</button></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-slate-200 pt-8 text-center text-sm text-slate-400">
+            &copy; {new Date().getFullYear()} Listify AI HQ. All rights reserved.
+          </div>
+        </div>
+      </footer>
+
+      {/* ✅ RESTORED CHAT WIDGET */}
       <ChatWidget />
       
     </div>
