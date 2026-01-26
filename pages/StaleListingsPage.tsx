@@ -1,234 +1,236 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../supabaseClient';
 
 const StaleListingsPage: React.FC = () => {
-  // Mock Data: Items that are "Stale" (Old + Low Views)
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?q=80&w=100&auto=format&fit=crop",
-      title: "Nike Air Jordan 1 Mid - Chicago Black Toe",
-      price: "$110.00",
-      daysActive: 84,
-      views: 12,
-      health: "Critical",
-      status: "stale" // stale | refreshing | fresh
-    },
-    {
-      id: 2,
-      image: "https://images.unsplash.com/photo-1550259114-ad7188f0a967?q=80&w=100&auto=format&fit=crop",
-      title: "Vintage 90s Ralph Lauren Polo Bear Sweater",
-      price: "$195.00",
-      daysActive: 62,
-      views: 45,
-      health: "Warning",
-      status: "stale"
-    },
-    {
-      id: 3,
-      image: "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?q=80&w=100&auto=format&fit=crop",
-      title: "Sony PlayStation 2 Console Bundle",
-      price: "$85.00",
-      daysActive: 105,
-      views: 8,
-      health: "Critical",
-      status: "stale"
+  const [loading, setLoading] = useState(true);
+  const [issues, setIssues] = useState<any[]>([]);
+  const [healthScore, setHealthScore] = useState(100);
+  const [externalUrl, setExternalUrl] = useState('');
+  
+  // 🔗 Store external links temporarily (in a real app, we'd save these to DB)
+  const [externalLinks, setExternalLinks] = useState<string[]>([]);
+
+  useEffect(() => {
+    runDiagnosis();
+  }, [externalLinks]); // Re-run if links change
+
+  const runDiagnosis = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // 1. Fetch Internal Listings
+      const { data: listings, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      const detectedIssues: any[] = [];
+      let penaltyPoints = 0;
+
+      // 🩺 A. EXAMINE INTERNAL PATIENTS
+      listings?.forEach(item => {
+        const itemIssues: string[] = [];
+        
+        if (!item.image_url) {
+          itemIssues.push('Missing Photo');
+          penaltyPoints += 20;
+        }
+        if (!item.title || item.title.length < 30) {
+          itemIssues.push('Title too short');
+          penaltyPoints += 10;
+        }
+        if (!item.description || item.description.length < 50) {
+          itemIssues.push('Description thin');
+          penaltyPoints += 10;
+        }
+        if (!item.price) {
+          itemIssues.push('No Price');
+          penaltyPoints += 5;
+        }
+
+        if (itemIssues.length > 0) {
+          detectedIssues.push({
+            ...item,
+            type: 'internal',
+            diagnosis: itemIssues
+          });
+        }
+      });
+
+      // 🩺 B. EXAMINE EXTERNAL PATIENTS (The Links you added)
+      externalLinks.forEach((link, index) => {
+        detectedIssues.push({
+          id: `ext-${index}`,
+          title: link, // Use URL as title for now
+          image_url: null,
+          type: 'external',
+          diagnosis: ['External Listing - Check Traffic', 'Potential Stale Listing']
+        });
+        penaltyPoints += 5; // Small penalty for stale external items
+      });
+
+      // Calculate Score
+      const totalItems = (listings?.length || 1) + externalLinks.length;
+      const simpleScore = Math.max(0, 100 - penaltyPoints);
+      
+      setHealthScore(Math.round(simpleScore));
+      setIssues(detectedIssues);
+
+    } catch (error) {
+      console.error("Doctor Error:", error);
+    } finally {
+      setLoading(false);
     }
-  ]);
-
-  const [isBulkRefreshing, setIsBulkRefreshing] = useState(false);
-
-  // Simulate the "Resurrection" process
-  const handleRefresh = (id: number) => {
-    // 1. Set to refreshing state
-    setItems(prev => prev.map(item => 
-      item.id === id ? { ...item, status: 'refreshing' } : item
-    ));
-
-    // 2. Simulate AI working (1.5 seconds delay)
-    setTimeout(() => {
-      setItems(prev => prev.map(item => 
-        item.id === id ? { ...item, status: 'fresh', daysActive: 0, views: 0 } : item
-      ));
-    }, 1500);
   };
 
-  const handleBulkRefresh = () => {
-    setIsBulkRefreshing(true);
-    // Refresh all items one by one
-    items.forEach((item, index) => {
-      setTimeout(() => {
-        handleRefresh(item.id);
-      }, index * 800); // Stagger the refreshes for visual effect
-    });
-    setTimeout(() => setIsBulkRefreshing(false), items.length * 800 + 1000);
+  // Handle adding a link
+  const handleAddLink = () => {
+    if (!externalUrl) return;
+    setExternalLinks([...externalLinks, externalUrl]);
+    setExternalUrl(''); // Clear input
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="font-bold text-slate-500">Running Diagnosis...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-24 pt-24 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#F8FAFC] pb-20 pt-24 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
         
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight">Listing Doctor</h1>
-              <span className="bg-red-100 text-red-700 border border-red-200 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                3 Issues Found
-              </span>
-            </div>
-            <p className="text-slate-500 max-w-2xl">
-              We found <span className="font-bold text-slate-900">3 stale listings</span> holding back <span className="font-bold text-slate-900">$390.00</span> in capital.
-              Refresh them now to boost visibility.
-            </p>
+        {/* HEADER */}
+        <div className="mb-10 text-center">
+          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight flex items-center justify-center gap-3">
+            <span className="text-4xl">🩺</span> Listing Doctor
+          </h1>
+          <p className="text-slate-500 mt-2">Diagnose drafts and check stale eBay listings.</p>
+        </div>
+
+        {/* 🏥 HEALTH SCORE CARD */}
+        <div className="bg-white rounded-[32px] p-8 shadow-xl shadow-blue-900/5 border border-slate-100 mb-8 relative overflow-hidden text-center">
+          <div className={`absolute top-0 left-0 w-full h-2 ${
+            healthScore > 80 ? 'bg-green-500' : healthScore > 50 ? 'bg-yellow-500' : 'bg-red-500'
+          }`}></div>
+          
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Overall Health Score</p>
+          <div className={`text-8xl font-black mb-2 tracking-tighter ${
+             healthScore > 80 ? 'text-green-500' : healthScore > 50 ? 'text-yellow-500' : 'text-red-500'
+          }`}>
+            {healthScore}%
           </div>
-          <div className="flex gap-3">
+          <p className="text-slate-500 font-medium">
+            {healthScore === 100 ? "Your inventory is in perfect shape! 💎" : 
+             healthScore > 80 ? "Looking good, just a few tweaks needed." : 
+             "We found issues needing attention."}
+          </p>
+        </div>
+
+        {/* 🔗 NEW SECTION: ADMIT EXTERNAL PATIENT */}
+        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 mb-12">
+           <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-3 flex items-center gap-2">
+             <span>🔗</span> Check External Listings
+           </h3>
+           <div className="flex flex-col sm:flex-row gap-3">
+             <input 
+               type="text" 
+               value={externalUrl}
+               onChange={(e) => setExternalUrl(e.target.value)}
+               placeholder="Paste eBay URL here (e.g., ebay.com/itm/123...)"
+               className="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400"
+             />
              <button 
-               onClick={handleBulkRefresh}
-               disabled={isBulkRefreshing || items.every(i => i.status === 'fresh')}
-               className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm shadow-lg transition-all ${
-                 isBulkRefreshing || items.every(i => i.status === 'fresh')
-                   ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                   : 'bg-[#0F172A] text-white hover:bg-slate-800 hover:-translate-y-0.5'
-               }`}
+               onClick={handleAddLink}
+               disabled={!externalUrl}
+               className="bg-[#0F172A] text-white font-bold px-6 py-3 rounded-xl hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex-shrink-0"
              >
-               {isBulkRefreshing ? (
-                 <>
-                   <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                   Fixing Inventory...
-                 </>
-               ) : (
-                 <>
-                   ⚡ Fix All Issues
-                 </>
-               )}
+               + Track Listing
              </button>
-          </div>
+           </div>
+           <p className="text-[10px] text-slate-400 mt-2 ml-1">
+             Paste links to old listings you want to monitor or refresh.
+           </p>
         </div>
 
-        {/* 1. HEALTH SCORE CARD */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-           <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm relative overflow-hidden">
-              <div className="absolute right-0 top-0 w-24 h-24 bg-orange-100 rounded-bl-[100px] -mr-4 -mt-4 opacity-50"></div>
-              <div className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Store Health</div>
-              <div className="text-4xl font-bold text-orange-500">72<span className="text-lg text-slate-400 font-medium">/100</span></div>
-              <div className="text-xs text-slate-400 mt-2">Your store is <span className="text-orange-600 font-bold">At Risk</span> due to inactive items.</div>
-           </div>
-
-           <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm">
-              <div className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Stale Inventory Value</div>
-              <div className="text-3xl font-bold text-[#0F172A]">$390.00</div>
-              <div className="text-xs text-slate-400 mt-2">Capital stuck in items older than 60 days.</div>
-           </div>
-
-           <div className="bg-white p-6 rounded-[24px] border border-slate-200 shadow-sm">
-              <div className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Algorithm Impact</div>
-              <div className="flex items-center gap-2 text-red-600 font-bold mt-1">
-                <span className="text-2xl">Negative</span>
-                <span className="bg-red-50 px-2 py-0.5 rounded text-[10px] border border-red-100">📉 Low Visibility</span>
-              </div>
-              <div className="text-xs text-slate-400 mt-2">Old items hurt your entire store's ranking.</div>
-           </div>
-        </div>
-
-        {/* 2. THE STALE LIST */}
-        <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-8 py-6 border-b border-slate-100">
-             <h3 className="text-lg font-bold text-[#0F172A]">Action Required (3 Items)</h3>
-          </div>
+        {/* 💊 PATIENT LIST */}
+        <div className="space-y-6">
+          <h3 className="text-lg font-bold text-[#0F172A] ml-2">Patients List ({issues.length})</h3>
           
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50/50">
-                <tr>
-                  <th className="px-8 py-4 font-bold text-slate-500 uppercase tracking-wider w-[40%]">Item</th>
-                  <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-center">Days Active</th>
-                  <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider text-center">Views</th>
-                  <th className="px-4 py-4 font-bold text-slate-500 uppercase tracking-wider">Diagnosis</th>
-                  <th className="px-8 py-4 font-bold text-slate-500 uppercase tracking-wider text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {items.map((item) => (
-                  <tr key={item.id} className={`transition-all duration-500 ${item.status === 'fresh' ? 'bg-green-50/30' : 'hover:bg-slate-50'}`}>
+          {issues.length === 0 ? (
+            <div className="bg-green-50 border border-green-100 rounded-[24px] p-12 text-center">
+              <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">✓</div>
+              <h3 className="font-bold text-green-800 text-lg">All Clear!</h3>
+              <p className="text-green-600">No issues found in your inventory.</p>
+            </div>
+          ) : (
+            issues.map((item, index) => (
+              <div key={index} className="bg-white rounded-[20px] p-1 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <div className="flex flex-col md:flex-row gap-6 p-5">
+                  
+                  {/* Image */}
+                  <div className="w-full md:w-24 h-24 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    {item.type === 'external' ? (
+                      <span className="text-2xl">🌍</span>
+                    ) : item.image_url ? (
+                      <img src={item.image_url} className="w-full h-full object-cover" alt="item" />
+                    ) : (
+                      <span className="text-xs font-bold text-red-400">NO IMG</span>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex-grow">
+                    <div className="flex items-center gap-2 mb-1">
+                      {item.type === 'external' && (
+                        <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">External Link</span>
+                      )}
+                      <h4 className={`font-bold ${item.type === 'external' ? 'text-blue-600 break-all text-sm' : 'text-[#0F172A]'}`}>
+                        {item.title || "Untitled Draft"}
+                      </h4>
+                    </div>
                     
-                    {/* Item Details */}
-                    <td className="px-8 py-4">
-                      <div className="flex items-center gap-4">
-                        <img src={item.image} alt={item.title} className="w-12 h-12 rounded-lg object-cover border border-slate-200 shadow-sm grayscale opacity-80" />
-                        <div>
-                          <div className={`font-bold transition-colors ${item.status === 'fresh' ? 'text-green-700' : 'text-[#0F172A]'}`}>{item.title}</div>
-                          <div className="text-xs text-slate-400 font-mono mt-0.5">{item.price}</div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Days Active */}
-                    <td className="px-4 py-4 text-center">
-                      {item.status === 'fresh' ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">Just Now</span>
-                      ) : (
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                          item.daysActive > 90 ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'
-                        }`}>
-                          {item.daysActive} Days
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {item.diagnosis.map((diag: string, i: number) => (
+                        <span key={i} className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 border border-red-100">
+                          ⚠️ {diag}
                         </span>
-                      )}
-                    </td>
+                      ))}
+                    </div>
+                  </div>
 
-                    {/* Views */}
-                    <td className="px-4 py-4 text-center font-mono text-slate-500">
-                      {item.views}
-                    </td>
-
-                    {/* Diagnosis */}
-                    <td className="px-4 py-4">
-                      {item.status === 'fresh' ? (
-                         <div className="flex items-center gap-1 text-green-600 text-xs font-bold">
-                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
-                           Optimized
-                         </div>
-                      ) : (
-                        <div className="text-xs text-slate-500">
-                          <span className="block font-bold text-slate-700">⚠️ Title Fatigue</span>
-                          Re-list to boost rank
-                        </div>
-                      )}
-                    </td>
-
-                    {/* Action Button */}
-                    <td className="px-8 py-4 text-right">
-                      {item.status === 'stale' && (
-                        <button 
-                          onClick={() => handleRefresh(item.id)}
-                          className="bg-white border border-slate-200 text-blue-600 font-bold px-4 py-2 rounded-lg text-xs hover:bg-blue-50 hover:border-blue-200 transition-all shadow-sm active:scale-95"
-                        >
-                          Auto-Refresh ✨
-                        </button>
-                      )}
-                      {item.status === 'refreshing' && (
-                        <span className="inline-flex items-center gap-2 text-xs font-bold text-blue-600">
-                          <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                          AI Working...
-                        </span>
-                      )}
-                      {item.status === 'fresh' && (
-                        <span className="text-xs font-bold text-green-600">
-                          Resurrected 🚀
-                        </span>
-                      )}
-                    </td>
-
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          <div className="bg-slate-50 px-8 py-4 text-center">
-            <p className="text-xs text-slate-400">
-              Refreshing items ends the current listing and creates a "Sell Similar" draft instantly.
-            </p>
-          </div>
+                  {/* Action */}
+                  <div className="flex items-center">
+                    {item.type === 'internal' ? (
+                      <button 
+                        onClick={() => window.location.hash = '/inventory'}
+                        className="w-full md:w-auto px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors text-sm"
+                      >
+                        Fix
+                      </button>
+                    ) : (
+                      <a 
+                        href={item.title.startsWith('http') ? item.title : `https://${item.title}`} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="w-full md:w-auto px-6 py-3 bg-white border-2 border-slate-100 text-slate-600 font-bold rounded-xl hover:border-blue-500 hover:text-blue-600 transition-colors text-sm text-center"
+                      >
+                        Visit Link
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
       </div>
