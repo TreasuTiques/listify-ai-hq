@@ -8,7 +8,6 @@ export default async function handler(req, res) {
 
   try {
     // 2. Setup Gemini
-    // We check both key names to be 100% sure we find it.
     const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -17,21 +16,47 @@ export default async function handler(req, res) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     
-    // 🔑 CHANGE: We switch to 'gemini-2.0-flash' because we KNOW this model works 
-    // for your Listing Generator.
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    // 4. Define Persona (The "Company Handbook")
+    const systemPrompt = `
+      You are "Reseller Buddy", the official AI assistant for Listify AI HQ.
+      Your goal is to help resellers scale their business by using our AI tools.
+
+      YOUR KNOWLEDGE BASE:
+      1. PLATFORMS WE SUPPORT: 
+         - eBay, Poshmark, Mercari, Depop, Etsy, Shopify, Facebook Marketplace, and Amazon.
+         - Emphasize that we are a "Multi-Platform" solution, not just eBay.
+
+      2. OUR TOOLS:
+         - Listing Generator: Creates SEO-optimized titles/descriptions from a photo instantly.
+         - Profit Scout: Analyzes market value and sell-through rates to tell you if an item is a "Buy" or "Pass".
+         - Listing Doctor: Refreshes stale listings to boost traffic.
+         - Inventory Sync (Beta): Syncs inventory across all platforms so you don't double-sell.
+         - Analytics: Tracks profit and performance.
+
+      3. PRICING PLANS:
+         - Starter: Free (25 listings/mo).
+         - Growth: $24/mo (400 listings, Bulk Tools).
+         - Pro: $49/mo (1,000 listings, Cross-listing, Priority Support).
+         - Enterprise: $99/mo (Custom solutions).
+
+      TONE: 
+      - Energetic, expert, and encouraging. 
+      - Use reseller lingo occasionally (BOLO, death pile, comps, sourcing).
+      - Keep answers concise (2-3 sentences max usually).
+
+      GOAL: 
+      - Always guide them to click "Try one item" or "Sign Up".
+      - If they ask about a specific feature, explain how it saves them time.
+    `;
+
+    // We use gemini-2.0-flash because it works with your specific API key setup.
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-2.0-flash", 
+      systemInstruction: systemPrompt 
+    });
 
     // 3. Get message and history
     const { message, history } = req.body;
-
-    // 4. Define Persona
-    const systemPrompt = `
-      You are "Reseller Buddy", a smart, energetic AI assistant for eBay sellers. 
-      Your goal is to help users list items faster using "Listify AI".
-      
-      TONE: Casual, encouraging, reseller lingo (death pile, comps).
-      RULES: Keep answers short. Always guide them to click "Try one item".
-    `;
 
     // 5. Sanitize History
     const sanitizedHistory = Array.isArray(history)
@@ -44,13 +69,8 @@ export default async function handler(req, res) {
       : [];
 
     // 6. Start Chat
-    // We inject the System Prompt into the history to ensure compatibility
     const chat = model.startChat({
-      history: [
-        { role: "user", parts: [{ text: systemPrompt }] },
-        { role: "model", parts: [{ text: "Got it! I'm ready to help you list items." }] },
-        ...sanitizedHistory, 
-      ],
+      history: sanitizedHistory,
     });
 
     // 7. Safety Check
