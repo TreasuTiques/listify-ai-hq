@@ -10,11 +10,10 @@ export default async function handler(req, res) {
     // 2. Setup Gemini
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     
-    // 🔑 CHANGE: We are switching to 'gemini-pro'. 
-    // This model is older and works with ANY library version.
+    // We utilize 'gemini-pro' as it is stable and widely compatible.
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    // 3. Get message
+    // 3. Get message and history from the frontend
     const { message, history } = req.body;
 
     // 4. Define Persona
@@ -26,13 +25,30 @@ export default async function handler(req, res) {
       RULES: Keep answers short. Always guide them to click "Try one item".
     `;
 
-    // 5. Start Chat
+    // 5. Sanitize History (The Green Part from your screenshot)
+    // This converts the frontend chat format into what Gemini understands.
+    const sanitizedHistory = Array.isArray(history)
+      ? history
+          .filter((entry) => entry && typeof entry.content === "string")
+          .map((entry) => ({
+            role: entry.role === "assistant" ? "model" : "user",
+            parts: [{ text: entry.content }],
+          }))
+      : [];
+
+    // 6. Start Chat with History
     const chat = model.startChat({
       history: [
         { role: "user", parts: [{ text: systemPrompt }] },
         { role: "model", parts: [{ text: "Got it. Ready to help." }] },
+        ...sanitizedHistory, // ✅ Injecting the conversation history here
       ],
     });
+
+    // 7. Safety Check (The other Green Part)
+    if (!message || typeof message !== "string") {
+      return res.status(400).json({ error: "Message is required." });
+    }
 
     const result = await chat.sendMessage(message);
     const response = await result.response;
