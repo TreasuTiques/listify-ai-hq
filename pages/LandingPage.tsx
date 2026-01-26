@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import ChatWidget from '../components/ChatWidget'; // ✅ 1. Added Chat Widget Import
 
 interface LandingPageProps {
   onNavigate: (path: string) => void;
@@ -10,25 +9,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
-  // ✅ 2. Added Scroll Helper for Header/Footer links
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  // Pricing Data - YOUR ORIGINAL DATA
+  // Pricing Data for the Landing Page
   const plans = [
     {
       name: "Starter",
       summary: "Perfect for casual sellers.",
       price: "$0",
-      features: [
-        "25 AI Listings / mo", 
-        "Basic AI Vision", 
-        "HTML & Plain Text",
-        "Mobile-Friendly Output",
-        "Community Support"
-      ],
+      features: ["25 AI Listings / mo", "Basic AI Vision", "HTML & Plain Text"],
       cta: "Get Started Free",
       popular: false,
       platforms: ['shopify', 'ebay', 'poshmark']
@@ -37,14 +24,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       name: "Growth",
       summary: "For growing businesses.",
       price: "$24",
-      features: [
-        "400 AI Listings / mo", 
-        "Advanced AI Vision", 
-        "Bulk Export Tools",
-        "Premium Collector Mode",
-        "SEO Keyword Research",
-        "Priority Email Support"
-      ],
+      features: ["400 AI Listings / mo", "Advanced AI Vision", "Bulk Export Tools"],
       cta: "Choose Growth",
       popular: false,
       platforms: ['shopify', 'ebay', 'poshmark', 'mercari']
@@ -53,14 +33,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       name: "Pro",
       summary: "The complete power seller toolkit.",
       price: "$49",
-      features: [
-        "1,000 AI Listings / mo", 
-        "Premium Storytelling", 
-        "Inventory Sync (Beta)", 
-        "Smart Pricing Tools",
-        "Unlimited Cloud Storage",
-        "Dedicated Human Support"
-      ],
+      features: ["1,000 AI Listings / mo", "Premium Storytelling", "Inventory Sync (Beta)", "Dedicated Support"],
       cta: "Go Pro",
       popular: true,
       platforms: ['shopify', 'ebay', 'poshmark', 'mercari', 'depop', 'etsy']
@@ -69,21 +42,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       name: "Enterprise",
       summary: "Custom solutions for teams.",
       price: "$99",
-      features: [
-        "3,000+ AI Listings", 
-        "API Access & Webhooks", 
-        "Custom AI Models",
-        "Multi-User Access (3 Seats)",
-        "Advanced Analytics",
-        "White-Glove Onboarding"
-      ],
+      features: ["3,000+ AI Listings", "API Access", "Custom AI Models"],
       cta: "Contact Sales",
       popular: false,
       platforms: ['all']
     }
   ];
 
-  // YOUR ORIGINAL HTML STRING
+  // FIXED: Forced Colors Style Block
   const rawHtml = `
 <div class="listing-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #000000; line-height: 1.6;">
   
@@ -158,58 +124,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900 flex flex-col min-h-screen">
+    <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
-      {/* ✅ 3. RESTORED HEADER (Matches your Screenshot) */}
-      {/* ===================================================== */}
-      <nav className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-slate-200 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            {/* Logo */}
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
-              <div className="w-8 h-8 bg-[#0F172A] rounded-lg flex items-center justify-center text-white font-bold text-lg">L</div>
-              <span className="text-xl font-black text-[#0F172A] tracking-tight">Listify AI HQ</span>
-            </div>
-
-            {/* Desktop Links (Exactly from your screenshot) */}
-            <div className="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-500">
-               <button className="hover:text-slate-900 flex items-center gap-1">Platforms <span>⌄</span></button>
-               <button onClick={() => scrollTo('pricing')} className="hover:text-slate-900">Pricing</button>
-               <button onClick={() => onNavigate('/login')} className="hover:text-blue-600 flex items-center gap-1">
-                 Inventory <span className="bg-blue-100 text-blue-600 text-[9px] px-1.5 py-0.5 rounded-sm font-extrabold">BETA</span>
-               </button>
-               <button onClick={() => onNavigate('/signup')} className="hover:text-slate-900">Analytics</button>
-               <button onClick={() => scrollTo('doctor')} className="hover:text-red-600 text-red-500 bg-red-50 px-3 py-1.5 rounded-full flex items-center gap-2">
-                 <span className="w-2 h-2 rounded-full bg-red-500"></span> Listing Doctor
-               </button>
-               <button onClick={() => onNavigate('/signup')} className="hover:text-slate-900">Vision</button>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={() => onNavigate('/login')}
-                className="px-4 py-2 font-bold text-sm text-slate-600 hover:text-slate-900"
-              >
-                Log in
-              </button>
-              <button 
-                onClick={() => onNavigate('/signup')}
-                className="bg-[#0F172A] text-white px-6 py-2.5 rounded-full font-bold text-sm hover:bg-slate-800 transition-all shadow-lg"
-              >
-                Start Listing
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content Wrapper (To push content down below fixed header) */}
-      <main className="flex-grow pt-20">
-
-      {/* ===================================================== */}
-      {/* HERO SECTION (Your Original Code) */}
+      {/* HERO SECTION */}
       {/* ===================================================== */}
       <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-80 animate-pulse"></div>
@@ -234,7 +152,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   SEO-optimized titles, descriptions, and specs for Shopify, Amazon, eBay, and more.
                 </p>
                 <button 
-                  onClick={() => onNavigate('/signup')}
+                  onClick={() => onNavigate('/builder')}
                   className="bg-[#2563EB] text-white px-10 py-5 rounded-3xl text-lg font-bold shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition-all hover:-translate-y-1 active:scale-95 mb-10"
                 >
                   Start Listing Free
@@ -256,11 +174,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 </div>
               </div>
               <div className="relative perspective-1000 w-full flex justify-center items-center z-10 -mt-8 lg:-mt-16">
-                {/* ✅ I FIXED THE IMAGE URL HERE SO IT SHOWS UP */}
                 <img 
-                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" 
+                  src="/hero-dashboard.png" 
                   alt="Listify AI Dashboard Interface" 
-                  className="w-full max-w-[900px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out scale-[1.1] rounded-2xl border border-slate-200"
+                  className="w-full max-w-[900px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out scale-[1.1]"
+                  style={{
+                    WebkitMaskImage: 'radial-gradient(ellipse at center, black 50%, transparent 100%)',
+                    maskImage: 'radial-gradient(ellipse at center, black 50%, transparent 100%)'
+                  }}
                 />
               </div>
             </div>
@@ -269,7 +190,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* FEATURES (Your Original Code) */}
+      {/* FEATURES */}
       {/* ===================================================== */}
       <section className="py-12 sm:py-16 bg-white border-b border-slate-100 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-blue-50/50 blur-[120px] rounded-full -z-10"></div>
@@ -298,9 +219,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* BEFORE & AFTER SLIDER (ID Added for Doctor) */}
+      {/* BEFORE & AFTER SLIDER */}
       {/* ===================================================== */}
-      <section id="doctor" className="py-24 bg-[#0F172A] relative overflow-hidden">
+      <section className="py-24 bg-[#0F172A] relative overflow-hidden">
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none"></div>
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
         <div className="max-w-4xl mx-auto px-4 relative z-10">
@@ -345,7 +266,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* COMPARISON TABLE (Your Original Code) */}
+      {/* COMPARISON TABLE */}
       {/* ===================================================== */}
       <section className="pt-20 pb-10 bg-slate-50">
         <div className="max-w-4xl mx-auto px-4 text-center">
@@ -396,7 +317,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* PREMIUM SAMPLE LISTING (Your Original Code) */}
+      {/* PREMIUM SAMPLE LISTING */}
       {/* ===================================================== */}
       <section className="pt-10 pb-24 sm:pb-28 px-4 bg-white relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-50 rounded-full blur-[100px] -z-10"></div>
@@ -462,9 +383,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* PRICING SECTION — (Your Original Code with ID added) */}
+      {/* PRICING SECTION — RESTORED PREMIUM DESIGN */}
       {/* ===================================================== */}
-      <section id="pricing" className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
+      <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
+        {/* Ambient Glows */}
         <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[120px] -z-10"></div>
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-100/50 rounded-full blur-[120px] -z-10"></div>
 
@@ -495,7 +417,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                       </div>
                       <p className="text-xs text-slate-500 font-medium h-8 leading-relaxed">{plan.summary}</p>
                     </div>
-                    
                     {/* Platform Box */}
                     <div className={`rounded-xl p-4 mb-8 ${isPro ? 'bg-[#0F172A] border border-slate-700' : 'bg-slate-100 border border-slate-200'}`}>
                       <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${isPro ? 'text-blue-300' : 'text-slate-500'}`}>Platforms Included:</p>
@@ -512,7 +433,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                         )}
                       </div>
                     </div>
-
                     <ul className="flex-1 space-y-4 mb-10">
                       {plan.features.map((feat, fIdx) => (
                         <li key={fIdx} className="flex items-start gap-3 text-sm text-slate-600">
@@ -521,11 +441,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                         </li>
                       ))}
                     </ul>
-                    
                     <div className="mt-auto">
-                      <button 
-                        onClick={() => onNavigate('/signup')}
-                        className={`w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-md ${
+                      <button className={`w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-md ${
                         isPro 
                         ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:shadow-cyan-500/25 hover:-translate-y-0.5' 
                         : 'bg-white border border-slate-300 text-[#0F172A] hover:bg-slate-50'
@@ -541,7 +458,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* FINAL CTA (Your Original Code) */}
+      {/* FINAL CTA - PREMIUM UPGRADE */}
       <section className="py-24 px-4 bg-white relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-purple-600 rounded-[44px] blur opacity-50 animate-pulse"></div>
@@ -552,7 +469,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             <div className="relative z-10">
               <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight">Stop typing. Start scaling.</h2>
               <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed">Join the thousands of professional resellers automating their inventory with Listify AI HQ.</p>
-              <button onClick={() => onNavigate('/signup')} className="bg-white text-[#0F172A] px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300">Create My First Listing Free</button>
+              <button onClick={() => onNavigate('/builder')} className="bg-white text-[#0F172A] px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300">Create My First Listing Free</button>
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-slate-400 font-medium">
                 <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>No credit card required</span>
                 <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>Free 25 listings/mo</span>
@@ -561,73 +478,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </section>
-      </main>
-
-      {/* ===================================================== */}
-      {/* ✅ 4. RESTORED FOOTER (Matches your Screenshot) */}
-      {/* ===================================================== */}
-      <footer className="bg-slate-50 border-t border-slate-200 pt-16 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 bg-[#0F172A] rounded-lg flex items-center justify-center text-white font-bold text-sm">L</div>
-                <span className="font-bold text-[#0F172A]">Listify AI HQ</span>
-              </div>
-              <p className="text-sm text-slate-500 mb-4">The all-in-one command center for serious resellers. Scale your business faster.</p>
-              <div className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-slate-200"></div>
-                <div className="w-8 h-8 rounded-full bg-slate-200"></div>
-                <div className="w-8 h-8 rounded-full bg-slate-200"></div>
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="font-bold text-[#0F172A] mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-slate-500">
-                <li><button onClick={() => scrollTo('pricing')} className="hover:text-blue-600 text-left">Pricing</button></li>
-                <li><button onClick={() => scrollTo('doctor')} className="hover:text-blue-600 text-left">Listing Doctor</button></li>
-                <li><button onClick={() => onNavigate('/login')} className="hover:text-blue-600 text-left">Login</button></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-[#0F172A] mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-slate-500">
-                <li><button className="hover:text-blue-600 text-left">Blog</button></li>
-                <li><button className="hover:text-blue-600 text-left">Community</button></li>
-                <li><button className="hover:text-blue-600 text-left">Help Center</button></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-[#0F172A] mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-slate-500">
-                <li><button className="hover:text-blue-600 text-left">Privacy Policy</button></li>
-                <li><button className="hover:text-blue-600 text-left">Terms of Service</button></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-slate-200 pt-8 text-center text-sm text-slate-400">
-            &copy; {new Date().getFullYear()} Listify AI HQ. All rights reserved.
-          </div>
-        </div>
-      </footer>
-
-      {/* ✅ 5. BUDDY CHAT WIDGET */}
-      <ChatWidget />
-
-      {/* Tailwind Config for Custom Animations */}
+      
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-15px); }
-        }
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(-10px); }
-          50% { transform: translateY(0px); }
-        }
-        .animate-float { animation: float 5s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
         .perspective-1000 { perspective: 1000px; }
       `}</style>
 
