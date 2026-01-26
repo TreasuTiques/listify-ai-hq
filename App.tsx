@@ -11,7 +11,7 @@ import DashboardPage from './pages/DashboardPage';
 import InventoryPage from './pages/InventoryPage';
 import BuilderPage from './pages/BuilderPage';
 import StaleListingsPage from './pages/StaleListingsPage'; // Listing Doctor
-import SourcingPage from './pages/SourcingPage'; // Profit Scout Tool
+import SourcingPage from './pages/SourcingPage'; // ✅ The NEW Sourcing Tool
 import AnalyticsPage from './pages/AnalyticsPage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
@@ -23,7 +23,7 @@ import BlogPage from './pages/BlogPage';
 import VisionPage from './pages/VisionPage';
 import SuccessHub from './pages/SuccessHub';
 import PartnersPage from './pages/PartnersPage';
-import ProfitScoutPage from './pages/ProfitScoutPage'; 
+// import ProfitScoutPage from './pages/ProfitScoutPage'; // ❌ REMOVED: Replaced by Sourcing Tool
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
@@ -78,7 +78,10 @@ const App: React.FC = () => {
               // --- MARKETING / PUBLIC PAGES ---
               case '/pricing': return <PricingPage />;
               case '/analytics': return <AnalyticsPage />; 
-              case '/sourcing': return <ProfitScoutPage /> || <SourcingPage />;
+              
+              // ✅ SWAP: Now '/sourcing' goes directly to the tool!
+              case '/sourcing': return <SourcingPage />;
+              
               case '/doctor': return <StaleListingsPage />;
               case '/contact': return <ContactPage />;
               case '/privacy': return <PrivacyPage />;
@@ -88,9 +91,9 @@ const App: React.FC = () => {
               case '/success': return <SuccessHub />;
               case '/partnerships': return <PartnersPage />;
               
-              // --- FIX: ADDED THESE SO HEADER/FOOTER LINKS WORK ---
+              // --- HEADER/FOOTER LINKS ---
               case '/inventory': return <InventoryPage onNavigate={navigate} />;
-              case '/builder': return <BuilderPage />; // "Listing Generator" link goes here
+              case '/builder': return <BuilderPage />; // "Listing Generator" link
 
               default: return <LandingPage onNavigate={navigate} />;
             }
