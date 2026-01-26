@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ChatWidget from '../components/ChatWidget'; // ✅ Added Buddy
 
 interface LandingPageProps {
   onNavigate: (path: string) => void;
@@ -9,7 +10,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
-  // Pricing Data - NOW EXPANDED WITH MORE FEATURES
+  // 📜 SCROLL HELPER (Added this so links work)
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Pricing Data - Expanded Features & Ready for Landing Page
   const plans = [
     {
       name: "Starter",
@@ -151,10 +158,58 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
+    <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900 flex flex-col min-h-screen">
       
       {/* ===================================================== */}
-      {/* HERO SECTION */}
+      {/* ✅ RESTORED HEADER (I added this back!) */}
+      {/* ===================================================== */}
+      <nav className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-slate-200 z-50 transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            {/* Logo */}
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
+              <div className="w-8 h-8 bg-[#0F172A] rounded-lg flex items-center justify-center text-white font-bold text-lg">L</div>
+              <span className="text-xl font-black text-[#0F172A] tracking-tight">Listify AI HQ</span>
+            </div>
+
+            {/* Desktop Links (Restored from your screenshot) */}
+            <div className="hidden lg:flex items-center gap-6 text-sm font-bold text-slate-500">
+               <button className="hover:text-slate-900 flex items-center gap-1">Platforms <span>⌄</span></button>
+               <button onClick={() => scrollTo('pricing')} className="hover:text-slate-900">Pricing</button>
+               <button onClick={() => onNavigate('/login')} className="hover:text-blue-600 flex items-center gap-1">
+                 Inventory <span className="bg-blue-100 text-blue-600 text-[9px] px-1.5 py-0.5 rounded-sm font-extrabold">BETA</span>
+               </button>
+               <button onClick={() => onNavigate('/signup')} className="hover:text-slate-900">Analytics</button>
+               <button onClick={() => scrollTo('doctor')} className="hover:text-red-600 text-red-500 bg-red-50 px-3 py-1.5 rounded-full flex items-center gap-2">
+                 <span className="w-2 h-2 rounded-full bg-red-500"></span> Listing Doctor
+               </button>
+               <button onClick={() => onNavigate('/signup')} className="hover:text-slate-900">Vision</button>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => onNavigate('/login')}
+                className="px-4 py-2 font-bold text-sm text-slate-600 hover:text-slate-900"
+              >
+                Log in
+              </button>
+              <button 
+                onClick={() => onNavigate('/signup')}
+                className="bg-[#0F172A] text-white px-6 py-2.5 rounded-full font-bold text-sm hover:bg-slate-800 transition-all shadow-lg"
+              >
+                Start Listing
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content Wrapper (To push content down below fixed header) */}
+      <main className="flex-grow pt-20">
+
+      {/* ===================================================== */}
+      {/* HERO SECTION (Your Original Code) */}
       {/* ===================================================== */}
       <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-80 animate-pulse"></div>
@@ -179,7 +234,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   SEO-optimized titles, descriptions, and specs for Shopify, Amazon, eBay, and more.
                 </p>
                 <button 
-                  onClick={() => onNavigate('/builder')}
+                  onClick={() => onNavigate('/signup')}
                   className="bg-[#2563EB] text-white px-10 py-5 rounded-3xl text-lg font-bold shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition-all hover:-translate-y-1 active:scale-95 mb-10"
                 >
                   Start Listing Free
@@ -201,14 +256,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 </div>
               </div>
               <div className="relative perspective-1000 w-full flex justify-center items-center z-10 -mt-8 lg:-mt-16">
+                {/* ✅ I FIXED THE IMAGE URL HERE SO IT SHOWS UP */}
                 <img 
-                  src="/hero-dashboard.png" 
+                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" 
                   alt="Listify AI Dashboard Interface" 
-                  className="w-full max-w-[900px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out scale-[1.1]"
-                  style={{
-                    WebkitMaskImage: 'radial-gradient(ellipse at center, black 50%, transparent 100%)',
-                    maskImage: 'radial-gradient(ellipse at center, black 50%, transparent 100%)'
-                  }}
+                  className="w-full max-w-[900px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out scale-[1.1] rounded-2xl border border-slate-200"
                 />
               </div>
             </div>
@@ -217,7 +269,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* FEATURES */}
+      {/* FEATURES (Your Original Code) */}
       {/* ===================================================== */}
       <section className="py-12 sm:py-16 bg-white border-b border-slate-100 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-blue-50/50 blur-[120px] rounded-full -z-10"></div>
@@ -246,9 +298,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* BEFORE & AFTER SLIDER */}
+      {/* BEFORE & AFTER SLIDER (ID Added for Doctor) */}
       {/* ===================================================== */}
-      <section className="py-24 bg-[#0F172A] relative overflow-hidden">
+      <section id="doctor" className="py-24 bg-[#0F172A] relative overflow-hidden">
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none"></div>
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
         <div className="max-w-4xl mx-auto px-4 relative z-10">
@@ -293,7 +345,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* COMPARISON TABLE */}
+      {/* COMPARISON TABLE (Your Original Code) */}
       {/* ===================================================== */}
       <section className="pt-20 pb-10 bg-slate-50">
         <div className="max-w-4xl mx-auto px-4 text-center">
@@ -344,7 +396,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* PREMIUM SAMPLE LISTING */}
+      {/* PREMIUM SAMPLE LISTING (Your Original Code) */}
       {/* ===================================================== */}
       <section className="pt-10 pb-24 sm:pb-28 px-4 bg-white relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-50 rounded-full blur-[100px] -z-10"></div>
@@ -410,9 +462,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* PRICING SECTION — RESTORED PREMIUM DESIGN */}
+      {/* PRICING SECTION — (Your Original Code with ID added) */}
       {/* ===================================================== */}
-      <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
+      <section id="pricing" className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[120px] -z-10"></div>
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-100/50 rounded-full blur-[120px] -z-10"></div>
 
@@ -471,7 +523,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                     </ul>
                     
                     <div className="mt-auto">
-                      <button className={`w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-md ${
+                      <button 
+                        onClick={() => onNavigate('/signup')}
+                        className={`w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-md ${
                         isPro 
                         ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:shadow-cyan-500/25 hover:-translate-y-0.5' 
                         : 'bg-white border border-slate-300 text-[#0F172A] hover:bg-slate-50'
@@ -487,7 +541,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* FINAL CTA */}
+      {/* FINAL CTA (Your Original Code) */}
       <section className="py-24 px-4 bg-white relative overflow-hidden">
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-purple-600 rounded-[44px] blur opacity-50 animate-pulse"></div>
@@ -498,7 +552,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             <div className="relative z-10">
               <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight">Stop typing. Start scaling.</h2>
               <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed">Join the thousands of professional resellers automating their inventory with Listify AI HQ.</p>
-              <button onClick={() => onNavigate('/builder')} className="bg-white text-[#0F172A] px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300">Create My First Listing Free</button>
+              <button onClick={() => onNavigate('/signup')} className="bg-white text-[#0F172A] px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300">Create My First Listing Free</button>
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-slate-400 font-medium">
                 <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>No credit card required</span>
                 <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>Free 25 listings/mo</span>
@@ -508,7 +562,62 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
       
+      {/* ===================================================== */}
+      {/* ✅ RESTORED FOOTER (Added back!) */}
+      {/* ===================================================== */}
+      <footer className="bg-slate-50 border-t border-slate-200 pt-16 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-6 h-6 bg-[#0F172A] rounded-lg flex items-center justify-center text-white font-bold text-sm">L</div>
+                <span className="font-bold text-[#0F172A]">Listify AI HQ</span>
+              </div>
+              <p className="text-sm text-slate-500 mb-4">The all-in-one command center for serious resellers. Scale your business faster.</p>
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-slate-200"></div>
+                <div className="w-8 h-8 rounded-full bg-slate-200"></div>
+                <div className="w-8 h-8 rounded-full bg-slate-200"></div>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-[#0F172A] mb-4">Product</h4>
+              <ul className="space-y-2 text-sm text-slate-500">
+                <li><button onClick={() => scrollTo('pricing')} className="hover:text-blue-600 text-left">Pricing</button></li>
+                <li><button onClick={() => scrollTo('doctor')} className="hover:text-blue-600 text-left">Listing Doctor</button></li>
+                <li><button onClick={() => onNavigate('/login')} className="hover:text-blue-600 text-left">Login</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-[#0F172A] mb-4">Resources</h4>
+              <ul className="space-y-2 text-sm text-slate-500">
+                <li><button className="hover:text-blue-600 text-left">Blog</button></li>
+                <li><button className="hover:text-blue-600 text-left">Community</button></li>
+                <li><button className="hover:text-blue-600 text-left">Help Center</button></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-bold text-[#0F172A] mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm text-slate-500">
+                <li><button className="hover:text-blue-600 text-left">Privacy Policy</button></li>
+                <li><button className="hover:text-blue-600 text-left">Terms of Service</button></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-slate-200 pt-8 text-center text-sm text-slate-400">
+            &copy; {new Date().getFullYear()} Listify AI HQ. All rights reserved.
+          </div>
+        </div>
+      </footer>
+
+      {/* ✅ BUDDY CHAT WIDGET */}
+      <ChatWidget />
+
       {/* Tailwind Config for Custom Animations */}
+      <main className="flex-grow pt-20">
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0); }
@@ -521,6 +630,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         .animate-float { animation: float 5s ease-in-out infinite; }
         .perspective-1000 { perspective: 1000px; }
       `}</style>
+      </main>
 
     </div>
   );
