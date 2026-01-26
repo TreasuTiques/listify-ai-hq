@@ -10,13 +10,7 @@ export default async function handler(req, res) {
     // 2. Setup Gemini
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     
-    // We utilize 'gemini-pro' as it is stable and widely compatible.
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-    // 3. Get message and history from the frontend
-    const { message, history } = req.body;
-
-    // 4. Define Persona
+    // 4. Define Persona (System Instruction)
     const systemPrompt = `
       You are "Reseller Buddy", a smart, energetic AI assistant for eBay sellers. 
       Your goal is to help users list items faster using "Listify AI".
@@ -25,8 +19,18 @@ export default async function handler(req, res) {
       RULES: Keep answers short. Always guide them to click "Try one item".
     `;
 
-    // 5. Sanitize History (The Green Part from your screenshot)
-    // This converts the frontend chat format into what Gemini understands.
+    // 🔑 CHANGE: Use the modern 'flash' model (matches your working Listing Generator)
+    // We pass the persona as 'systemInstruction' which is the new standard.
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash", 
+      systemInstruction: systemPrompt 
+    });
+
+    // 3. Get message and history
+    const { message, history } = req.body;
+
+    // 5. Sanitize History
+    // This ensures the AI remembers previous messages without crashing on bad data
     const sanitizedHistory = Array.isArray(history)
       ? history
           .filter((entry) => entry && typeof entry.content === "string")
@@ -36,16 +40,12 @@ export default async function handler(req, res) {
           }))
       : [];
 
-    // 6. Start Chat with History
+    // 6. Start Chat
     const chat = model.startChat({
-      history: [
-        { role: "user", parts: [{ text: systemPrompt }] },
-        { role: "model", parts: [{ text: "Got it. Ready to help." }] },
-        ...sanitizedHistory, // ✅ Injecting the conversation history here
-      ],
+      history: sanitizedHistory,
     });
 
-    // 7. Safety Check (The other Green Part)
+    // 7. Safety Check
     if (!message || typeof message !== "string") {
       return res.status(400).json({ error: "Message is required." });
     }
@@ -58,6 +58,10 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error("AI Error:", error);
-    return res.status(500).json({ error: "Brain freeze!" });
+    // 🔑 DEBUG: Send the REAL error details so we can see exactly what's wrong
+    return res.status(500).json({ 
+      error: error.message || "Unknown AI Error", 
+      details: error.toString() 
+    });
   }
 }
