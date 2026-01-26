@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-// import ChatWidget from './ChatWidget'; // Uncomment if you have this file
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import ChatWidget from './components/ChatWidget';
 
 interface LandingPageProps {
   onNavigate: (path: string) => void;
@@ -155,56 +157,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
-      {/* HEADER (Restored from Screenshots) */}
+      {/* NAVBAR COMPONENT */}
       {/* ===================================================== */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 h-20 flex items-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex justify-between items-center">
-          {/* Left: Logo & Nav Links */}
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => onNavigate('/')}>
-              <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-              </div>
-              <span className="text-lg font-bold text-slate-900 tracking-tight">Listify <span className="text-blue-600">AI HQ</span></span>
-            </div>
-
-            {/* Desktop Nav Items */}
-            <div className="hidden lg:flex items-center gap-6">
-              <button className="text-sm font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1">
-                Platforms <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
-              </button>
-              <button className="text-sm font-medium text-slate-600 hover:text-slate-900">Pricing</button>
-              <button className="text-sm font-medium text-slate-600 hover:text-slate-900 flex items-center gap-1.5">
-                Inventory <span className="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.5 rounded font-bold">Beta</span>
-              </button>
-              <button className="text-sm font-medium text-slate-600 hover:text-slate-900">Analytics</button>
-              
-              {/* Special Items */}
-              <button className="text-sm font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-full hover:bg-green-100 transition-colors flex items-center gap-1.5">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                Profit Scout
-              </button>
-              <button className="text-sm font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-full hover:bg-red-100 transition-colors flex items-center gap-1.5">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                Listing Doctor
-              </button>
-            </div>
-          </div>
-
-          {/* Right: Actions */}
-          <div className="flex items-center gap-4">
-            <button onClick={() => onNavigate('/login')} className="text-sm font-bold text-slate-700 hover:text-slate-900">Log in</button>
-            <button onClick={() => onNavigate('/signup')} className="bg-[#0F172A] text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
-              Start Listing
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar onNavigate={onNavigate} />
 
       {/* ===================================================== */}
       {/* HERO SECTION */}
       {/* ===================================================== */}
-      <section className="relative pt-32 sm:pt-40 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
+      <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-80 animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/60 blur-[100px] rounded-full -mr-20 -mb-20 mix-blend-multiply opacity-80"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -250,9 +210,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 </div>
               </div>
               <div className="relative perspective-1000 w-full flex justify-center items-center z-10 -mt-8 lg:-mt-16">
-                {/* FIXED: Updated Hero Image from broken link to Unsplash Dashboard */}
                 <img 
-                  src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop" 
+                  src="/hero-dashboard.png" 
                   alt="Listify AI Dashboard Interface" 
                   className="w-full max-w-[900px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out scale-[1.1]"
                   style={{
@@ -566,91 +525,31 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </section>
-
-      {/* ===================================================== */}
-      {/* FOOTER (Restored from Screenshots) */}
-      {/* ===================================================== */}
-      <footer className="bg-white border-t border-slate-200 pt-16 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
-            
-            {/* Column 1: Brand */}
-            <div className="col-span-2 md:col-span-1 pr-8">
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                </div>
-                <span className="text-lg font-bold text-slate-900 tracking-tight">Listify <span className="text-blue-600">AI HQ</span></span>
-              </div>
-              <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                The all-in-one AI command center for serious resellers. Scale your business faster.
-              </p>
-              <div className="flex gap-4">
-                 {/* Social Icons Placeholder */}
-                 <span className="text-slate-400 hover:text-blue-600 cursor-pointer transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>
-                 <span className="text-slate-400 hover:text-blue-600 cursor-pointer transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></span>
-                 <span className="text-slate-400 hover:text-blue-600 cursor-pointer transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></span>
-                 <span className="text-slate-400 hover:text-blue-600 cursor-pointer transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></span>
-              </div>
-            </div>
-
-            {/* Column 2: Product */}
-            <div>
-              <h4 className="font-bold text-slate-900 mb-6 text-sm">Product</h4>
-              <ul className="space-y-4 text-sm text-slate-500 font-medium">
-                <li className="hover:text-blue-600 cursor-pointer">Listing Generator</li>
-                <li className="hover:text-blue-600 cursor-pointer">Inventory Sync</li>
-                <li className="hover:text-blue-600 cursor-pointer">Analytics</li>
-                <li className="hover:text-blue-600 cursor-pointer">Profit Scout</li>
-                <li className="hover:text-blue-600 cursor-pointer">Pricing</li>
-              </ul>
-            </div>
-
-            {/* Column 3: Resources */}
-            <div>
-              <h4 className="font-bold text-slate-900 mb-6 text-sm">Resources</h4>
-              <ul className="space-y-4 text-sm text-slate-500 font-medium">
-                <li className="hover:text-blue-600 cursor-pointer">Blog & Guides</li>
-                <li className="hover:text-blue-600 cursor-pointer">Our Vision</li>
-                <li className="hover:text-blue-600 cursor-pointer">Success Stories</li>
-                <li className="hover:text-blue-600 cursor-pointer">Partners</li>
-              </ul>
-            </div>
-
-            {/* Column 4: Support */}
-            <div>
-              <h4 className="font-bold text-slate-900 mb-6 text-sm">Support</h4>
-              <ul className="space-y-4 text-sm text-slate-500 font-medium">
-                <li className="hover:text-blue-600 cursor-pointer">Contact Us</li>
-                <li className="hover:text-blue-600 cursor-pointer">Privacy Policy</li>
-                <li className="hover:text-blue-600 cursor-pointer">Terms of Service</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-slate-400 text-xs font-medium">© 2026 Listify AI HQ. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
       
-      {/* FIXED: Chat with Buddy Widget (Bottom Right) */}
-      <div className="fixed bottom-6 right-6 z-50">
-        {/* If you have the ChatWidget component, replace this button with <ChatWidget /> */}
-        <button className="bg-[#2563EB] hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg shadow-blue-500/30 flex items-center gap-2 transition-transform hover:scale-105 active:scale-95">
-          <span>Chat with Buddy</span>
-        </button>
-      </div>
+      {/* ===================================================== */}
+      {/* FOOTER COMPONENT */}
+      {/* ===================================================== */}
+      <Footer />
 
+      {/* ===================================================== */}
+      {/* CHAT WIDGET COMPONENT */}
+      {/* ===================================================== */}
+      <ChatWidget />
+
+      {/* Tailwind Config for Custom Animations */}
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-15px); }
         }
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(-10px); }
+          50% { transform: translateY(0px); }
+        }
         .animate-float { animation: float 5s ease-in-out infinite; }
         .perspective-1000 { perspective: 1000px; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
       `}</style>
+
     </div>
   );
 };
