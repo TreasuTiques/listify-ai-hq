@@ -7,15 +7,12 @@ type Msg = { role: "user" | "assistant"; content: string };
 function track(event: string, props: Record<string, any> = {}) {
   if ((window as any).analytics?.track) {
     (window as any).analytics.track(event, props);
-  } else {
-    // console.log("[track]", event, props);
   }
 }
 
 /* ---------------- NAVIGATION ---------------- */
 function navigateTo(dest: "builder" | "pricing") {
   track("navigate", { dest });
-  // ✅ UPDATE: Matches your App.tsx router perfectly
   window.location.hash = dest === "builder" ? "/builder" : "/pricing";
 }
 
@@ -27,7 +24,7 @@ export default function ChatWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll to bottom
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isLoading]);
@@ -39,39 +36,40 @@ export default function ChatWidget() {
   async function send(text: string) {
     if (!text.trim()) return;
 
-    // 1. Add User Message immediately
+    // 1. Add User Message
     const userMsg: Msg = { role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
 
     try {
-      // 2. Call your API Brain
+      // 2. Call API
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message: text,
-          history: messages.slice(-6) // ✅ Send recent context (The Green Part)
+          history: messages.slice(-6) 
         }),
       });
 
-      // ✅ FIX: Robust error handling (The Green Part)
       const data = await response.json();
 
+      // ✅ DEBUG CHANGE: If it fails, we throw the specific error code
       if (!response.ok) {
-        throw new Error(`Chat request failed: ${response.status}`);
+        throw new Error(`Error Code: ${response.status} (${data.error || 'Unknown'})`);
       }
 
-      // Safely get the reply
-      const reply = typeof data?.reply === "string" ? data.reply : "I'm having trouble connecting.";
+      const reply = typeof data?.reply === "string" ? data.reply : "Connection success, but empty reply.";
 
       // 3. Add AI Reply
       const aiMsg: Msg = { role: "assistant", content: reply };
       setMessages((prev) => [...prev, aiMsg]);
 
-    } catch (error) {
-      setMessages((prev) => [...prev, { role: "assistant", content: "My brain is freezing up. Try again?" }]);
+    } catch (error: any) {
+      // ✅ DEBUG CHANGE: Print the actual error to the screen
+      console.error(error);
+      setMessages((prev) => [...prev, { role: "assistant", content: `DEBUG ERROR: ${error.message}` }]);
     } finally {
       setIsLoading(false);
     }
@@ -131,7 +129,7 @@ export default function ChatWidget() {
             )}
           </div>
 
-          {/* CTA Buttons */}
+          {/* Buttons */}
           <div className="px-4 pt-2 flex gap-2">
              <button onClick={() => navigateTo("builder")} className="flex-1 bg-blue-100 text-blue-700 py-2 rounded-lg text-sm font-bold hover:bg-blue-200 transition">
                📸 Try one item
