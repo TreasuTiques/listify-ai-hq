@@ -136,8 +136,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   return (
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
-      {/* NAVBAR WITH LANDING MODE */}
-      <Navbar onNavigate={onNavigate} isLanding={true} />
+      {/* NAVBAR */}
+      {/* Passing undefined for session to simulate 'public' view, but keeping the component standard */}
+      <Navbar session={null} onNavigate={onNavigate} isLanding={true} />
 
       {/* HERO SECTION */}
       <section className="relative pt-32 sm:pt-44 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
@@ -162,6 +163,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   The ultimate AI engine for E-commerce. Upload one photo and get 
                   SEO-optimized titles, descriptions, and specs for Shopify, Amazon, eBay, and more.
                 </p>
+                {/* FIXED: Point to /signup */}
                 <button 
                   onClick={() => onNavigate('/signup')}
                   className="bg-[#2563EB] text-white px-10 py-5 rounded-3xl text-lg font-bold shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition-all hover:-translate-y-1 active:scale-95 mb-10"
@@ -200,8 +202,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* FEATURES - Added ID for scrolling */}
-      <section id="features" className="py-12 sm:py-16 bg-white border-b border-slate-100 relative overflow-hidden">
+      {/* FEATURES */}
+      <section className="py-12 sm:py-16 bg-white border-b border-slate-100 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-blue-50/50 blur-[120px] rounded-full -z-10"></div>
         <div className="max-w-7xl mx-auto px-4 text-left">
           <div className="text-center mb-10">
@@ -385,8 +387,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* PRICING SECTION - Added ID for scrolling */}
-      <section id="pricing" className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
+      {/* PRICING SECTION */}
+      <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[120px] -z-10"></div>
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-100/50 rounded-full blur-[120px] -z-10"></div>
 
@@ -506,6 +508,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         }
         .animate-float { animation: float 5s ease-in-out infinite; }
         .perspective-1000 { perspective: 1000px; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
       `}</style>
 
     </div>
