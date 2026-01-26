@@ -8,14 +8,14 @@ function track(event: string, props: Record<string, any> = {}) {
   if ((window as any).analytics?.track) {
     (window as any).analytics.track(event, props);
   } else {
-    console.log("[track]", event, props);
+    // console.log("[track]", event, props);
   }
 }
 
 /* ---------------- NAVIGATION ---------------- */
 function navigateTo(dest: "builder" | "pricing") {
   track("navigate", { dest });
-  // Handle hash routing if using HashRouter, or standard link
+  // ✅ UPDATE: Matches your App.tsx router perfectly
   window.location.hash = dest === "builder" ? "/builder" : "/pricing";
 }
 
@@ -52,11 +52,11 @@ export default function ChatWidget() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message: text,
-          history: messages.slice(-6) // Send recent context
+          history: messages.slice(-6) // ✅ Send recent context (The Green Part)
         }),
       });
 
-      // ✅ FIX: Robust error handling from screenshot
+      // ✅ FIX: Robust error handling (The Green Part)
       const data = await response.json();
 
       if (!response.ok) {
