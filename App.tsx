@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 
-// ✅ 1. IMPORT COMPONENTS
+// 1. IMPORT COMPONENTS
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
-// ✅ 2. IMPORT ALL PAGES (Based on your file list)
+// 2. IMPORT ALL PAGES
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import InventoryPage from './pages/InventoryPage';
@@ -23,7 +23,7 @@ import BlogPage from './pages/BlogPage';
 import VisionPage from './pages/VisionPage';
 import SuccessHub from './pages/SuccessHub';
 import PartnersPage from './pages/PartnersPage';
-import ProfitScoutPage from './pages/ProfitScoutPage'; // Likely the Marketing Page for Profit Scout
+import ProfitScoutPage from './pages/ProfitScoutPage'; 
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
@@ -56,34 +56,29 @@ const App: React.FC = () => {
 
   const navigate = (path: string) => {
     window.location.hash = path;
-    window.scrollTo(0, 0); // Always scroll to top on navigation
+    window.scrollTo(0, 0); 
   };
 
   if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
 
   // 🚪 LOGGED OUT STATE
   if (!session) {
-    // 1. Auth Pages (No Navbar/Footer usually, or simple one)
     if (currentPath === '/login') return <LoginPage onNavigate={navigate} />;
     if (currentPath === '/signup') return <SignUpPage onNavigate={navigate} />;
-
-    // 2. Landing Page (Has its own internal layout logic if using the one we built, 
-    //    but standardizing imports means we can treat it uniquely)
     if (currentPath === '/') return <LandingPage onNavigate={navigate} />;
 
-    // 3. Public Marketing Pages (Pricing, Contact, etc.)
-    // We wrap these in the Public Navbar and Footer so they look consistent
+    // PUBLIC LAYOUT WRAPPER
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col">
-        {/* Pass isLanding={true} to show the Public links (Pricing, Platforms) instead of App links */}
         <Navbar session={null} onNavigate={navigate} isLanding={true} />
         
-        <div className="flex-grow pt-20"> {/* pt-20 accounts for fixed navbar */}
+        <div className="flex-grow pt-20"> 
           {(() => {
             switch (currentPath) {
+              // --- MARKETING / PUBLIC PAGES ---
               case '/pricing': return <PricingPage />;
-              case '/analytics': return <AnalyticsPage />; // Public view of analytics
-              case '/sourcing': return <ProfitScoutPage /> || <SourcingPage />; // Use Marketing page if available
+              case '/analytics': return <AnalyticsPage />; 
+              case '/sourcing': return <ProfitScoutPage /> || <SourcingPage />;
               case '/doctor': return <StaleListingsPage />;
               case '/contact': return <ContactPage />;
               case '/privacy': return <PrivacyPage />;
@@ -92,7 +87,12 @@ const App: React.FC = () => {
               case '/vision': return <VisionPage />;
               case '/success': return <SuccessHub />;
               case '/partnerships': return <PartnersPage />;
-              default: return <LandingPage onNavigate={navigate} />; // Fallback
+              
+              // --- FIX: ADDED THESE SO HEADER/FOOTER LINKS WORK ---
+              case '/inventory': return <InventoryPage onNavigate={navigate} />;
+              case '/builder': return <BuilderPage />; // "Listing Generator" link goes here
+
+              default: return <LandingPage onNavigate={navigate} />;
             }
           })()}
         </div>
@@ -102,7 +102,7 @@ const App: React.FC = () => {
     );
   }
 
-  // 🏠 LOGGED IN STATE (Dashboard & Tools)
+  // 🏠 LOGGED IN STATE
   const renderContent = () => {
     switch (currentPath) {
       case '/':
@@ -119,7 +119,7 @@ const App: React.FC = () => {
       case '/analytics': 
          return <AnalyticsPage />;
       case '/pricing':
-         return <PricingPage />; // Allow viewing pricing while logged in
+         return <PricingPage />;
       default:
         return <DashboardPage onNavigate={navigate} />;
     }
@@ -127,9 +127,8 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Logged In Navbar (isLanding defaults to false) */}
       <Navbar session={session} onNavigate={navigate} />
-      <div className="pt-20"> {/* Content padding for fixed navbar */}
+      <div className="pt-20">
         {renderContent()}
       </div>
     </div>
