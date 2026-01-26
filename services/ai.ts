@@ -100,3 +100,44 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
     throw error;
   }
 }
+
+/**
+ * 🔭 BRAIN 3: THE SCOUT (New!)
+ * Analyzes market value and gives a Buy/Pass verdict.
+ */
+export async function scoutProduct(productName: string) {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    const prompt = `
+      Act as an expert vintage reseller.
+      I am looking at a "${productName}".
+      
+      Based on general market knowledge (eBay sold history trends):
+      1. Estimate the Sold Price range (Low to High).
+      2. Estimate the Sell-Through Rate (Low/Medium/High).
+      3. Give a Verdict: "BUY" (if profitable/popular) or "PASS" (if junk/saturated).
+      4. Provide a 1-sentence reason.
+
+      Return ONLY valid JSON:
+      {
+        "minPrice": 10,
+        "maxPrice": 20,
+        "demand": "High",
+        "verdict": "BUY",
+        "reason": "Consistent seller with high nostalgia demand."
+      }
+    `;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    
+    const cleanedText = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(cleanedText);
+
+  } catch (error) {
+    console.error("Scout Error:", error);
+    throw error;
+  }
+}
