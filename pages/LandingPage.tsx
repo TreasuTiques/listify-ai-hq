@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+// Assuming ChatWidget is in the same directory or properly mapped in your project
+// import ChatWidget from './ChatWidget'; 
 
 interface LandingPageProps {
   onNavigate: (path: string) => void;
@@ -9,7 +11,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
   const [sliderVal, setSliderVal] = useState(50);
 
-  // Pricing Data - Expanded Features & Ready for Landing Page
+  // Pricing Data
   const plans = [
     {
       name: "Starter",
@@ -76,7 +78,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     }
   ];
 
-  // FIXED: Forced Colors Style Block
   const rawHtml = `
 <div class="listing-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #000000; line-height: 1.6;">
   
@@ -154,9 +155,45 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* ===================================================== */}
+      {/* HEADER (NAVBAR) */}
+      {/* ===================================================== */}
+      <nav className="fixed top-0 left-0 right-0 z-[100] bg-white/70 backdrop-blur-xl border-b border-slate-200/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-2 cursor-pointer" onClick={() => onNavigate('/')}>
+                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
+                   <span className="text-white font-black text-xl">L</span>
+                </div>
+                <span className="text-xl font-black tracking-tight text-slate-900">Listify AI <span className="text-blue-600">HQ</span></span>
+              </div>
+              
+              <div className="hidden lg:flex items-center gap-6">
+                {['Platforms', 'Pricing', 'Inventory (BETA)', 'Analytics', 'Listing Doctor', 'Vision'].map((link) => (
+                  <button key={link} className="text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors">
+                    {link}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button onClick={() => onNavigate('/login')} className="text-sm font-bold text-slate-700 hover:text-blue-600 px-4 py-2 transition-all">Log In</button>
+              <button 
+                onClick={() => onNavigate('/signup')}
+                className="bg-[#2563EB] text-white px-6 py-3 rounded-2xl text-sm font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all hover:-translate-y-0.5"
+              >
+                Start Listing
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* ===================================================== */}
       {/* HERO SECTION */}
       {/* ===================================================== */}
-      <section className="relative pt-12 sm:pt-16 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
+      <section className="relative pt-32 sm:pt-40 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-80 animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/60 blur-[100px] rounded-full -mr-20 -mb-20 mix-blend-multiply opacity-80"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -178,7 +215,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   The ultimate AI engine for E-commerce. Upload one photo and get 
                   SEO-optimized titles, descriptions, and specs for Shopify, Amazon, eBay, and more.
                 </p>
-                {/* FIXED: Point to /signup */}
                 <button 
                   onClick={() => onNavigate('/signup')}
                   className="bg-[#2563EB] text-white px-10 py-5 rounded-3xl text-lg font-bold shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition-all hover:-translate-y-1 active:scale-95 mb-10"
@@ -203,7 +239,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               </div>
               <div className="relative perspective-1000 w-full flex justify-center items-center z-10 -mt-8 lg:-mt-16">
                 <img 
-                  src="/hero-dashboard.png" 
+                  src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop" 
                   alt="Listify AI Dashboard Interface" 
                   className="w-full max-w-[900px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out scale-[1.1]"
                   style={{
@@ -411,7 +447,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* ===================================================== */}
-      {/* PRICING SECTION — RESTORED PREMIUM DESIGN */}
+      {/* PRICING SECTION */}
       {/* ===================================================== */}
       <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[120px] -z-10"></div>
@@ -445,7 +481,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                       <p className="text-xs text-slate-500 font-medium h-8 leading-relaxed">{plan.summary}</p>
                     </div>
                     
-                    {/* Platform Box */}
                     <div className={`rounded-xl p-4 mb-8 ${isPro ? 'bg-[#0F172A] border border-slate-700' : 'bg-slate-100 border border-slate-200'}`}>
                       <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${isPro ? 'text-blue-300' : 'text-slate-500'}`}>Platforms Included:</p>
                       <div className="flex flex-wrap gap-2">
@@ -472,7 +507,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                     </ul>
                     
                     <div className="mt-auto">
-                      {/* FIXED: Now points to /signup */}
                       <button 
                         onClick={() => onNavigate('/signup')}
                         className={`w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-md ${
@@ -502,36 +536,82 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             <div className="relative z-10">
               <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight">Stop typing. Start scaling.</h2>
               <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed">Join the thousands of professional resellers automating their inventory with Listify AI HQ.</p>
-              {/* FIXED: Point to /signup */}
               <button 
                 onClick={() => onNavigate('/signup')} 
                 className="bg-white text-[#0F172A] px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300"
               >
                 Create My First Listing Free
               </button>
-              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-slate-400 font-medium">
-                <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>No credit card required</span>
-                <span className="flex items-center gap-2"><svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg>Free 25 listings/mo</span>
-              </div>
             </div>
           </div>
         </div>
       </section>
-      
-      {/* Tailwind Config for Custom Animations */}
+
+      {/* ===================================================== */}
+      {/* FOOTER */}
+      {/* ===================================================== */}
+      <footer className="bg-slate-50 border-t border-slate-200 pt-20 pb-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-16">
+            <div className="col-span-2">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-black text-sm">L</span>
+                </div>
+                <span className="text-lg font-black tracking-tight">Listify AI <span className="text-blue-600">HQ</span></span>
+              </div>
+              <p className="text-slate-500 text-sm max-w-xs leading-relaxed mb-6">
+                The world's most advanced AI listing engine for professional resellers. Built for speed, optimized for profit.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-900 mb-6 text-sm uppercase tracking-widest">Product</h4>
+              <ul className="space-y-4 text-sm text-slate-500 font-medium">
+                <li className="hover:text-blue-600 cursor-pointer">Pricing</li>
+                <li className="hover:text-blue-600 cursor-pointer">Platforms</li>
+                <li className="hover:text-blue-600 cursor-pointer">Vision API</li>
+                <li className="hover:text-blue-600 cursor-pointer">Inventory</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-900 mb-6 text-sm uppercase tracking-widest">Company</h4>
+              <ul className="space-y-4 text-sm text-slate-500 font-medium">
+                <li className="hover:text-blue-600 cursor-pointer">About Us</li>
+                <li className="hover:text-blue-600 cursor-pointer">Success Stories</li>
+                <li className="hover:text-blue-600 cursor-pointer">Contact</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-900 mb-6 text-sm uppercase tracking-widest">Legal</h4>
+              <ul className="space-y-4 text-sm text-slate-500 font-medium">
+                <li className="hover:text-blue-600 cursor-pointer">Privacy Policy</li>
+                <li className="hover:text-blue-600 cursor-pointer">Terms of Service</li>
+              </ul>
+            </div>
+          </div>
+          <div className="pt-10 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-slate-400 text-xs">© 2026 Listify AI HQ. All rights reserved.</p>
+            <div className="flex gap-6">
+              <div className="w-5 h-5 bg-slate-200 rounded-full"></div>
+              <div className="w-5 h-5 bg-slate-200 rounded-full"></div>
+              <div className="w-5 h-5 bg-slate-200 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      {/* CHAT WIDGET INTEGRATION */}
+      {/* <ChatWidget /> */}
+
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-15px); }
         }
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(-10px); }
-          50% { transform: translateY(0px); }
-        }
         .animate-float { animation: float 5s ease-in-out infinite; }
         .perspective-1000 { perspective: 1000px; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
       `}</style>
-
     </div>
   );
 };
