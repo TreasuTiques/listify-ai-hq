@@ -137,11 +137,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     <div className="bg-white selection:bg-blue-100 font-sans antialiased text-slate-900">
       
       {/* NAVBAR */}
-      {/* Passing undefined for session to simulate 'public' view, but keeping the component standard */}
+      {/* isLanding={true} makes the Navbar show the Pricing/Platforms links instead of Dashboard links */}
       <Navbar session={null} onNavigate={onNavigate} isLanding={true} />
 
       {/* HERO SECTION */}
-      <section className="relative pt-32 sm:pt-44 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
+      {/* ✅ ADDED id="hero" so clicking the Logo scrolls to top */}
+      <section id="hero" className="relative pt-32 sm:pt-44 pb-8 sm:pb-12 bg-[#F8FAFC] overflow-hidden">
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply opacity-80 animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/60 blur-[100px] rounded-full -mr-20 -mb-20 mix-blend-multiply opacity-80"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -163,7 +164,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   The ultimate AI engine for E-commerce. Upload one photo and get 
                   SEO-optimized titles, descriptions, and specs for Shopify, Amazon, eBay, and more.
                 </p>
-                {/* FIXED: Point to /signup */}
+                {/* Point to /signup via App.tsx router */}
                 <button 
                   onClick={() => onNavigate('/signup')}
                   className="bg-[#2563EB] text-white px-10 py-5 rounded-3xl text-lg font-bold shadow-[0_20px_40px_-10px_rgba(37,99,235,0.4)] hover:bg-blue-700 transition-all hover:-translate-y-1 active:scale-95 mb-10"
@@ -203,7 +204,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* FEATURES */}
-      <section className="py-12 sm:py-16 bg-white border-b border-slate-100 relative overflow-hidden">
+      {/* ✅ ADDED id="features" so the 'Platforms' link scrolls here */}
+      <section id="features" className="py-12 sm:py-16 bg-white border-b border-slate-100 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-blue-50/50 blur-[120px] rounded-full -z-10"></div>
         <div className="max-w-7xl mx-auto px-4 text-left">
           <div className="text-center mb-10">
@@ -388,7 +390,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* PRICING SECTION */}
-      <section className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
+      {/* ✅ ADDED id="pricing" so the 'Pricing' link scrolls here */}
+      <section id="pricing" className="py-24 px-4 bg-slate-50 text-left border-t border-slate-200 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/4 w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[120px] -z-10"></div>
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-100/50 rounded-full blur-[120px] -z-10"></div>
 
@@ -475,6 +478,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             <div className="relative z-10">
               <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight">Stop typing. Start scaling.</h2>
               <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed">Join the thousands of professional resellers automating their inventory with Listify AI HQ.</p>
+              {/* FIXED: Point to /signup */}
               <button 
                 onClick={() => onNavigate('/signup')} 
                 className="bg-white text-[#0F172A] px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300"
