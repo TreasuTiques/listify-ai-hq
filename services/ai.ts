@@ -1,8 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // 🔑 ROBUST KEY CHECK:
-// We check both VITE_ (Frontend) and standard (Backend) names just in case.
-// This prevents "Missing Key" errors if the environment setup changes slightly.
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY;
 
 if (!apiKey) {
@@ -11,30 +9,32 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// ⚡️ CONSTANT: The Stable Model
-// We use 'gemini-flash-latest' because it is on your "Available" list
-// and it has High Rate Limits (Tier 1), so the Sourcing Scout won't crash.
+// ⚡️ CONSTANT: The Stable Model (High Speed, No Limits)
 const MODEL_NAME = "gemini-flash-latest";
+
+// Helper: Convert File to Base64
+const fileToGenerativePart = async (file: File) => {
+  const base64EncodedDataPromise = new Promise<string>((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+    reader.readAsDataURL(file);
+  });
+  return {
+    inlineData: {
+      data: await base64EncodedDataPromise,
+      mimeType: file.type,
+    },
+  };
+};
 
 /**
  * 📸 BRAIN 1: THE BUILDER
- * Generates a listing from an image.
  */
 export async function generateListingFromImage(imageFile: File, platform: string = 'ebay') {
   try {
-    // 1. Convert image to Base64
-    const base64Image = await new Promise<string>((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.readAsDataURL(imageFile);
-    });
-
-    const base64Data = base64Image.split(',')[1]; // Remove header
-
-    // 2. Prepare the Model
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+    const imagePart = await fileToGenerativePart(imageFile);
 
-    // 3. The Prompt
     const prompt = `
       You are an expert reseller on ${platform}.
       Analyze this image and generate a high-converting sales listing.
@@ -50,22 +50,9 @@ export async function generateListingFromImage(imageFile: File, platform: string
       }
     `;
 
-    // 4. Call Gemini
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: base64Data,
-          mimeType: imageFile.type,
-        },
-      },
-    ]);
-
+    const result = await model.generateContent([prompt, imagePart]);
     const response = await result.response;
-    const text = response.text();
-
-    // 5. Clean and Parse JSON
-    const cleanedText = text.replace(/```json|```/g, '').trim();
+    const cleanedText = response.text().replace(/```json|```/g, '').trim();
     return JSON.parse(cleanedText);
 
   } catch (error) {
@@ -76,7 +63,6 @@ export async function generateListingFromImage(imageFile: File, platform: string
 
 /**
  * 🩺 BRAIN 2: THE DOCTOR
- * Optimizes an existing title and description.
  */
 export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
   try {
@@ -90,10 +76,7 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
       Current Description: "${currentDescription}"
 
       Please generate a strictly better, SEO-optimized version.
-      1. Create a keyword-rich title (max 80 chars for eBay).
-      2. Write a compelling, sales-focused description.
-      
-      Return ONLY valid JSON like this:
+      Return ONLY valid JSON:
       {
         "optimizedTitle": "The new better title...",
         "optimizedDescription": "The new better description..."
@@ -102,9 +85,7 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
-    
-    const cleanedText = text.replace(/```json|```/g, '').trim();
+    const cleanedText = response.text().replace(/```json|```/g, '').trim();
     return JSON.parse(cleanedText);
 
   } catch (error) {
@@ -114,40 +95,68 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
 }
 
 /**
- * 🔭 BRAIN 3: THE SCOUT
- * Analyzes market value and gives a Buy/Pass verdict.
+ * 🔭 BRAIN 3: THE SCOUT (Now with Eyes! 👁️)
  */
-export async function scoutProduct(productName: string) {
+export async function scoutProduct(productName: string, imageFile?: File) {
   try {
-    // 🔑 THIS FIXES THE SOURCING LIMIT ERROR
-    // Switching to MODEL_NAME (gemini-flash-latest) removes the 15 RPM limit.
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
-    const prompt = `
-      Act as an expert vintage reseller.
-      I am looking at a "${productName}".
+    let prompt = "";
+    let requestParts: any[] = [];
+
+    // 🧠 SMART LOGIC: Did the user provide a photo?
+    if (imageFile) {
+      const imagePart = await fileToGenerativePart(imageFile);
+      requestParts = [imagePart];
       
-      Based on general market knowledge (eBay sold history trends):
-      1. Estimate the Sold Price range (Low to High).
-      2. Estimate the Sell-Through Rate (Low/Medium/High).
-      3. Give a Verdict: "BUY" (if profitable/popular) or "PASS" (if junk/saturated).
-      4. Provide a 1-sentence reason.
+      prompt = `
+        Act as an expert vintage reseller.
+        1. ANALYZE the image to identify the specific item (Brand, Model, Edition).
+        2. IGNORE generic keywords if the image shows something specific.
+        3. User Context: "${productName}" (Use this only if helpful).
 
-      Return ONLY valid JSON:
-      {
-        "minPrice": 10,
-        "maxPrice": 20,
-        "demand": "High",
-        "verdict": "BUY",
-        "reason": "Consistent seller with high nostalgia demand."
-      }
-    `;
+        Based on visual identification and eBay market trends:
+        - Estimate Sold Price (Low-High).
+        - Estimate Demand.
+        - Verdict: "BUY" or "PASS".
+        - Reason: Be specific about WHAT you see in the photo.
 
-    const result = await model.generateContent(prompt);
+        Return ONLY valid JSON:
+        {
+          "minPrice": 10,
+          "maxPrice": 20,
+          "demand": "High",
+          "verdict": "BUY",
+          "reason": "Specific reason based on visual ID."
+        }
+      `;
+      requestParts.push(prompt);
+    } else {
+      // Text Only Mode
+      prompt = `
+        Act as an expert vintage reseller.
+        I am looking at a "${productName}".
+        
+        Based on general market knowledge (eBay sold history trends):
+        - Estimate Sold Price range.
+        - Estimate Sell-Through Rate.
+        - Verdict: "BUY" or "PASS".
+        
+        Return ONLY valid JSON:
+        {
+          "minPrice": 10,
+          "maxPrice": 20,
+          "demand": "High",
+          "verdict": "BUY",
+          "reason": "Consistent seller with high nostalgia demand."
+        }
+      `;
+      requestParts = [prompt];
+    }
+
+    const result = await model.generateContent(requestParts);
     const response = await result.response;
-    const text = response.text();
-    
-    const cleanedText = text.replace(/```json|```/g, '').trim();
+    const cleanedText = response.text().replace(/```json|```/g, '').trim();
     return JSON.parse(cleanedText);
 
   } catch (error) {
