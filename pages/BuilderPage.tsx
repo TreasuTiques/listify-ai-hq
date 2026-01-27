@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
-import { generateListingFromImage } from '../services/ai';
+import { generateListingFromImages } from '../services/ai'; // ✅ Updated Import
 import { saveListingToInventory } from '../services/inventory'; 
 
 const BuilderPage: React.FC = () => {
@@ -10,31 +10,30 @@ const BuilderPage: React.FC = () => {
   
   // eBay Editor State
   const [editorTab, setEditorTab] = useState<'visual' | 'html'>('visual');
-  const [copySuccess, setCopySuccess] = useState(''); // 'title' or 'desc'
+  const [copySuccess, setCopySuccess] = useState(''); 
 
   // Form Fields
   const [title, setTitle] = useState('');
   const [brand, setBrand] = useState('');
-  // ⚠️ SAFETY: Default is empty to force user selection
+  // ⚠️ SAFETY: Default is empty. User MUST select one.
   const [condition, setCondition] = useState(''); 
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   
-  // 📸 File Memory
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); 
+  // 📸 NEW: Multi-Image Memory
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]); 
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   
   // UI States
   const [loading, setLoading] = useState(false); 
   const [analyzing, setAnalyzing] = useState(false); 
   const [user, setUser] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [showConditionError, setShowConditionError] = useState(false); // 🚨 New Error State
+  const [showConditionError, setShowConditionError] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Check for User on Load
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -53,17 +52,21 @@ const BuilderPage: React.FC = () => {
     { id: 'facebook', label: 'Facebook', color: 'bg-blue-800' },
   ];
 
-  // 🧠 HELPER: The Brain Function
-  const runAIAnalysis = async (file: File, platform: string, proMode: boolean) => {
+  // 🧠 HELPER: The Brain Function (Handles Arrays now!)
+  const runAIAnalysis = async (files: File[], platform: string, proMode: boolean) => {
+    if (files.length === 0) return;
+    
     setAnalyzing(true);
     try {
-      const result = await generateListingFromImage(file, platform, proMode);
+      // ✅ Sending ARRAY of files
+      const result = await generateListingFromImages(files, platform, proMode);
       
       setTitle(result.title || '');
       setBrand(result.brand || '');
       setDescription(result.description || '');
-      // We do NOT auto-set condition to specific values to ensure user verifies it
-      if (result.condition) setCondition(result.condition); 
+      // Note: We do NOT auto-fill condition to force user review, unless AI is super confident.
+      // But per your request, we leave it blank for manual check.
+      // if (result.condition) setCondition(result.condition); 
       setPrice(result.estimated_price || '');
       setTags(result.tags || []);
       
@@ -71,37 +74,56 @@ const BuilderPage: React.FC = () => {
       
     } catch (error) {
       console.error("AI Error:", error);
-      alert("AI could not analyze image. Try another one!");
+      alert("AI could not analyze images. Try again!");
     } finally {
       setAnalyzing(false);
     }
   };
 
-  // 2. AI MAGIC: Handle Image Upload
+  // 2. AI MAGIC: Handle Image Upload (Supports Multiple!)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
-    let file: File | null = null;
+    let newFiles: File[] = [];
 
     if ((e as React.DragEvent).dataTransfer) {
       e.preventDefault();
-      file = (e as React.DragEvent).dataTransfer.files[0];
+      // Convert FileList to Array
+      newFiles = Array.from((e as React.DragEvent).dataTransfer.files);
     } else if ((e as React.ChangeEvent<HTMLInputElement>).target.files) {
-      file = (e as React.ChangeEvent<HTMLInputElement>).target.files![0];
+      newFiles = Array.from((e as React.ChangeEvent<HTMLInputElement>).target.files!);
     }
 
-    if (!file) return;
+    if (newFiles.length === 0) return;
 
-    setSelectedFile(file);
-    const reader = new FileReader();
-    reader.onload = (e) => setImagePreview(e.target?.result as string);
-    reader.readAsDataURL(file);
+    // Combine with existing files, limit to 8
+    const updatedFiles = [...selectedFiles, ...newFiles].slice(0, 8);
+    setSelectedFiles(updatedFiles);
 
-    await runAIAnalysis(file, activePlatform, isProMode);
+    // Generate previews
+    const newPreviews = await Promise.all(updatedFiles.map(file => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.readAsDataURL(file);
+      });
+    }));
+    setImagePreviews(newPreviews);
+
+    // Call AI with ALL files
+    await runAIAnalysis(updatedFiles, activePlatform, isProMode);
+  };
+
+  // Remove a single image
+  const removeImage = (index: number) => {
+    const updatedFiles = selectedFiles.filter((_, i) => i !== index);
+    const updatedPreviews = imagePreviews.filter((_, i) => i !== index);
+    setSelectedFiles(updatedFiles);
+    setImagePreviews(updatedPreviews);
   };
 
   const handlePlatformChange = async (newPlatform: string) => {
     setActivePlatform(newPlatform);
-    if (selectedFile) {
-      await runAIAnalysis(selectedFile, newPlatform, isProMode);
+    if (selectedFiles.length > 0) {
+      await runAIAnalysis(selectedFiles, newPlatform, isProMode);
     }
   };
 
@@ -112,12 +134,11 @@ const BuilderPage: React.FC = () => {
     }
     const newMode = !isProMode;
     setIsProMode(newMode);
-    if (selectedFile) {
-      await runAIAnalysis(selectedFile, activePlatform, newMode);
+    if (selectedFiles.length > 0) {
+      await runAIAnalysis(selectedFiles, activePlatform, newMode);
     }
   };
 
-  // 📋 Copy Functions
   const copyToClipboard = (text: string, type: 'title' | 'desc') => {
     navigator.clipboard.writeText(text);
     setCopySuccess(type);
@@ -126,21 +147,20 @@ const BuilderPage: React.FC = () => {
 
   const onDragOver = (e: React.DragEvent) => e.preventDefault();
   
-  // 3. SAVE FUNCTION (With Safety Checks)
+  // 3. SAVE FUNCTION
   const handleGenerateAndSave = async () => {
     if (!user) {
       alert("Please log in to save listings!");
       return;
     }
     
-    // 🚨 VALIDATION CHECKS
+    // 🚨 VALIDATION
     if (!title) {
       alert("Please enter a title first.");
       return;
     }
     if (!condition || condition === '') {
       setShowConditionError(true);
-      // Shake animation effect via logic or just alert
       alert("⚠️ PLEASE SELECT A CONDITION to continue.");
       return;
     }
@@ -159,7 +179,10 @@ const BuilderPage: React.FC = () => {
         platform: activePlatform
       };
 
-      await saveListingToInventory(listingData, selectedFile);
+      // Pass the primary file (index 0) for the main thumbnail in inventory, 
+      // or expand this service later to handle multiple uploads.
+      // For now, we send the first file as the "Main" image.
+      await saveListingToInventory(listingData, selectedFiles[0]);
 
       setShowSuccess(true);
       setTimeout(() => {
@@ -199,7 +222,7 @@ const BuilderPage: React.FC = () => {
             <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
             Listing Command Center
           </h1>
-          <p className="text-slate-500 mt-1">Upload photos to generate optimized listings instantly.</p>
+          <p className="text-slate-500 mt-1">Upload up to 8 photos for maximum accuracy.</p>
         </div>
         <div className="flex items-center gap-4">
            {/* PRO MODE TOGGLE */}
@@ -220,7 +243,7 @@ const BuilderPage: React.FC = () => {
              </button>
            )}
            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider bg-white px-4 py-2 rounded-lg border border-slate-100 shadow-sm">
-             {imagePreview ? '1' : '0'} Photos • Target: <span className={`font-bold ml-1 ${
+             {imagePreviews.length} / 8 Photos • Target: <span className={`font-bold ml-1 ${
                activePlatform === 'ebay' ? 'text-blue-600' : 'text-slate-900'
              }`}>{activePlatform.toUpperCase()}</span>
            </div>
@@ -229,12 +252,12 @@ const BuilderPage: React.FC = () => {
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* LEFT: DROP ZONE */}
+        {/* LEFT: DROP ZONE (MULTI-IMAGE) */}
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm p-6 relative overflow-hidden group">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Source Media</h3>
-              <span className="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded-md">AI Vision Ready</span>
+              <span className="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded-md">Multi-Vision Ready</span>
             </div>
             
             <input 
@@ -243,33 +266,57 @@ const BuilderPage: React.FC = () => {
               onChange={handleFileUpload}
               className="hidden" 
               accept="image/*"
+              multiple // ✅ Allow multiple
             />
 
             <div 
               onClick={() => fileInputRef.current?.click()}
               onDragOver={onDragOver}
               onDrop={handleFileUpload}
-              className={`border-2 border-dashed rounded-2xl h-[400px] flex flex-col items-center justify-center transition-all cursor-pointer relative overflow-hidden ${
+              className={`border-2 border-dashed rounded-2xl h-[400px] flex flex-col transition-all cursor-pointer relative overflow-hidden ${
                 analyzing ? 'border-blue-500 bg-blue-50' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-blue-400'
               }`}
             >
-              {imagePreview ? (
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded-xl" />
+              {imagePreviews.length > 0 ? (
+                <div className="h-full flex flex-col">
+                  {/* Main Preview (First Image) */}
+                  <div className="h-2/3 w-full relative">
+                    <img src={imagePreviews[0]} alt="Main" className="w-full h-full object-cover" />
+                    <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-md">Main Photo</div>
+                  </div>
+                  {/* Thumbnails Grid */}
+                  <div className="h-1/3 w-full bg-white border-t border-slate-200 p-2 grid grid-cols-4 gap-2 overflow-y-auto">
+                    {imagePreviews.map((src, idx) => (
+                      <div key={idx} className="relative group/thumb aspect-square rounded-lg overflow-hidden border border-slate-100">
+                        <img src={src} className="w-full h-full object-cover" />
+                        <button 
+                           onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
+                           className="absolute inset-0 bg-red-500/80 text-white opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center font-bold text-xs transition-opacity"
+                        >✕</button>
+                      </div>
+                    ))}
+                    {imagePreviews.length < 8 && (
+                      <div className="flex items-center justify-center border-2 border-dashed border-slate-200 rounded-lg text-slate-400 text-xs font-bold hover:bg-slate-50">
+                        + Add
+                      </div>
+                    )}
+                  </div>
+                </div>
               ) : (
-                <>
+                <div className="h-full flex flex-col items-center justify-center">
                   <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                   </div>
-                  <p className="text-sm font-bold text-slate-700">Drop Photos Here</p>
-                  <p className="text-xs text-slate-400 mt-1">Supports JPG, PNG, HEIC</p>
-                </>
+                  <p className="text-sm font-bold text-slate-700">Drop up to 8 Photos</p>
+                  <p className="text-xs text-slate-400 mt-1">Front, Back, Tags, Flaws</p>
+                </div>
               )}
 
               {analyzing && (
-                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-20">
                   <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="font-bold text-blue-700 animate-pulse">Refining for {activePlatform.toUpperCase()}...</p>
-                  <p className="text-xs text-blue-500">Optimizing SEO & Tone...</p>
+                  <p className="font-bold text-blue-700 animate-pulse">Analyzing {imagePreviews.length} Photos...</p>
+                  <p className="text-xs text-blue-500">Writing {activePlatform} description...</p>
                 </div>
               )}
             </div>
@@ -301,7 +348,7 @@ const BuilderPage: React.FC = () => {
                </div>
             </div>
 
-            {/* TITLE */}
+            {/* TITLE (With BLUE Copy Button) */}
             <div className="mb-6 relative">
               <div className="flex justify-between mb-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Listing Title</label>
@@ -317,10 +364,10 @@ const BuilderPage: React.FC = () => {
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 pr-12 font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400"
                   placeholder="Upload a photo to generate title..."
                 />
-                {/* 📋 COPY BUTTON INSIDE TITLE */}
+                {/* 📋 BLUE COPY BUTTON */}
                 <button 
                   onClick={() => copyToClipboard(title, 'title')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 p-2 transition-colors"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-50 hover:bg-blue-100 text-blue-600 p-2 rounded-lg transition-colors border border-blue-100"
                   title="Copy Title"
                 >
                   {copySuccess === 'title' ? (
@@ -344,7 +391,7 @@ const BuilderPage: React.FC = () => {
                 />
               </div>
               
-              {/* ⚠️ CONDITION with ARROW & VALIDATION */}
+              {/* ⚠️ CONDITION: STARTS BLANK + ERROR STATE */}
               <div className="relative">
                 <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${showConditionError ? 'text-red-500 animate-pulse' : 'text-slate-500'}`}>
                    Condition {showConditionError && "(Required!)"}
@@ -369,7 +416,6 @@ const BuilderPage: React.FC = () => {
                     <option>Pre-owned (Good)</option>
                     <option>For Parts / Not Working</option>
                   </select>
-                  {/* Custom Arrow Icon */}
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
                   </div>
@@ -401,7 +447,8 @@ const BuilderPage: React.FC = () => {
                           <button onClick={() => setEditorTab('visual')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${editorTab === 'visual' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>Visual Preview</button>
                           <button onClick={() => setEditorTab('html')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${editorTab === 'html' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>HTML Source</button>
                        </div>
-                       <button onClick={() => copyToClipboard(description, 'desc')} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all">
+                       {/* BLUE COPY BUTTON */}
+                       <button onClick={() => copyToClipboard(description, 'desc')} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all shadow-md shadow-blue-500/20">
                           {copySuccess === 'desc' ? <span>✓ Copied</span> : <><span>📋</span> Copy Code</>}
                        </button>
                     </div>
@@ -409,7 +456,7 @@ const BuilderPage: React.FC = () => {
               </div>
 
               {activePlatform === 'ebay' ? (
-                // EBAY SMART EDITOR (HTML Support)
+                // EBAY SMART EDITOR
                 <div className="relative">
                    {editorTab === 'visual' ? (
                       <div 
@@ -426,8 +473,7 @@ const BuilderPage: React.FC = () => {
                    )}
                 </div>
               ) : (
-                // STANDARD EDITOR (Plain Text for Poshmark, Mercari, etc)
-                // Prevents formatting errors on platforms that don't support HTML
+                // STANDARD EDITOR
                 <textarea 
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -443,7 +489,7 @@ const BuilderPage: React.FC = () => {
               disabled={loading || analyzing}
               className="w-full bg-[#2563EB] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:bg-blue-600 hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? "Uploading & Saving..." : analyzing ? `Optimizing for ${activePlatform.toUpperCase()}...` : `Save ${platforms.find(p => p.id === activePlatform)?.label} Listing`}
+              {loading ? "Uploading & Saving..." : analyzing ? `Optimizing ${imagePreviews.length} Photos...` : `Save ${platforms.find(p => p.id === activePlatform)?.label} Listing`}
             </button>
 
           </div>
