@@ -145,6 +145,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean) => {
  * 📸 BRAIN 1: THE BUILDER (UPDATED FOR MULTI-IMAGE)
  * Now accepts an ARRAY of files.
  */
+// ✅ THIS IS THE FUNCTION YOUR BUILDER PAGE NEEDS
 export async function generateListingFromImages(imageFiles: File[], platform: string = 'ebay', isProMode: boolean = false) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
