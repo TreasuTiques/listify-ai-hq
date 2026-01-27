@@ -24,7 +24,8 @@ const fileToGenerativePart = async (file: File) => {
  * Defines the exact rules for Title, Description, and Keywords for each platform.
  */
 const getPlatformPrompt = (platform: string, isProMode: boolean) => {
-  const baseHelper = `Analyze this image and return valid JSON.`;
+  // ✅ UPDATED: Now refers to plural "images"
+  const baseHelper = `Analyze these images and return valid JSON.`;
 
   switch (platform.toLowerCase()) {
     case 'poshmark':
@@ -48,7 +49,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean) => {
         RULES:
         - TITLE: MAX 80 CHARACTERS. Put the most important keywords first. No fluff.
         - DESCRIPTION: Short, punchy, bullet points. Mention "Fast shipping".
-        - CONDITION: Be very honest about flaws to prevent returns.
+        - CONDITION: Be very honest about flaws visible in the images.
         
         JSON OUTPUT: { title, description, brand, condition, estimated_price, tags }
       `;
@@ -109,10 +110,10 @@ const getPlatformPrompt = (platform: string, isProMode: boolean) => {
           DESCRIPTION RULES (HTML "Sales Letter"):
           - Format as clean HTML (no CSS classes, just <h2>, <p>, <ul>, <strong>).
           - STRUCTURE:
-            1. <h2> "The Hook": A catchy headline about the item.
-            2. <p> "The Story": A 2-3 sentence engaging story about why this item is special.
-            3. <h3> "Key Features": Bullet points of specs.
-            4. <h3> "Condition": Detailed honest report.
+            1. <h2> "The Hook": A catchy headline based on the visual appeal.
+            2. <p> "The Story": A engaging story about why this item is special.
+            3. <h3> "Key Features": Bullet points of specs found in the images (tags/box).
+            4. <h3> "Condition": Detailed honest report based on ALL photos.
             5. <strong> "Why Buy": A closing sentence on value.
 
           JSON OUTPUT: { title, description, brand, condition, estimated_price, itemSpecifics }
@@ -132,7 +133,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean) => {
           - Format as clean HTML.
           - <h2> Product Summary
           - <ul> List of features
-          - <strong> Condition Note
+          - <strong> Condition Note (Analyze all photos for flaws)
           
           JSON OUTPUT: { title, description, brand, condition, estimated_price, itemSpecifics }
         `;
@@ -141,15 +142,20 @@ const getPlatformPrompt = (platform: string, isProMode: boolean) => {
 };
 
 /**
- * 📸 BRAIN 1: THE BUILDER
+ * 📸 BRAIN 1: THE BUILDER (UPDATED FOR MULTI-IMAGE)
+ * Now accepts an ARRAY of files.
  */
-export async function generateListingFromImage(imageFile: File, platform: string = 'ebay', isProMode: boolean = false) {
+export async function generateListingFromImages(imageFiles: File[], platform: string = 'ebay', isProMode: boolean = false) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-    const imagePart = await fileToGenerativePart(imageFile);
+    
+    // 🚀 PROCESS ALL IMAGES IN PARALLEL
+    const imageParts = await Promise.all(imageFiles.map(file => fileToGenerativePart(file)));
+    
     const prompt = getPlatformPrompt(platform, isProMode);
 
-    const result = await model.generateContent([prompt, imagePart]);
+    // Send the prompt AND all the image parts to Gemini
+    const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
     const cleanedText = response.text().replace(/```json|```/g, '').trim();
     return JSON.parse(cleanedText);
