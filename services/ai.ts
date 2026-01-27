@@ -1,8 +1,20 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Initialize Gemini with your API Key (Vite will load this from .env)
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(API_KEY);
+// 🔑 ROBUST KEY CHECK:
+// We check both VITE_ (Frontend) and standard (Backend) names just in case.
+// This prevents "Missing Key" errors if the environment setup changes slightly.
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY;
+
+if (!apiKey) {
+  console.error("Missing Gemini API Key! Check your .env file or Vercel settings.");
+}
+
+const genAI = new GoogleGenerativeAI(apiKey);
+
+// ⚡️ CONSTANT: The Stable Model
+// We use 'gemini-flash-latest' because it is on your "Available" list
+// and it has High Rate Limits (Tier 1), so the Sourcing Scout won't crash.
+const MODEL_NAME = "gemini-flash-latest";
 
 /**
  * 📸 BRAIN 1: THE BUILDER
@@ -20,7 +32,7 @@ export async function generateListingFromImage(imageFile: File, platform: string
     const base64Data = base64Image.split(',')[1]; // Remove header
 
     // 2. Prepare the Model
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
     // 3. The Prompt
     const prompt = `
@@ -68,7 +80,7 @@ export async function generateListingFromImage(imageFile: File, platform: string
  */
 export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
     const prompt = `
       Act as an expert reseller on ${platform}.
@@ -102,12 +114,14 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
 }
 
 /**
- * 🔭 BRAIN 3: THE SCOUT (New!)
+ * 🔭 BRAIN 3: THE SCOUT
  * Analyzes market value and gives a Buy/Pass verdict.
  */
 export async function scoutProduct(productName: string) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    // 🔑 THIS FIXES THE SOURCING LIMIT ERROR
+    // Switching to MODEL_NAME (gemini-flash-latest) removes the 15 RPM limit.
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 
     const prompt = `
       Act as an expert vintage reseller.
