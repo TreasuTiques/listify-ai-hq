@@ -21,61 +21,51 @@ const fileToGenerativePart = async (file: File) => {
 
 /**
  * 🎨 MARKETPLACE PROMPT ENGINEER
- * Defines the exact rules for Title, Description, and Keywords for each platform.
  */
-const getPlatformPrompt = (platform: string, isProMode: boolean) => {
-  // ✅ UPDATED: Now refers to plural "images"
+const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: string) => {
   const baseHelper = `Analyze these images and return valid JSON.`;
+  // ✅ NEW: Tell AI the specific condition selected by user
+  const conditionContext = userCondition ? `IMPORTANT: The user specified the condition is "${userCondition}". Ensure the description matches this.` : '';
 
   switch (platform.toLowerCase()) {
     case 'poshmark':
       return `
         ${baseHelper}
+        ${conditionContext}
         CONTEXT: Poshmark is a social fashion marketplace.
-        
         RULES:
-        - TITLE: MAX 50 CHARACTERS (Strict Limit). Format: Brand + Category + Style/Fit.
-        - DESCRIPTION: Friendly, emoji-friendly 💖. Mention material, fit, and occasion.
-        - KEYWORDS: Use trendy fashion tags (e.g., #boho, #streetwear).
-        
+        - TITLE: MAX 50 CHARS. Brand + Category + Style.
+        - DESCRIPTION: Friendly, emoji-friendly 💖.
         JSON OUTPUT: { title, description, brand, condition, estimated_price, size, tags }
       `;
     
     case 'mercari':
       return `
         ${baseHelper}
-        CONTEXT: Mercari is for quick sales. Buyers want value.
-        
+        ${conditionContext}
+        CONTEXT: Mercari is for quick sales.
         RULES:
-        - TITLE: MAX 80 CHARACTERS. Put the most important keywords first. No fluff.
-        - DESCRIPTION: Short, punchy, bullet points. Mention "Fast shipping".
-        - CONDITION: Be very honest about flaws visible in the images.
-        
+        - TITLE: MAX 80 CHARS. Keywords first.
+        - DESCRIPTION: Short, punchy.
         JSON OUTPUT: { title, description, brand, condition, estimated_price, tags }
       `;
 
     case 'depop':
       return `
         ${baseHelper}
-        CONTEXT: Depop is for Gen-Z, Vintage, and Streetwear.
-        
+        ${conditionContext}
+        CONTEXT: Depop is for Gen-Z/Vintage.
         RULES:
-        - TITLE: Aesthetic, descriptive. Lowercase stylization is okay if it fits the vibe.
-        - DESCRIPTION: Mention the "Era" (90s, Y2K), the "Vibe" (Skater, Goth, Cottagecore).
-        - TAGS: Crucial for Depop. Include 5 specific aesthetic tags.
-        
+        - TITLE: Aesthetic, descriptive.
+        - DESCRIPTION: Mention Era (Y2K, 90s), Vibe.
         JSON OUTPUT: { title, description, brand, condition, estimated_price, tags }
       `;
 
     case 'etsy':
       return `
         ${baseHelper}
-        CONTEXT: Etsy is for Vintage (>20 years old) or Handmade.
-        
-        RULES:
-        - TITLE: Long, keyword-stuffed (up to 140 chars allowed). Use phrases buyers search for ("Gift for him", "1970s Decor").
-        - DESCRIPTION: Emotional storytelling. Mention the history/age of the item.
-        
+        ${conditionContext}
+        CONTEXT: Etsy is for Vintage/Handmade.
         JSON OUTPUT: { title, description, brand, condition, estimated_price, tags }
       `;
 
@@ -83,58 +73,36 @@ const getPlatformPrompt = (platform: string, isProMode: boolean) => {
     case 'facebook':
       return `
         ${baseHelper}
-        CONTEXT: Standard E-Commerce / Local Sales.
-        
-        RULES:
-        - TITLE: Clean, professional. Brand + Model + Specs.
-        - DESCRIPTION: Professional paragraph followed by specs list.
-        
+        ${conditionContext}
+        CONTEXT: Standard E-Commerce.
         JSON OUTPUT: { title, description, brand, condition, estimated_price, tags }
       `;
 
     case 'ebay':
     default:
-      // 🌟 EBAY LOGIC 🌟
       if (isProMode) {
-        // PRO MODE: STORYTELLING & HIGH-END HTML
         return `
           ${baseHelper}
-          CONTEXT: eBay Premium Listing (High Ticket/Unique Item).
-          
-          TITLE RULES (Cassini Optimized):
-          - MAX 80 CHARACTERS.
-          - Structure: Brand + Model + Key Feature 1 + Key Feature 2 + Size/Color.
-          - NO filler words (L@@K, Wow, Nice).
-          - Use long-tail keywords relevant to collectors.
-
-          DESCRIPTION RULES (HTML "Sales Letter"):
-          - Format as clean HTML (no CSS classes, just <h2>, <p>, <ul>, <strong>).
-          - STRUCTURE:
-            1. <h2> "The Hook": A catchy headline based on the visual appeal.
-            2. <p> "The Story": A engaging story about why this item is special.
-            3. <h3> "Key Features": Bullet points of specs found in the images (tags/box).
-            4. <h3> "Condition": Detailed honest report based on ALL photos.
-            5. <strong> "Why Buy": A closing sentence on value.
-
+          ${conditionContext}
+          CONTEXT: eBay Premium Listing.
+          TITLE RULES: MAX 80 CHARS. Brand + Model + Features.
+          DESCRIPTION (HTML Sales Letter):
+          - Section 1: The Hook.
+          - Section 2: The Story.
+          - Section 3: Key Features.
+          - Section 4: Condition (Must reflect: ${userCondition}).
           JSON OUTPUT: { title, description, brand, condition, estimated_price, itemSpecifics }
         `;
       } else {
-        // STANDARD MODE: CLEAN & EFFICIENT
         return `
           ${baseHelper}
+          ${conditionContext}
           CONTEXT: eBay Standard Listing.
-          
-          TITLE RULES (Cassini Optimized):
-          - MAX 80 CHARACTERS.
-          - Structure: Brand + Model + Specifications.
-          - Prioritize keywords by search volume.
-          
-          DESCRIPTION RULES (Clean HTML):
-          - Format as clean HTML.
+          TITLE RULES: MAX 80 CHARS.
+          DESCRIPTION (Clean HTML):
           - <h2> Product Summary
-          - <ul> List of features
-          - <strong> Condition Note (Analyze all photos for flaws)
-          
+          - <ul> Key Features
+          - <strong> Condition Note (Must reflect: ${userCondition})
           JSON OUTPUT: { title, description, brand, condition, estimated_price, itemSpecifics }
         `;
       }
@@ -142,20 +110,20 @@ const getPlatformPrompt = (platform: string, isProMode: boolean) => {
 };
 
 /**
- * 📸 BRAIN 1: THE BUILDER (UPDATED FOR MULTI-IMAGE)
- * Now accepts an ARRAY of files.
+ * 📸 BRAIN 1: THE BUILDER
+ * ✅ UPDATED: Now accepts 'userCondition'
  */
-// ✅ THIS IS THE FUNCTION YOUR BUILDER PAGE NEEDS
-export async function generateListingFromImages(imageFiles: File[], platform: string = 'ebay', isProMode: boolean = false) {
+export async function generateListingFromImages(
+  imageFiles: File[], 
+  platform: string = 'ebay', 
+  isProMode: boolean = false, 
+  userCondition: string = ''
+) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-    
-    // 🚀 PROCESS ALL IMAGES IN PARALLEL
     const imageParts = await Promise.all(imageFiles.map(file => fileToGenerativePart(file)));
-    
-    const prompt = getPlatformPrompt(platform, isProMode);
+    const prompt = getPlatformPrompt(platform, isProMode, userCondition);
 
-    // Send the prompt AND all the image parts to Gemini
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
     const cleanedText = response.text().replace(/```json|```/g, '').trim();
@@ -168,78 +136,33 @@ export async function generateListingFromImages(imageFiles: File[], platform: st
 }
 
 /**
- * 🩺 BRAIN 2: THE DOCTOR (Optimizes existing text)
+ * 🩺 BRAIN 2: THE DOCTOR
  */
 export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-    const prompt = `
-      Act as an expert reseller on ${platform}.
-      Improve this listing.
-      Current Title: "${currentTitle}"
-      Current Description: "${currentDescription}"
-
-      GOAL: Better SEO and conversion.
-      - If eBay: Max 80 chars title, keyword rich.
-      - If Poshmark: Max 50 chars title.
-      
-      Return ONLY valid JSON:
-      { "optimizedTitle": "...", "optimizedDescription": "..." }
-    `;
-
+    const prompt = `Act as an expert reseller on ${platform}. Improve this listing: Title: "${currentTitle}", Desc: "${currentDescription}". Return JSON: { "optimizedTitle": "...", "optimizedDescription": "..." }`;
     const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const cleanedText = response.text().replace(/```json|```/g, '').trim();
+    const cleanedText = result.response.text().replace(/```json|```/g, '').trim();
     return JSON.parse(cleanedText);
-
-  } catch (error) {
-    console.error("Optimization Error:", error);
-    throw error;
-  }
+  } catch (error) { console.error("Optimization Error:", error); throw error; }
 }
 
 /**
- * 🔭 BRAIN 3: THE SCOUT (Sourcing)
+ * 🔭 BRAIN 3: THE SCOUT
  */
 export async function scoutProduct(productName: string, imageFile?: File) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-    let prompt = "";
     let requestParts: any[] = [];
-
     if (imageFile) {
       const imagePart = await fileToGenerativePart(imageFile);
-      requestParts = [imagePart];
-      prompt = `
-        Act as an expert vintage reseller.
-        1. IDENTIFY the item in the image visually.
-        2. Context: "${productName}".
-        
-        Based on eBay sold history:
-        - Estimate Value (Low-High).
-        - Verdict: BUY or PASS.
-        - Reason: Be specific.
-
-        Return ONLY valid JSON:
-        { "minPrice": 10, "maxPrice": 20, "demand": "High", "verdict": "BUY", "reason": "..." }
-      `;
-      requestParts.push(prompt);
+      requestParts = [imagePart, `Act as an expert reseller. Identify item: "${productName}". Estimate Value & Demand. JSON: { "minPrice": 10, "maxPrice": 20, "demand": "High", "verdict": "BUY", "reason": "..." }`];
     } else {
-      prompt = `
-        Act as an expert vintage reseller. Look at "${productName}".
-        Return ONLY valid JSON:
-        { "minPrice": 10, "maxPrice": 20, "demand": "High", "verdict": "BUY", "reason": "..." }
-      `;
-      requestParts = [prompt];
+      requestParts = [`Act as an expert reseller. Look at "${productName}". JSON: { "minPrice": 10, "maxPrice": 20, "demand": "High", "verdict": "BUY", "reason": "..." }`];
     }
-
     const result = await model.generateContent(requestParts);
-    const response = await result.response;
-    const cleanedText = response.text().replace(/```json|```/g, '').trim();
+    const cleanedText = result.response.text().replace(/```json|```/g, '').trim();
     return JSON.parse(cleanedText);
-
-  } catch (error) {
-    console.error("Scout Error:", error);
-    throw error;
-  }
+  } catch (error) { console.error("Scout Error:", error); throw error; }
 }
