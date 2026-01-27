@@ -6,6 +6,7 @@ import { saveListingToInventory } from '../services/inventory';
 const BuilderPage: React.FC = () => {
   // 1. STATE MANAGEMENT
   const [activePlatform, setActivePlatform] = useState('ebay');
+  const [isProMode, setIsProMode] = useState(false); // 🌟 NEW: Pro Mode Toggle
   
   // Form Fields
   const [title, setTitle] = useState('');
@@ -46,31 +47,12 @@ const BuilderPage: React.FC = () => {
     { id: 'facebook', label: 'Facebook', color: 'bg-blue-800' },
   ];
 
-  // 2. AI MAGIC: Handle Image Upload
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
-    let file: File | null = null;
-
-    if ((e as React.DragEvent).dataTransfer) {
-      e.preventDefault();
-      file = (e as React.DragEvent).dataTransfer.files[0];
-    } else if ((e as React.ChangeEvent<HTMLInputElement>).target.files) {
-      file = (e as React.ChangeEvent<HTMLInputElement>).target.files![0];
-    }
-
-    if (!file) return;
-
-    // ✅ SAVE THE FILE TO STATE (So we can upload it later)
-    setSelectedFile(file);
-
-    // Show Preview
-    const reader = new FileReader();
-    reader.onload = (e) => setImagePreview(e.target?.result as string);
-    reader.readAsDataURL(file);
-
-    // CALL THE BRAIN 🧠
+  // 🧠 HELPER: The Brain Function
+  const runAIAnalysis = async (file: File, platform: string, proMode: boolean) => {
     setAnalyzing(true);
     try {
-      const result = await generateListingFromImage(file, activePlatform);
+      // Pass platform and proMode to the AI service
+      const result = await generateListingFromImage(file, platform, proMode);
       
       setTitle(result.title || '');
       setBrand(result.brand || '');
@@ -87,9 +69,52 @@ const BuilderPage: React.FC = () => {
     }
   };
 
+  // 2. AI MAGIC: Handle Image Upload
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
+    let file: File | null = null;
+
+    if ((e as React.DragEvent).dataTransfer) {
+      e.preventDefault();
+      file = (e as React.DragEvent).dataTransfer.files[0];
+    } else if ((e as React.ChangeEvent<HTMLInputElement>).target.files) {
+      file = (e as React.ChangeEvent<HTMLInputElement>).target.files![0];
+    }
+
+    if (!file) return;
+
+    // ✅ SAVE THE FILE TO STATE
+    setSelectedFile(file);
+
+    // Show Preview
+    const reader = new FileReader();
+    reader.onload = (e) => setImagePreview(e.target?.result as string);
+    reader.readAsDataURL(file);
+
+    // CALL THE BRAIN 🧠 (Use current active platform)
+    await runAIAnalysis(file, activePlatform, isProMode);
+  };
+
+  // 🔄 NEW: Handle Platform Change
+  const handlePlatformChange = async (newPlatform: string) => {
+    setActivePlatform(newPlatform);
+    // If we have a file, re-run AI with the new platform personality!
+    if (selectedFile) {
+      await runAIAnalysis(selectedFile, newPlatform, isProMode);
+    }
+  };
+
+  // 🔄 NEW: Handle Pro Mode Toggle
+  const handleProModeToggle = async () => {
+    const newMode = !isProMode;
+    setIsProMode(newMode);
+    if (selectedFile) {
+      await runAIAnalysis(selectedFile, activePlatform, newMode);
+    }
+  };
+
   const onDragOver = (e: React.DragEvent) => e.preventDefault();
   
-  // 3. THE SAVE FUNCTION (Now with Image Upload!)
+  // 3. THE SAVE FUNCTION
   const handleGenerateAndSave = async () => {
     if (!user) {
       alert("Please log in to save listings!");
@@ -118,7 +143,7 @@ const BuilderPage: React.FC = () => {
 
       setShowSuccess(true);
       setTimeout(() => {
-        window.location.hash = '/inventory'; // Redirect to Inventory to see the photo!
+        window.location.hash = '/inventory';
       }, 1500);
 
     } catch (error: any) {
@@ -156,10 +181,26 @@ const BuilderPage: React.FC = () => {
           </h1>
           <p className="text-slate-500 mt-1">Upload photos to generate optimized listings instantly.</p>
         </div>
-        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider bg-white px-4 py-2 rounded-lg border border-slate-100 shadow-sm">
-          {imagePreview ? '1' : '0'} Photos Uploaded • Target: <span className={`font-bold ml-1 ${
-            activePlatform === 'ebay' ? 'text-blue-600' : 'text-slate-900'
-          }`}>{activePlatform.toUpperCase()}</span>
+        <div className="flex items-center gap-4">
+           {/* PRO MODE TOGGLE (Only visible for eBay) */}
+           {activePlatform === 'ebay' && (
+             <button 
+               onClick={handleProModeToggle}
+               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${
+                 isProMode 
+                   ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-lg' 
+                   : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
+               }`}
+             >
+               <span className={`w-2 h-2 rounded-full ${isProMode ? 'bg-green-400 animate-pulse' : 'bg-slate-300'}`}></span>
+               Pro Mode: {isProMode ? 'ON' : 'OFF'}
+             </button>
+           )}
+           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider bg-white px-4 py-2 rounded-lg border border-slate-100 shadow-sm">
+             {imagePreview ? '1' : '0'} Photos • Target: <span className={`font-bold ml-1 ${
+               activePlatform === 'ebay' ? 'text-blue-600' : 'text-slate-900'
+             }`}>{activePlatform.toUpperCase()}</span>
+           </div>
         </div>
       </div>
 
@@ -204,8 +245,8 @@ const BuilderPage: React.FC = () => {
               {analyzing && (
                 <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
                   <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="font-bold text-blue-700 animate-pulse">Analyzing Item...</p>
-                  <p className="text-xs text-blue-500">Writing description...</p>
+                  <p className="font-bold text-blue-700 animate-pulse">Refining for {activePlatform.toUpperCase()}...</p>
+                  <p className="text-xs text-blue-500">Optimizing SEO & Tone...</p>
                 </div>
               )}
             </div>
@@ -223,7 +264,7 @@ const BuilderPage: React.FC = () => {
                  {platforms.map((platform) => (
                    <button
                      key={platform.id}
-                     onClick={() => setActivePlatform(platform.id)}
+                     onClick={() => handlePlatformChange(platform.id)}
                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all border ${
                        activePlatform === platform.id
                          ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-md transform scale-105'
@@ -241,7 +282,9 @@ const BuilderPage: React.FC = () => {
             <div className="mb-6">
               <div className="flex justify-between mb-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Listing Title</label>
-                <span className={`text-xs font-bold ${title.length > 70 ? 'text-red-500' : 'text-slate-400'}`}>{title.length} / 80</span>
+                <span className={`text-xs font-bold ${title.length > (activePlatform === 'poshmark' ? 50 : 80) ? 'text-red-500' : 'text-slate-400'}`}>
+                   {title.length} / {activePlatform === 'poshmark' ? '50' : '80'}
+                </span>
               </div>
               <input 
                 type="text" 
@@ -308,7 +351,7 @@ const BuilderPage: React.FC = () => {
               disabled={loading || analyzing}
               className="w-full bg-[#2563EB] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:bg-blue-600 hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? "Uploading & Saving..." : analyzing ? "AI Working..." : `Save ${platforms.find(p => p.id === activePlatform)?.label} Listing`}
+              {loading ? "Uploading & Saving..." : analyzing ? `Optimizing for ${activePlatform.toUpperCase()}...` : `Save ${platforms.find(p => p.id === activePlatform)?.label} Listing`}
             </button>
 
           </div>
