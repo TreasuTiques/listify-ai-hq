@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
-import { generateListingFromImages } from '../services/ai'; // ✅ Updated Import
+import { generateListingFromImages } from '../services/ai'; // ✅ FIX: Imports the PLURAL function
 import { saveListingToInventory } from '../services/inventory'; 
 
 const BuilderPage: React.FC = () => {
@@ -58,15 +58,13 @@ const BuilderPage: React.FC = () => {
     
     setAnalyzing(true);
     try {
-      // ✅ Sending ARRAY of files
+      // ✅ Sending ARRAY of files to the new plural function
       const result = await generateListingFromImages(files, platform, proMode);
       
       setTitle(result.title || '');
       setBrand(result.brand || '');
       setDescription(result.description || '');
-      // Note: We do NOT auto-fill condition to force user review, unless AI is super confident.
-      // But per your request, we leave it blank for manual check.
-      // if (result.condition) setCondition(result.condition); 
+      // We explicitly DO NOT auto-fill condition so the user is forced to check it
       setPrice(result.estimated_price || '');
       setTags(result.tags || []);
       
@@ -86,7 +84,6 @@ const BuilderPage: React.FC = () => {
 
     if ((e as React.DragEvent).dataTransfer) {
       e.preventDefault();
-      // Convert FileList to Array
       newFiles = Array.from((e as React.DragEvent).dataTransfer.files);
     } else if ((e as React.ChangeEvent<HTMLInputElement>).target.files) {
       newFiles = Array.from((e as React.ChangeEvent<HTMLInputElement>).target.files!);
@@ -179,9 +176,7 @@ const BuilderPage: React.FC = () => {
         platform: activePlatform
       };
 
-      // Pass the primary file (index 0) for the main thumbnail in inventory, 
-      // or expand this service later to handle multiple uploads.
-      // For now, we send the first file as the "Main" image.
+      // Pass the primary file (index 0) as the main image for inventory
       await saveListingToInventory(listingData, selectedFiles[0]);
 
       setShowSuccess(true);
