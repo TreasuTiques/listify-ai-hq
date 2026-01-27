@@ -6,11 +6,11 @@ const SourcingPage: React.FC = () => {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [scoutResult, setScoutResult] = useState<any>(null);
-  // ✅ NEW: Error state for smooth messages instead of popups
   const [error, setError] = useState<string | null>(null);
   
   // 📸 IMAGE STATE
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // ✅ NEW: Stores the actual file for AI
   const [showRefine, setShowRefine] = useState(false);
   const [condition, setCondition] = useState('Used');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,8 +30,9 @@ const SourcingPage: React.FC = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Reset error on new upload attempt
       setError(null);
+      setSelectedFile(file); // ✅ Store file for AI
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -41,11 +42,11 @@ const SourcingPage: React.FC = () => {
     }
   };
 
-  // Handle removing image and resetting input
+  // Handle removing image
   const handleRemoveImage = () => {
     setImagePreview(null);
+    setSelectedFile(null); // ✅ Clear file
     setShowRefine(false);
-    // ✅ FIX: Reset the file input so you can upload again immediately
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -53,23 +54,23 @@ const SourcingPage: React.FC = () => {
 
   // 🤖 AI SCOUT HANDLER
   const handleScout = async () => {
-    if (!query && !imagePreview) {
+    if (!query && !selectedFile) {
       setError("Please enter keywords or upload an image.");
       return;
     }
     
     setLoading(true);
     setScoutResult(null);
-    setError(null); // Clear previous errors
+    setError(null); 
     
     try {
-      // Build a smarter query based on condition
+      // Build a smarter query
       const fullQuery = condition === 'New' 
         ? `${query} new with tags` 
         : query;
 
-      // NOTE: Currently only sending text query until backend is updated for images.
-      const data = await scoutProduct(fullQuery);
+      // ✅ FIX: Send the actual image file to the brain!
+      const data = await scoutProduct(fullQuery, selectedFile || undefined);
       setScoutResult(data);
 
       // ✨ AUTO-FILL CALCULATOR
@@ -77,7 +78,6 @@ const SourcingPage: React.FC = () => {
       setSellPrice(avgPrice.toFixed(2));
 
     } catch (err) {
-      // ✅ FIX: Smooth error message instead of alert popup
       console.error(err);
       setError("The market scanner is busy or hit a limit. Please wait a minute and try again.");
     } finally {
@@ -85,7 +85,7 @@ const SourcingPage: React.FC = () => {
     }
   };
 
-  // 🧮 CALCULATOR ENGINE
+  // 🧮 CALCULATOR ENGINE (Unchanged)
   useEffect(() => {
     const cost = parseFloat(costPrice) || 0;
     const sell = parseFloat(sellPrice) || 0;
@@ -117,7 +117,7 @@ const SourcingPage: React.FC = () => {
     }
   }, [costPrice, sellPrice, shipping, platform]);
 
-  // 🎨 FLIP STATUS LOGIC (New 20%/75% thresholds)
+  // 🎨 FLIP STATUS LOGIC
   const getFlipStatus = (roiVal: number) => {
     if (roiVal < 20) return { color: 'bg-red-500', text: 'bg-red-600', label: '⛔ Bad Flip', glow: 'shadow-red-500/50' };
     if (roiVal < 75) return { color: 'bg-orange-500', text: 'bg-orange-500', label: '⚠️ Decent Flip', glow: 'shadow-orange-500/50' };
@@ -138,7 +138,6 @@ const SourcingPage: React.FC = () => {
       <div className="max-w-md mx-auto relative">
         
         {/* HEADER */}
-        {/* ✅ FIX: Reduced margin-bottom to mb-4 for tighter spacing */}
         <div className="text-center mb-4 animate-in fade-in slide-in-from-top-4 duration-700">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0F172A] text-white text-[10px] font-bold uppercase tracking-wider mb-3 shadow-lg shadow-blue-900/20">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
@@ -151,7 +150,6 @@ const SourcingPage: React.FC = () => {
         {/* 🔭 PREMIUM SEARCH WIZARD */}
         <div className="bg-white rounded-[24px] shadow-xl shadow-slate-200/50 border border-slate-100 p-2 mb-6 transition-all duration-300">
           
-          {/* Main Input Row */}
           <div className="flex gap-2">
             <div className="relative flex-grow">
                <input 
@@ -162,7 +160,6 @@ const SourcingPage: React.FC = () => {
                  placeholder={showRefine ? "Add keywords (e.g. 'Vintage Nike')" : "Search item (e.g. Nike Air Max)"}
                  className="w-full bg-slate-50 rounded-xl pl-4 pr-12 py-3.5 font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                />
-               {/* ✅ FIX: Camera Icon is now Emerald Green */}
                <button 
                  onClick={() => fileInputRef.current?.click()}
                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-emerald-600 hover:text-emerald-700 bg-emerald-50/50 rounded-lg transition-colors"
@@ -186,7 +183,6 @@ const SourcingPage: React.FC = () => {
             </button>
           </div>
 
-          {/* ✅ NEW: Error Message Display */}
           {error && (
             <div className="mt-3 p-3 bg-red-50 text-red-600 text-sm font-medium rounded-xl flex items-center gap-2 animate-in slide-in-from-top-1">
               <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -194,14 +190,12 @@ const SourcingPage: React.FC = () => {
             </div>
           )}
 
-          {/* Expanded Refinement Panel */}
           {showRefine && !error && (
             <div className="mt-3 pt-3 border-t border-slate-100 animate-in slide-in-from-top-2 duration-300">
               <div className="flex gap-3">
                  {imagePreview && (
                    <div className="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex-shrink-0 relative group">
                       <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                      {/* ✅ FIX: Uses handleRemoveImage to correctly reset input */}
                       <button onClick={handleRemoveImage} className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center font-bold text-xs transition-opacity">Remove</button>
                    </div>
                  )}
