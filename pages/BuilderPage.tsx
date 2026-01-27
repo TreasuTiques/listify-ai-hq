@@ -6,8 +6,12 @@ import { saveListingToInventory } from '../services/inventory';
 const BuilderPage: React.FC = () => {
   // 1. STATE MANAGEMENT
   const [activePlatform, setActivePlatform] = useState('ebay');
-  const [isProMode, setIsProMode] = useState(false); // 🌟 NEW: Pro Mode Toggle
+  const [isProMode, setIsProMode] = useState(false);
   
+  // eBay Editor State
+  const [editorTab, setEditorTab] = useState<'visual' | 'html'>('visual');
+  const [copySuccess, setCopySuccess] = useState(false);
+
   // Form Fields
   const [title, setTitle] = useState('');
   const [brand, setBrand] = useState('');
@@ -16,7 +20,7 @@ const BuilderPage: React.FC = () => {
   const [price, setPrice] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   
-  // 📸 NEW: File Memory
+  // 📸 File Memory
   const [selectedFile, setSelectedFile] = useState<File | null>(null); 
   
   // UI States
@@ -51,7 +55,6 @@ const BuilderPage: React.FC = () => {
   const runAIAnalysis = async (file: File, platform: string, proMode: boolean) => {
     setAnalyzing(true);
     try {
-      // Pass platform and proMode to the AI service
       const result = await generateListingFromImage(file, platform, proMode);
       
       setTitle(result.title || '');
@@ -60,6 +63,9 @@ const BuilderPage: React.FC = () => {
       setCondition(result.condition || 'New with Tags');
       setPrice(result.estimated_price || '');
       setTags(result.tags || []);
+      
+      // Auto-switch to visual tab on new generation
+      setEditorTab('visual');
       
     } catch (error) {
       console.error("AI Error:", error);
@@ -82,29 +88,30 @@ const BuilderPage: React.FC = () => {
 
     if (!file) return;
 
-    // ✅ SAVE THE FILE TO STATE
     setSelectedFile(file);
-
-    // Show Preview
     const reader = new FileReader();
     reader.onload = (e) => setImagePreview(e.target?.result as string);
     reader.readAsDataURL(file);
 
-    // CALL THE BRAIN 🧠 (Use current active platform)
     await runAIAnalysis(file, activePlatform, isProMode);
   };
 
-  // 🔄 NEW: Handle Platform Change
+  // 🔄 Handle Platform Change
   const handlePlatformChange = async (newPlatform: string) => {
     setActivePlatform(newPlatform);
-    // If we have a file, re-run AI with the new platform personality!
     if (selectedFile) {
       await runAIAnalysis(selectedFile, newPlatform, isProMode);
     }
   };
 
-  // 🔄 NEW: Handle Pro Mode Toggle
+  // 🔄 Handle Pro Mode Toggle (With "Teaser" Logic)
   const handleProModeToggle = async () => {
+    if (!user) {
+      alert("🔒 PRO FEATURE: Sign up for a free account to unlock AI Storytelling Mode!");
+      return;
+    }
+    // Future: Add check here for 'starter' tier to upsell to 'pro'
+    
     const newMode = !isProMode;
     setIsProMode(newMode);
     if (selectedFile) {
@@ -112,9 +119,16 @@ const BuilderPage: React.FC = () => {
     }
   };
 
+  // 📋 Copy Code Function
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(description);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
+
   const onDragOver = (e: React.DragEvent) => e.preventDefault();
   
-  // 3. THE SAVE FUNCTION
+  // 3. SAVE FUNCTION
   const handleGenerateAndSave = async () => {
     if (!user) {
       alert("Please log in to save listings!");
@@ -138,7 +152,6 @@ const BuilderPage: React.FC = () => {
         platform: activePlatform
       };
 
-      // 🚀 PASS THE FILE TO THE INVENTORY SERVICE
       await saveListingToInventory(listingData, selectedFile);
 
       setShowSuccess(true);
@@ -182,16 +195,19 @@ const BuilderPage: React.FC = () => {
           <p className="text-slate-500 mt-1">Upload photos to generate optimized listings instantly.</p>
         </div>
         <div className="flex items-center gap-4">
-           {/* PRO MODE TOGGLE (Only visible for eBay) */}
+           {/* PRO MODE TOGGLE (Teaser Mode) */}
            {activePlatform === 'ebay' && (
              <button 
                onClick={handleProModeToggle}
                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${
                  isProMode 
                    ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-lg' 
-                   : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
+                   : user 
+                     ? 'bg-white text-slate-500 border-slate-200 hover:border-slate-300' // Logged in but OFF
+                     : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70' // Visitor (Locked)
                }`}
              >
+               {!user && <span className="text-xs">🔒</span>}
                <span className={`w-2 h-2 rounded-full ${isProMode ? 'bg-green-400 animate-pulse' : 'bg-slate-300'}`}></span>
                Pro Mode: {isProMode ? 'ON' : 'OFF'}
              </button>
@@ -334,15 +350,51 @@ const BuilderPage: React.FC = () => {
                 />
             </div>
 
-            {/* DESCRIPTION */}
+            {/* DESCRIPTION - SMART EDITOR FOR EBAY */}
             <div className="mb-6">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Description / Notes</label>
-              <textarea 
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-32 resize-none"
-                placeholder="AI will write this for you..."
-              ></textarea>
+              <div className="flex justify-between items-center mb-2">
+                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Description / Notes</label>
+                 
+                 {/* EBAY ONLY: Tabbed Interface */}
+                 {activePlatform === 'ebay' && (
+                    <div className="flex gap-2">
+                       <div className="flex bg-slate-100 rounded-lg p-1">
+                          <button onClick={() => setEditorTab('visual')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${editorTab === 'visual' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>Visual Preview</button>
+                          <button onClick={() => setEditorTab('html')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${editorTab === 'html' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>HTML Source</button>
+                       </div>
+                       <button onClick={handleCopyCode} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all">
+                          {copySuccess ? <span>✓ Copied</span> : <><span>📋</span> Copy Code</>}
+                       </button>
+                    </div>
+                 )}
+              </div>
+
+              {activePlatform === 'ebay' ? (
+                // EBAY SMART EDITOR
+                <div className="relative">
+                   {editorTab === 'visual' ? (
+                      <div 
+                         className="w-full bg-white border border-slate-200 rounded-xl px-4 py-4 h-64 overflow-y-auto prose prose-sm max-w-none"
+                         dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic">Generated listing will appear here...</p>' }}
+                      ></div>
+                   ) : (
+                      <textarea 
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        className="w-full bg-slate-900 text-green-400 font-mono text-sm border border-slate-700 rounded-xl px-4 py-4 focus:outline-none focus:border-blue-500 h-64 resize-none"
+                        placeholder="<html>...</html>"
+                      ></textarea>
+                   )}
+                </div>
+              ) : (
+                // STANDARD EDITOR (Poshmark, Mercari, etc)
+                <textarea 
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-32 resize-none"
+                  placeholder="AI will write this for you..."
+                ></textarea>
+              )}
             </div>
 
             {/* ACTION BUTTON */}
