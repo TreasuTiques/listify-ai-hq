@@ -10,12 +10,13 @@ const BuilderPage: React.FC = () => {
   
   // eBay Editor State
   const [editorTab, setEditorTab] = useState<'visual' | 'html'>('visual');
-  const [copySuccess, setCopySuccess] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(''); // 'title' or 'desc'
 
   // Form Fields
   const [title, setTitle] = useState('');
   const [brand, setBrand] = useState('');
-  const [condition, setCondition] = useState('New with Tags');
+  // ⚠️ SAFETY: Default is empty to force user selection
+  const [condition, setCondition] = useState(''); 
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -29,6 +30,7 @@ const BuilderPage: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showConditionError, setShowConditionError] = useState(false); // 🚨 New Error State
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -60,11 +62,11 @@ const BuilderPage: React.FC = () => {
       setTitle(result.title || '');
       setBrand(result.brand || '');
       setDescription(result.description || '');
-      setCondition(result.condition || 'New with Tags');
+      // We do NOT auto-set condition to specific values to ensure user verifies it
+      if (result.condition) setCondition(result.condition); 
       setPrice(result.estimated_price || '');
       setTags(result.tags || []);
       
-      // Auto-switch to visual tab on new generation
       setEditorTab('visual');
       
     } catch (error) {
@@ -96,7 +98,6 @@ const BuilderPage: React.FC = () => {
     await runAIAnalysis(file, activePlatform, isProMode);
   };
 
-  // 🔄 Handle Platform Change
   const handlePlatformChange = async (newPlatform: string) => {
     setActivePlatform(newPlatform);
     if (selectedFile) {
@@ -104,14 +105,11 @@ const BuilderPage: React.FC = () => {
     }
   };
 
-  // 🔄 Handle Pro Mode Toggle (With "Teaser" Logic)
   const handleProModeToggle = async () => {
     if (!user) {
       alert("🔒 PRO FEATURE: Sign up for a free account to unlock AI Storytelling Mode!");
       return;
     }
-    // Future: Add check here for 'starter' tier to upsell to 'pro'
-    
     const newMode = !isProMode;
     setIsProMode(newMode);
     if (selectedFile) {
@@ -119,27 +117,36 @@ const BuilderPage: React.FC = () => {
     }
   };
 
-  // 📋 Copy Code Function
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(description);
-    setCopySuccess(true);
-    setTimeout(() => setCopySuccess(false), 2000);
+  // 📋 Copy Functions
+  const copyToClipboard = (text: string, type: 'title' | 'desc') => {
+    navigator.clipboard.writeText(text);
+    setCopySuccess(type);
+    setTimeout(() => setCopySuccess(''), 2000);
   };
 
   const onDragOver = (e: React.DragEvent) => e.preventDefault();
   
-  // 3. SAVE FUNCTION
+  // 3. SAVE FUNCTION (With Safety Checks)
   const handleGenerateAndSave = async () => {
     if (!user) {
       alert("Please log in to save listings!");
       return;
     }
+    
+    // 🚨 VALIDATION CHECKS
     if (!title) {
       alert("Please enter a title first.");
       return;
     }
+    if (!condition || condition === '') {
+      setShowConditionError(true);
+      // Shake animation effect via logic or just alert
+      alert("⚠️ PLEASE SELECT A CONDITION to continue.");
+      return;
+    }
 
     setLoading(true);
+    setShowConditionError(false);
 
     try {
       const listingData = {
@@ -195,7 +202,7 @@ const BuilderPage: React.FC = () => {
           <p className="text-slate-500 mt-1">Upload photos to generate optimized listings instantly.</p>
         </div>
         <div className="flex items-center gap-4">
-           {/* PRO MODE TOGGLE (Teaser Mode) */}
+           {/* PRO MODE TOGGLE */}
            {activePlatform === 'ebay' && (
              <button 
                onClick={handleProModeToggle}
@@ -203,8 +210,8 @@ const BuilderPage: React.FC = () => {
                  isProMode 
                    ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-lg' 
                    : user 
-                     ? 'bg-white text-slate-500 border-slate-200 hover:border-slate-300' // Logged in but OFF
-                     : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70' // Visitor (Locked)
+                     ? 'bg-white text-slate-500 border-slate-200 hover:border-slate-300' 
+                     : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70' 
                }`}
              >
                {!user && <span className="text-xs">🔒</span>}
@@ -295,20 +302,34 @@ const BuilderPage: React.FC = () => {
             </div>
 
             {/* TITLE */}
-            <div className="mb-6">
+            <div className="mb-6 relative">
               <div className="flex justify-between mb-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Listing Title</label>
                 <span className={`text-xs font-bold ${title.length > (activePlatform === 'poshmark' ? 50 : 80) ? 'text-red-500' : 'text-slate-400'}`}>
                    {title.length} / {activePlatform === 'poshmark' ? '50' : '80'}
                 </span>
               </div>
-              <input 
-                type="text" 
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400"
-                placeholder="Upload a photo to generate title..."
-              />
+              <div className="relative">
+                <input 
+                  type="text" 
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 pr-12 font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400"
+                  placeholder="Upload a photo to generate title..."
+                />
+                {/* 📋 COPY BUTTON INSIDE TITLE */}
+                <button 
+                  onClick={() => copyToClipboard(title, 'title')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 p-2 transition-colors"
+                  title="Copy Title"
+                >
+                  {copySuccess === 'title' ? (
+                     <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
+                  ) : (
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-6 mb-6">
@@ -322,19 +343,37 @@ const BuilderPage: React.FC = () => {
                   placeholder="Nike, Sony..."
                 />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Condition</label>
-                <select 
-                  value={condition}
-                  onChange={(e) => setCondition(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all appearance-none cursor-pointer"
-                >
-                  <option>New with Tags</option>
-                  <option>New without Tags</option>
-                  <option>Pre-owned (Excellent)</option>
-                  <option>Pre-owned (Good)</option>
-                  <option>For Parts / Not Working</option>
-                </select>
+              
+              {/* ⚠️ CONDITION with ARROW & VALIDATION */}
+              <div className="relative">
+                <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${showConditionError ? 'text-red-500 animate-pulse' : 'text-slate-500'}`}>
+                   Condition {showConditionError && "(Required!)"}
+                </label>
+                <div className="relative">
+                  <select 
+                    value={condition}
+                    onChange={(e) => {
+                      setCondition(e.target.value);
+                      setShowConditionError(false);
+                    }}
+                    className={`w-full bg-white border rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:ring-4 transition-all appearance-none cursor-pointer ${
+                       showConditionError 
+                       ? 'border-red-300 ring-red-500/10' 
+                       : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/10'
+                    }`}
+                  >
+                    <option value="" disabled>Select Condition...</option>
+                    <option>New with Tags</option>
+                    <option>New without Tags</option>
+                    <option>Pre-owned (Excellent)</option>
+                    <option>Pre-owned (Good)</option>
+                    <option>For Parts / Not Working</option>
+                  </select>
+                  {/* Custom Arrow Icon */}
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -350,7 +389,7 @@ const BuilderPage: React.FC = () => {
                 />
             </div>
 
-            {/* DESCRIPTION - SMART EDITOR FOR EBAY */}
+            {/* DESCRIPTION */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Description / Notes</label>
@@ -362,15 +401,15 @@ const BuilderPage: React.FC = () => {
                           <button onClick={() => setEditorTab('visual')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${editorTab === 'visual' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>Visual Preview</button>
                           <button onClick={() => setEditorTab('html')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${editorTab === 'html' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>HTML Source</button>
                        </div>
-                       <button onClick={handleCopyCode} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all">
-                          {copySuccess ? <span>✓ Copied</span> : <><span>📋</span> Copy Code</>}
+                       <button onClick={() => copyToClipboard(description, 'desc')} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all">
+                          {copySuccess === 'desc' ? <span>✓ Copied</span> : <><span>📋</span> Copy Code</>}
                        </button>
                     </div>
                  )}
               </div>
 
               {activePlatform === 'ebay' ? (
-                // EBAY SMART EDITOR
+                // EBAY SMART EDITOR (HTML Support)
                 <div className="relative">
                    {editorTab === 'visual' ? (
                       <div 
@@ -387,7 +426,8 @@ const BuilderPage: React.FC = () => {
                    )}
                 </div>
               ) : (
-                // STANDARD EDITOR (Poshmark, Mercari, etc)
+                // STANDARD EDITOR (Plain Text for Poshmark, Mercari, etc)
+                // Prevents formatting errors on platforms that don't support HTML
                 <textarea 
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
