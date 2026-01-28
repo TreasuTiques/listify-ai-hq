@@ -24,7 +24,6 @@ const fileToGenerativePart = async (file: File) => {
  */
 const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: string) => {
   const baseHelper = `Analyze these images and return valid JSON.`;
-  // ✅ Tell AI the specific condition selected by user
   const conditionContext = userCondition ? `IMPORTANT: The user specified the condition is "${userCondition}". Ensure the description matches this.` : '';
 
   switch (platform.toLowerCase()) {
@@ -32,7 +31,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
       return `
         ${baseHelper}
         ${conditionContext}
-        CONTEXT: Poshmark is a social fashion marketplace.
+        CONTEXT: Poshmark social fashion marketplace.
         RULES:
         - TITLE: MAX 50 CHARS. Brand + Category + Style.
         - DESCRIPTION: Friendly, emoji-friendly 💖. Mention material, fit, and occasion.
@@ -43,7 +42,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
       return `
         ${baseHelper}
         ${conditionContext}
-        CONTEXT: Mercari is for quick sales.
+        CONTEXT: Mercari quick sales.
         RULES:
         - TITLE: MAX 80 CHARS. Keywords first.
         - DESCRIPTION: Short, punchy. "Ships fast!" vibe.
@@ -54,7 +53,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
       return `
         ${baseHelper}
         ${conditionContext}
-        CONTEXT: Depop is for Gen-Z/Vintage.
+        CONTEXT: Depop Gen-Z/Vintage.
         RULES:
         - TITLE: Aesthetic, descriptive.
         - DESCRIPTION: Mention Era (Y2K, 90s), Vibe. Use slang like "sick piece" if applicable.
@@ -65,7 +64,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
       return `
         ${baseHelper}
         ${conditionContext}
-        CONTEXT: Etsy is for Vintage/Handmade.
+        CONTEXT: Etsy Vintage/Handmade.
         RULES:
         - DESCRIPTION: Emotional storytelling. Mention history/maker.
         JSON OUTPUT: { title, description, brand, condition, estimated_price, tags }
@@ -85,11 +84,11 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     case 'ebay':
     default:
       if (isProMode) {
-        // 🌟 JUAN ACUÑA'S PREMIUM FORMULA 🌟
+        // 🌟 PRO MODE: ANONYMOUS PREMIUM FORMULA 🌟
         return `
           ${baseHelper}
           ${conditionContext}
-          CONTEXT: You are "Juan Acuña’s Premium eBay Listing Generator".
+          CONTEXT: Professional High-End eBay Listing Generator.
           GOAL: Transform visual data into high-quality, themed, Cassini-optimized eBay listings.
 
           --- TITLE RULES ---
@@ -106,7 +105,8 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
           
           **HTML STYLING:**
           - Use a main container div: max-width: 800px; margin: auto; font-family: sans-serif; text-align: center; color: #333;
-          - **SKU BADGE:** Must include a white "Pill Shaped Badge" (Border-radius 50px, border 1px solid #ccc, padding 5px 15px, font-size 12px, background: white, display: inline-block, margin-bottom: 10px). Content: "PREMIUM LISTING" (since we don't have a real SKU yet).
+          - **SKU BADGE:** Must include a white "Pill Shaped Badge" (Border-radius 50px, border 1px solid #ccc, padding 5px 15px, font-size 12px, background: white, display: inline-block, margin-bottom: 10px). 
+          - **BADGE CONTENT:** Display "AUTHENTIC • [ERA/STYLE]" (e.g. "AUTHENTIC • VINTAGE" or "OFFICIAL • 1990s"). DO NOT use the words "Premium Listing".
           
           **CONTENT SECTIONS:**
           1. **HEADER:** Item Name (Themed Color, H1).
@@ -118,9 +118,9 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
           7. **CTA PANEL (The 1-3-1):**
              - ⭐ Fun Headline (Themed/Humorous)
              - 3 Conversational/Unique Bullets
-             - ✨ Warm Closing Tagline
+             - ✨ Warm Closing Tagline (Generic, professional, welcoming).
 
-          **DO NOT:** Use cursive fonts. Do not break HTML structure. 
+          **DO NOT:** Use cursive fonts. Do not break HTML structure. NEVER use a specific person's name.
           
           JSON OUTPUT: { title, description, brand, condition, estimated_price, itemSpecifics }
         `;
@@ -130,17 +130,13 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
           ${baseHelper}
           ${conditionContext}
           CONTEXT: eBay Standard Listing (High Conversion).
-          
           TITLE RULES: MAX 80 CHARS. Keyword rich.
-          
           DESCRIPTION RULES (Clean HTML):
           - Use a centered container div.
           - Use <h2> for Product Summary.
           - Use <strong> for key details.
           - Use <ul> for features (Clean bullets).
           - Use <strong> for Condition Note (Must reflect: ${userCondition}).
-          - Tone: Professional, clear, trustworthy.
-          
           JSON OUTPUT: { title, description, brand, condition, estimated_price, itemSpecifics }
         `;
       }
@@ -149,7 +145,6 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
 
 /**
  * 📸 BRAIN 1: THE BUILDER
- * ✅ UPDATED: Now accepts 'userCondition'
  */
 export async function generateListingFromImages(
   imageFiles: File[], 
@@ -159,12 +154,9 @@ export async function generateListingFromImages(
 ) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-    // Process all images in parallel
     const imageParts = await Promise.all(imageFiles.map(file => fileToGenerativePart(file)));
-    
     const prompt = getPlatformPrompt(platform, isProMode, userCondition);
 
-    // Send prompt + all images
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
     const cleanedText = response.text().replace(/```json|```/g, '').trim();
