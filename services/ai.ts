@@ -118,7 +118,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
           7. **CTA PANEL (The 1-3-1):**
              - ⭐ Fun Headline (Themed/Humorous)
              - 3 Conversational/Unique Bullets
-             - ✨ Warm Closing Tagline (Generic, professional, welcoming).
+             - ✨ Warm Closing Tagline (Generic, professional, welcoming. e.g., "Thanks for stopping by!").
 
           **DO NOT:** Use cursive fonts. Do not break HTML structure. NEVER use a specific person's name.
           
@@ -144,7 +144,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
 };
 
 /**
- * 📸 BRAIN 1: THE BUILDER
+ * 📸 BRAIN 1: THE BUILDER (MULTI-IMAGE)
  */
 export async function generateListingFromImages(
   imageFiles: File[], 
