@@ -1,766 +1,333 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from '../supabaseClient';
+import { generateListingFromImages } from '../services/ai';
+import { saveListingToInventory } from '../services/inventory'; 
 
-interface Listing {
-  id?: string;
-  title: string;
-  description: string;
-  price: number;
-  category: string;
-  images: string[];
-  platforms: string[];
-  status: 'draft' | 'published';
-}
+const BuilderPage: React.FC = () => {
+  // 1. STATE MANAGEMENT
+  const [activePlatform, setActivePlatform] = useState('ebay');
+  const [isProMode, setIsProMode] = useState(false);
+  const [editorTab, setEditorTab] = useState<'visual' | 'html'>('visual');
+  const [copySuccess, setCopySuccess] = useState(''); 
 
-interface ListingFormProps {
-  initialListing?: Listing;
-  onSave: (listing: Listing) => void;
-  onCancel: () => void;
-}
-
-interface ValidationErrors {
-  title?: string;
-  description?: string;
-  price?: string;
-  category?: string;
-  platforms?: string;
-}
-
-export default function ListingForm({ initialListing, onSave, onCancel }: ListingFormProps) {
-  const [listing, setListing] = useState<Listing>(
-    initialListing || {
-      title: '',
-      description: '',
-      price: 0,
-      category: '',
-      images: [],
-      platforms: [],
-      status: 'draft',
-    }
-  );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
+  // Form Fields
+  const [title, setTitle] = useState('');
+  const [brand, setBrand] = useState('');
+  const [condition, setCondition] = useState(''); // Default Blank
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  
+  // 📸 Multi-Image Memory
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]); 
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  
+  // UI States
+  const [loading, setLoading] = useState(false); 
+  const [analyzing, setAnalyzing] = useState(false); 
+  const [user, setUser] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
-  const [imageUploading, setImageUploading] = useState(false);
-  const [hoveredImage, setHoveredImage] = useState<number | null>(null);
-  const [showTooltip, setShowTooltip] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
+  const [showConditionError, setShowConditionError] = useState(false);
 
-  // Keyboard shortcut for save (Cmd/Ctrl + S)
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-        e.preventDefault();
-        formRef.current?.requestSubmit();
-      }
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    getUser();
   }, []);
 
-  // Auto-save draft every 30 seconds
-  useEffect(() => {
-    if (!listing.title) return;
-    const interval = setInterval(() => {
-      localStorage.setItem('listing_draft', JSON.stringify(listing));
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [listing]);
+  const platforms = [
+    { id: 'ebay', label: 'eBay', color: 'bg-blue-600' },
+    { id: 'poshmark', label: 'Poshmark', color: 'bg-red-700' },
+    { id: 'mercari', label: 'Mercari', color: 'bg-purple-600' },
+    { id: 'depop', label: 'Depop', color: 'bg-black' },
+    { id: 'etsy', label: 'Etsy', color: 'bg-orange-500' },
+    { id: 'shopify', label: 'Shopify', color: 'bg-emerald-500' },
+    { id: 'facebook', label: 'Facebook', color: 'bg-blue-800' },
+  ];
 
-  const validateForm = useCallback((): boolean => {
-    const errors: ValidationErrors = {};
+  // 🧠 HELPER: The Brain Function
+  const runAIAnalysis = async (files: File[], platform: string, proMode: boolean, cond: string) => {
+    if (files.length === 0) return;
     
-    if (!listing.title || listing.title.trim().length < 3) {
-      errors.title = 'Title must be at least 3 characters';
-    }
-    
-    if (!listing.description || listing.description.trim().length < 10) {
-      errors.description = 'Description must be at least 10 characters';
-    }
-    
-    if (listing.price <= 0) {
-      errors.price = 'Price must be greater than 0';
-    }
-    
-    if (!listing.category) {
-      errors.category = 'Please select a category';
-    }
-    
-    if (listing.platforms.length === 0) {
-      errors.platforms = 'Please select at least one platform';
-    }
-    
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  }, [listing]);
+    // 🛑 STOP if no condition selected (User must pick first)
+    if (!cond) return; 
 
-  const handleImageUpload = async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-
-    setImageUploading(true);
-    setError('');
-    const uploadedUrls: string[] = [];
-    const totalFiles = files.length;
-
-    // Mock upload - replace with your actual upload logic
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    setAnalyzing(true);
+    try {
+      // ✅ Pass 'cond' (condition) to AI
+      const result = await generateListingFromImages(files, platform, proMode, cond);
       
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setError(`File ${file.name} is too large. Maximum size is 5MB.`);
-        continue;
-      }
-
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setError(`File ${file.name} is not a valid image.`);
-        continue;
-      }
-
-      setUploadProgress(((i + 1) / totalFiles) * 100);
-      
-      // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Create a local URL for preview
-      const localUrl = URL.createObjectURL(file);
-      uploadedUrls.push(localUrl);
+      setTitle(result.title || '');
+      setBrand(result.brand || '');
+      setDescription(result.description || '');
+      setPrice(result.estimated_price || '');
+      setTags(result.tags || []);
+      setEditorTab('visual');
+    } catch (error) {
+      console.error("AI Error:", error);
+      alert("AI could not analyze images. Try again!");
+    } finally {
+      setAnalyzing(false);
     }
-
-    setListing({ ...listing, images: [...listing.images, ...uploadedUrls] });
-    setImageUploading(false);
-    setUploadProgress(0);
   };
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
+  // 2. AI MAGIC: Handle Image Upload (NO AUTO START)
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
+    let newFiles: File[] = [];
+    if ((e as React.DragEvent).dataTransfer) {
+      e.preventDefault();
+      newFiles = Array.from((e as React.DragEvent).dataTransfer.files);
+    } else if ((e as React.ChangeEvent<HTMLInputElement>).target.files) {
+      newFiles = Array.from((e as React.ChangeEvent<HTMLInputElement>).target.files!);
+    }
+    if (newFiles.length === 0) return;
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
+    const updatedFiles = [...selectedFiles, ...newFiles].slice(0, 8);
+    setSelectedFiles(updatedFiles);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    handleImageUpload(e.dataTransfer.files);
-  }, [listing]);
+    const newPreviews = await Promise.all(updatedFiles.map(file => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.readAsDataURL(file);
+      });
+    }));
+    setImagePreviews(newPreviews);
+
+    // 🛑 REMOVED auto-run. We wait for Condition selection now.
+    // However, if the user adds MORE photos later (and condition is already picked), we re-run.
+    if (condition) {
+       await runAIAnalysis(updatedFiles, activePlatform, isProMode, condition);
+    }
+  };
 
   const removeImage = (index: number) => {
-    const newImages = listing.images.filter((_, idx) => idx !== index);
-    setListing({ ...listing, images: newImages });
+    const updatedFiles = selectedFiles.filter((_, i) => i !== index);
+    const updatedPreviews = imagePreviews.filter((_, i) => i !== index);
+    setSelectedFiles(updatedFiles);
+    setImagePreviews(updatedPreviews);
   };
 
-  const handlePlatformToggle = (platform: string) => {
-    const platforms = listing.platforms.includes(platform)
-      ? listing.platforms.filter(p => p !== platform)
-      : [...listing.platforms, platform];
-    
-    setListing({ ...listing, platforms });
-    if (validationErrors.platforms) {
-      setValidationErrors({ ...validationErrors, platforms: undefined });
+  const handlePlatformChange = async (newPlatform: string) => {
+    setActivePlatform(newPlatform);
+    if (selectedFiles.length > 0 && condition) {
+      await runAIAnalysis(selectedFiles, newPlatform, isProMode, condition);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      setError('Please fix the validation errors before saving');
+  const handleProModeToggle = async () => {
+    if (!user) {
+      alert("🔒 PRO FEATURE: Sign up for a free account to unlock AI Storytelling Mode!");
       return;
     }
+    const newMode = !isProMode;
+    setIsProMode(newMode);
+    if (selectedFiles.length > 0 && condition) {
+      await runAIAnalysis(selectedFiles, activePlatform, newMode, condition);
+    }
+  };
+
+  // ✅ NEW: Trigger AI when Condition Changes
+  const handleConditionChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCondition = e.target.value;
+    setCondition(newCondition);
+    setShowConditionError(false);
+    
+    // 🚀 THE TRIGGER: If we have photos, GO!
+    if (selectedFiles.length > 0) {
+      await runAIAnalysis(selectedFiles, activePlatform, isProMode, newCondition);
+    }
+  };
+
+  const copyToClipboard = (text: string, type: 'title' | 'desc') => {
+    navigator.clipboard.writeText(text);
+    setCopySuccess(type);
+    setTimeout(() => setCopySuccess(''), 2000);
+  };
+  const onDragOver = (e: React.DragEvent) => e.preventDefault();
+  
+  // 3. SAVE FUNCTION
+  const handleGenerateAndSave = async () => {
+    if (!user) { alert("Please log in to save listings!"); return; }
+    if (!title) { alert("Please enter a title first."); return; }
+    if (!condition) { setShowConditionError(true); alert("⚠️ PLEASE SELECT A CONDITION."); return; }
 
     setLoading(true);
-    setError('');
-
     try {
-      // Simulate API call - replace with your actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Show success animation
+      const listingData = { title, brand, description, condition, estimated_price: price, tags: tags, platform: activePlatform };
+      await saveListingToInventory(listingData, selectedFiles[0]);
       setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        onSave(listing);
-      }, 1500);
-
-      // Clear draft
-      localStorage.removeItem('listing_draft');
-    } catch (err) {
-      setError('Failed to save listing. Please try again.');
+      setTimeout(() => { window.location.hash = '/inventory'; }, 1500);
+    } catch (error: any) {
+      console.error('Error saving listing:', error);
+      alert('Error saving: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleQuickFill = () => {
-    // AI-powered quick fill would go here
-    setListing({
-      ...listing,
-      description: listing.description || 'This is a premium quality item in excellent condition.',
-    });
-  };
-
-  const platforms = [
-    { name: 'eBay', icon: '🛒', color: 'from-yellow-400 to-yellow-600' },
-    { name: 'Amazon', icon: '📦', color: 'from-orange-400 to-orange-600' },
-    { name: 'Etsy', icon: '🎨', color: 'from-pink-400 to-pink-600' },
-    { name: 'Facebook Marketplace', icon: '👥', color: 'from-blue-400 to-blue-600' },
-  ];
-
-  const categories = ['Electronics', 'Clothing', 'Home & Garden', 'Toys', 'Sports'];
-
-  const completionPercentage = Math.round(
-    ((listing.title ? 1 : 0) +
-    (listing.description ? 1 : 0) +
-    (listing.price > 0 ? 1 : 0) +
-    (listing.category ? 1 : 0) +
-    (listing.images.length > 0 ? 1 : 0) +
-    (listing.platforms.length > 0 ? 1 : 0)) / 6 * 100
-  );
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-8 px-4 sm:px-6 lg:px-8">
-      {/* Success Animation Overlay */}
+    <div className="min-h-screen bg-[#F8FAFC] pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative">
       {showSuccess && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center space-y-4 animate-in zoom-in duration-500">
-            <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center animate-bounce">
-              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900">Listing Saved!</h3>
-            <p className="text-gray-600">Your listing has been successfully saved.</p>
+        <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="bg-[#0F172A] text-white px-8 py-4 rounded-2xl shadow-2xl shadow-blue-900/20 flex items-center gap-4 border border-slate-700">
+            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-[#0F172A] shadow-lg shadow-green-500/20"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg></div>
+            <div><h4 className="font-bold text-lg">Listing Saved!</h4><p className="text-slate-400 text-xs font-medium">Redirecting to Inventory...</p></div>
           </div>
         </div>
       )}
 
-      <div className="max-w-5xl mx-auto">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                {initialListing ? 'Edit Listing' : 'Create New Listing'}
-              </h1>
-              <p className="text-gray-600 mt-2">Fill in the details to create your listing across multiple platforms</p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="text-right">
-                <div className="text-sm text-gray-500">Completion</div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  {completionPercentage}%
-                </div>
-              </div>
-              <div className="relative w-16 h-16">
-                <svg className="transform -rotate-90 w-16 h-16">
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="28"
-                    stroke="currentColor"
-                    strokeWidth="6"
-                    fill="transparent"
-                    className="text-gray-200"
-                  />
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="28"
-                    stroke="currentColor"
-                    strokeWidth="6"
-                    fill="transparent"
-                    strokeDasharray={`${2 * Math.PI * 28}`}
-                    strokeDashoffset={`${2 * Math.PI * 28 * (1 - completionPercentage / 100)}`}
-                    className="text-indigo-600 transition-all duration-500"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
+      <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight flex items-center gap-3"><span className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>Listing Command Center</h1>
+          <p className="text-slate-500 mt-1">Upload up to 8 photos for maximum accuracy.</p>
+        </div>
+        <div className="flex items-center gap-4">
+           {activePlatform === 'ebay' && (
+             <button onClick={handleProModeToggle} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${isProMode ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-lg' : user ? 'bg-white text-slate-500 border-slate-200 hover:border-slate-300' : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70'}`}>
+               {!user && <span className="text-xs">🔒</span>}<span className={`w-2 h-2 rounded-full ${isProMode ? 'bg-green-400 animate-pulse' : 'bg-slate-300'}`}></span>Pro Mode: {isProMode ? 'ON' : 'OFF'}
+             </button>
+           )}
+           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider bg-white px-4 py-2 rounded-lg border border-slate-100 shadow-sm">{imagePreviews.length} / 8 Photos • Target: <span className={`font-bold ml-1 ${activePlatform === 'ebay' ? 'text-blue-600' : 'text-slate-900'}`}>{activePlatform.toUpperCase()}</span></div>
+        </div>
+      </div>
 
-          {/* Keyboard Shortcut Hint */}
-          <div className="inline-flex items-center space-x-2 px-3 py-1.5 bg-white/60 backdrop-blur-sm rounded-full border border-indigo-100 text-sm text-gray-600">
-            <span>💡 Pro tip:</span>
-            <kbd className="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono">⌘ S</kbd>
-            <span>to save quickly</span>
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm p-6 relative overflow-hidden group">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Source Media</h3>
+              <span className="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded-md">Multi-Vision Ready</span>
+            </div>
+            <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*" multiple />
+
+            <div onClick={() => fileInputRef.current?.click()} onDragOver={onDragOver} onDrop={handleFileUpload} className={`border-2 border-dashed rounded-2xl h-[400px] flex flex-col transition-all cursor-pointer relative overflow-hidden ${analyzing ? 'border-blue-500 bg-blue-50' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-blue-400'}`}>
+              {imagePreviews.length > 0 ? (
+                <div className="h-full flex flex-col">
+                  <div className="h-2/3 w-full relative">
+                    <img src={imagePreviews[0]} alt="Main" className="w-full h-full object-cover" />
+                    <div className="absolute top-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-md">Main Photo</div>
+                  </div>
+                  <div className="h-1/3 w-full bg-white border-t border-slate-200 p-2 grid grid-cols-4 gap-2 overflow-y-auto">
+                    {imagePreviews.map((src, idx) => (
+                      <div key={idx} className="relative group/thumb aspect-square rounded-lg overflow-hidden border border-slate-100">
+                        <img src={src} className="w-full h-full object-cover" />
+                        <button onClick={(e) => { e.stopPropagation(); removeImage(idx); }} className="absolute inset-0 bg-red-500/80 text-white opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center font-bold text-xs transition-opacity">✕</button>
+                      </div>
+                    ))}
+                    {imagePreviews.length < 8 && <div className="flex items-center justify-center border-2 border-dashed border-slate-200 rounded-lg text-slate-400 text-xs font-bold hover:bg-slate-50">+ Add</div>}
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+                  <p className="text-sm font-bold text-slate-700">Drop up to 8 Photos</p><p className="text-xs text-slate-400 mt-1">Front, Back, Tags, Flaws</p>
+                </div>
+              )}
+              {analyzing && (
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-20">
+                  <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <p className="font-bold text-blue-700 animate-pulse">Analyzing {imagePreviews.length} Photos...</p>
+                  <p className="text-xs text-blue-500">Reading Condition: {condition}...</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex space-x-2 mb-6">
-          <button
-            type="button"
-            onClick={() => setActiveTab('edit')}
-            className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
-              activeTab === 'edit'
-                ? 'bg-white shadow-lg shadow-indigo-100 text-indigo-600 scale-105'
-                : 'bg-white/40 backdrop-blur-sm text-gray-600 hover:bg-white/60'
-            }`}
-          >
-            ✏️ Edit Details
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('preview')}
-            className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
-              activeTab === 'preview'
-                ? 'bg-white shadow-lg shadow-indigo-100 text-indigo-600 scale-105'
-                : 'bg-white/40 backdrop-blur-sm text-gray-600 hover:bg-white/60'
-            }`}
-          >
-            👁️ Preview
-          </button>
-        </div>
-
-        {/* Error Alert */}
-        {error && (
-          <div className="mb-6 bg-red-50 border-l-4 border-red-500 rounded-xl p-4 backdrop-blur-sm animate-in slide-in-from-top duration-300">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-red-700 font-medium">{error}</p>
-              </div>
-              <button
-                onClick={() => setError('')}
-                className="ml-auto text-red-500 hover:text-red-700 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
+        <div className="lg:col-span-7 space-y-6">
+          <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm p-8">
+            <div className="mb-8">
+               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Target Marketplace</label>
+               <div className="flex flex-wrap gap-2">
+                 {platforms.map((platform) => (
+                   <button key={platform.id} onClick={() => handlePlatformChange(platform.id)} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all border ${activePlatform === platform.id ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-md transform scale-105' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}>
+                     <span className={`w-2 h-2 rounded-full ${activePlatform === platform.id ? 'bg-white' : platform.color}`}></span>{platform.label}
+                   </button>
+                 ))}
+               </div>
             </div>
-          </div>
-        )}
 
-        {activeTab === 'edit' ? (
-          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-            {/* Main Content Card */}
-            <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-8 space-y-6">
-              {/* Title Field */}
-              <div className="group">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Listing Title <span className="text-red-500">*</span>
-                  </label>
-                  <span className="text-xs text-gray-500">{listing.title.length}/100</span>
-                </div>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={listing.title}
-                    onChange={(e) => {
-                      setListing({ ...listing, title: e.target.value.slice(0, 100) });
-                      if (validationErrors.title) {
-                        setValidationErrors({ ...validationErrors, title: undefined });
-                      }
-                    }}
-                    className={`w-full px-4 py-3.5 bg-white/50 border-2 rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 focus:bg-white ${
-                      validationErrors.title ? 'border-red-300' : 'border-gray-200'
-                    } hover:border-gray-300`}
-                    placeholder="Enter a compelling title for your listing..."
-                  />
-                  {listing.title && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    </div>
-                  )}
-                </div>
-                {validationErrors.title && (
-                  <p className="mt-1.5 text-xs text-red-600 flex items-center animate-in slide-in-from-top duration-200">
-                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    {validationErrors.title}
-                  </p>
-                )}
+            <div className="mb-6 relative">
+              <div className="flex justify-between mb-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Listing Title</label>
+                <span className={`text-xs font-bold ${title.length > (activePlatform === 'poshmark' ? 50 : 80) ? 'text-red-500' : 'text-slate-400'}`}>{title.length} / {activePlatform === 'poshmark' ? '50' : '80'}</span>
               </div>
-
-              {/* Description Field */}
-              <div className="group">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-semibold text-gray-700">
-                    Description <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex items-center space-x-2">
-                    <button
-                      type="button"
-                      onClick={handleQuickFill}
-                      onMouseEnter={() => setShowTooltip('ai-assist')}
-                      onMouseLeave={() => setShowTooltip(null)}
-                      className="relative px-3 py-1 text-xs font-medium text-purple-600 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg hover:from-purple-100 hover:to-pink-100 transition-all duration-300 hover:scale-105"
-                    >
-                      ✨ AI Assist
-                      {showTooltip === 'ai-assist' && (
-                        <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap animate-in fade-in duration-200">
-                          Generate description with AI
-                          <div className="absolute top-full right-4 -mt-1 border-4 border-transparent border-t-gray-900"></div>
-                        </div>
-                      )}
-                    </button>
-                    <span className="text-xs text-gray-500">{listing.description.length}/2000</span>
-                  </div>
-                </div>
-                <textarea
-                  value={listing.description}
-                  onChange={(e) => {
-                    setListing({ ...listing, description: e.target.value.slice(0, 2000) });
-                    if (validationErrors.description) {
-                      setValidationErrors({ ...validationErrors, description: undefined });
-                    }
-                  }}
-                  className={`w-full px-4 py-3.5 bg-white/50 border-2 rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 focus:bg-white resize-none ${
-                    validationErrors.description ? 'border-red-300' : 'border-gray-200'
-                  } hover:border-gray-300`}
-                  rows={6}
-                  placeholder="Describe your item in detail. Include condition, features, specifications, and why buyers should choose this listing..."
-                />
-                {validationErrors.description && (
-                  <p className="mt-1.5 text-xs text-red-600 flex items-center animate-in slide-in-from-top duration-200">
-                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    {validationErrors.description}
-                  </p>
-                )}
-              </div>
-
-              {/* Price and Category Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Price Field */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Price <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold">$</div>
-                    <input
-                      type="number"
-                      value={listing.price || ''}
-                      onChange={(e) => {
-                        setListing({ ...listing, price: parseFloat(e.target.value) || 0 });
-                        if (validationErrors.price) {
-                          setValidationErrors({ ...validationErrors, price: undefined });
-                        }
-                      }}
-                      className={`w-full pl-10 pr-4 py-3.5 bg-white/50 border-2 rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 focus:bg-white ${
-                        validationErrors.price ? 'border-red-300' : 'border-gray-200'
-                      } hover:border-gray-300`}
-                      placeholder="0.00"
-                      step="0.01"
-                      min="0"
-                    />
-                  </div>
-                  {validationErrors.price && (
-                    <p className="mt-1.5 text-xs text-red-600 flex items-center animate-in slide-in-from-top duration-200">
-                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                      {validationErrors.price}
-                    </p>
-                  )}
-                </div>
-
-                {/* Category Field */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Category <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={listing.category}
-                    onChange={(e) => {
-                      setListing({ ...listing, category: e.target.value });
-                      if (validationErrors.category) {
-                        setValidationErrors({ ...validationErrors, category: undefined });
-                      }
-                    }}
-                    className={`w-full px-4 py-3.5 bg-white/50 border-2 rounded-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 focus:bg-white ${
-                      validationErrors.category ? 'border-red-300' : 'border-gray-200'
-                    } hover:border-gray-300 cursor-pointer`}
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                  {validationErrors.category && (
-                    <p className="mt-1.5 text-xs text-red-600 flex items-center animate-in slide-in-from-top duration-200">
-                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                      {validationErrors.category}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Image Upload Section */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Product Images
-                  <span className="ml-2 text-xs font-normal text-gray-500">(Max 5MB per image)</span>
-                </label>
-                
-                {/* Drag & Drop Zone */}
-                <div
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`relative border-2 border-dashed rounded-2xl p-8 transition-all duration-300 cursor-pointer ${
-                    isDragging
-                      ? 'border-indigo-500 bg-indigo-50 scale-105'
-                      : 'border-gray-300 bg-gradient-to-br from-gray-50 to-gray-100 hover:border-indigo-400 hover:bg-indigo-50/50'
-                  }`}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={(e) => handleImageUpload(e.target.files)}
-                    className="hidden"
-                  />
-                  
-                  <div className="text-center">
-                    <div className="mx-auto w-16 h-16 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-2xl flex items-center justify-center mb-4 transform transition-transform duration-300 hover:scale-110">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </svg>
-                    </div>
-                    <p className="text-base font-medium text-gray-700 mb-1">
-                      {isDragging ? 'Drop images here' : 'Click to upload or drag and drop'}
-                    </p>
-                    <p className="text-sm text-gray-500">PNG, JPG, GIF up to 5MB</p>
-                  </div>
-
-                  {imageUploading && (
-                    <div className="mt-4">
-                      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300 rounded-full"
-                          style={{ width: `${uploadProgress}%` }}
-                        />
-                      </div>
-                      <p className="text-xs text-center text-gray-600 mt-2">Uploading... {Math.round(uploadProgress)}%</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Image Preview Grid */}
-                {listing.images.length > 0 && (
-                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {listing.images.map((img, idx) => (
-                      <div
-                        key={idx}
-                        onMouseEnter={() => setHoveredImage(idx)}
-                        onMouseLeave={() => setHoveredImage(null)}
-                        className="relative group aspect-square rounded-xl overflow-hidden bg-gray-100 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105"
-                      >
-                        <img
-                          src={img}
-                          alt={`Upload ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        {hoveredImage === idx && (
-                          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeImage(idx);
-                              }}
-                              className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-200 hover:scale-110"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
-                        )}
-                        {idx === 0 && (
-                          <div className="absolute top-2 left-2 px-2 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg">
-                            Primary
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Platform Selection */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Publish to Platforms <span className="text-red-500">*</span>
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {platforms.map(platform => {
-                    const isSelected = listing.platforms.includes(platform.name);
-                    return (
-                      <button
-                        key={platform.name}
-                        type="button"
-                        onClick={() => handlePlatformToggle(platform.name)}
-                        className={`relative p-4 rounded-xl border-2 transition-all duration-300 ${
-                          isSelected
-                            ? 'border-transparent bg-gradient-to-br ' + platform.color + ' text-white shadow-lg shadow-indigo-200 scale-105'
-                            : 'border-gray-200 bg-white/50 text-gray-700 hover:border-gray-300 hover:bg-white hover:shadow-md'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className={`text-2xl ${isSelected ? 'scale-110' : ''} transition-transform duration-300`}>
-                            {platform.icon}
-                          </div>
-                          <div className="flex-1 text-left">
-                            <div className="font-semibold">{platform.name}</div>
-                            <div className={`text-xs ${isSelected ? 'text-white/90' : 'text-gray-500'}`}>
-                              {isSelected ? 'Selected' : 'Click to select'}
-                            </div>
-                          </div>
-                          {isSelected && (
-                            <div className="w-6 h-6 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                              <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-                {validationErrors.platforms && (
-                  <p className="mt-2 text-xs text-red-600 flex items-center animate-in slide-in-from-top duration-200">
-                    <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    {validationErrors.platforms}
-                  </p>
-                )}
+              <div className="relative">
+                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 pr-12 font-medium text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400" placeholder="AI will generate this..." />
+                <button onClick={() => copyToClipboard(title, 'title')} className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-50 hover:bg-blue-100 text-blue-600 p-2 rounded-lg transition-colors border border-blue-100" title="Copy Title">
+                  {copySuccess === 'title' ? <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg> : <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>}
+                </button>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 relative overflow-hidden group px-8 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className="relative flex items-center justify-center space-x-2">
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Saving...</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>Save Listing</span>
-                    </>
-                  )}
-                </div>
-              </button>
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Brand</label>
+                <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400" placeholder="Nike, Sony..." />
+              </div>
               
-              <button
-                type="button"
-                onClick={onCancel}
-                className="px-8 py-4 bg-white/70 backdrop-blur-sm text-gray-700 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 hover:bg-white transition-all duration-300 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        ) : (
-          /* Preview Tab */
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Listing Preview</h2>
-            
-            <div className="space-y-6">
-              {/* Preview Card */}
-              <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border border-gray-200 shadow-lg">
-                {listing.images.length > 0 && (
-                  <div className="aspect-video rounded-lg overflow-hidden mb-6 bg-gray-100">
-                    <img
-                      src={listing.images[0]}
-                      alt={listing.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  {listing.title || 'Your listing title will appear here'}
-                </h3>
-                
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                    ${listing.price.toFixed(2)}
-                  </div>
-                  {listing.category && (
-                    <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
-                      {listing.category}
-                    </span>
-                  )}
+              <div className="relative">
+                <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${showConditionError ? 'text-red-500 animate-pulse' : 'text-slate-500'}`}>Condition {showConditionError && "(Required!)"}</label>
+                <div className="relative">
+                  <select value={condition} onChange={handleConditionChange} className={`w-full bg-white border rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:ring-4 transition-all appearance-none cursor-pointer ${showConditionError ? 'border-red-300 ring-red-500/10' : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/10'}`}>
+                    <option value="" disabled>Select Condition...</option>
+                    <option>New with Tags</option>
+                    <option>New without Tags</option>
+                    <option>Pre-owned (Excellent)</option>
+                    <option>Pre-owned (Good)</option>
+                    <option>For Parts / Not Working</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg></div>
                 </div>
-                
-                <p className="text-gray-700 whitespace-pre-wrap mb-6">
-                  {listing.description || 'Your detailed description will appear here'}
-                </p>
-                
-                {listing.platforms.length > 0 && (
-                  <div>
-                    <div className="text-sm font-semibold text-gray-700 mb-2">Available on:</div>
-                    <div className="flex flex-wrap gap-2">
-                      {listing.platforms.map(platform => (
-                        <span key={platform} className="px-3 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-indigo-700 rounded-lg text-sm font-medium border border-indigo-100">
-                          {platform}
-                        </span>
-                      ))}
+              </div>
+            </div>
+
+            <div className="mb-6">
+               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">AI Estimated Price</label>
+               <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-3 font-bold focus:outline-none focus:border-emerald-500 transition-all placeholder:text-emerald-300" placeholder="$0.00" />
+            </div>
+
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-2">
+                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Description / Notes</label>
+                 {activePlatform === 'ebay' && (
+                    <div className="flex gap-2">
+                       <div className="flex bg-slate-100 rounded-lg p-1">
+                          <button onClick={() => setEditorTab('visual')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${editorTab === 'visual' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>Visual Preview</button>
+                          <button onClick={() => setEditorTab('html')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${editorTab === 'html' ? 'bg-white shadow-sm text-slate-900' : 'text-slate-400 hover:text-slate-600'}`}>HTML Source</button>
+                       </div>
+                       <button onClick={() => copyToClipboard(description, 'desc')} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all shadow-md shadow-blue-500/20">
+                          {copySuccess === 'desc' ? <span>✓ Copied</span> : <><span>📋</span> Copy Code</>}
+                       </button>
                     </div>
-                  </div>
-                )}
+                 )}
               </div>
 
-              {/* Preview Info */}
-              <div className="bg-blue-50 border-l-4 border-blue-500 rounded-xl p-4">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-blue-700">
-                      This is a preview of how your listing will appear. Switch to the Edit tab to make changes.
-                    </p>
-                  </div>
+              {activePlatform === 'ebay' ? (
+                <div className="relative">
+                   {editorTab === 'visual' ? (
+                      <div className="w-full bg-white border border-slate-200 rounded-xl px-4 py-4 h-64 overflow-y-auto prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic">Select condition to generate listing...</p>' }}></div>
+                   ) : (
+                      <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-slate-900 text-green-400 font-mono text-sm border border-slate-700 rounded-xl px-4 py-4 focus:outline-none focus:border-blue-500 h-64 resize-none" placeholder="<html>...</html>"></textarea>
+                   )}
                 </div>
-              </div>
+              ) : (
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-900 focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-32 resize-none" placeholder="AI will write this for you..."></textarea>
+              )}
             </div>
+
+            <button onClick={handleGenerateAndSave} disabled={loading || analyzing} className="w-full bg-[#2563EB] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 hover:bg-blue-600 hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+              {loading ? "Uploading & Saving..." : analyzing ? `Optimizing with ${condition}...` : `Save ${platforms.find(p => p.id === activePlatform)?.label} Listing`}
+            </button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
-}
+};
+export default BuilderPage;
