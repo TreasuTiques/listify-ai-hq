@@ -23,43 +23,71 @@ import BlogPage from './pages/BlogPage';
 import VisionPage from './pages/VisionPage';
 import SuccessHub from './pages/SuccessHub';
 import PartnersPage from './pages/PartnersPage';
-// import ProfitScoutPage from './pages/ProfitScoutPage'; // ❌ REMOVED: Replaced by Sourcing Tool
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentPath, setCurrentPath] = useState(window.location.hash.replace('#', '') || '/');
 
+  // 🌑 GLOBAL DARK MODE STATE
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
   useEffect(() => {
-    // Check active session
+    // 1. Check Active Session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
 
-    // Listen for auth changes
+    // 2. Listen for Auth Changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setLoading(false);
     });
 
-    // Listen for navigation
+    // 3. Listen for Navigation
     const handleHashChange = () => {
       setCurrentPath(window.location.hash.replace('#', '') || '/');
     };
     window.addEventListener('hashchange', handleHashChange);
+
+    // 4. 🌑 Initialize Dark Mode (Check LocalStorage or System)
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+      setIsDarkMode(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
+    }
+
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
       subscription.unsubscribe();
     };
   }, []);
 
+  // 🌑 The Toggle Function (Passed to Navbar)
+  const toggleTheme = () => {
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+      setIsDarkMode(false);
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+      setIsDarkMode(true);
+    }
+  };
+
   const navigate = (path: string) => {
     window.location.hash = path;
     window.scrollTo(0, 0); 
   };
 
-  if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
+  if (loading) return <div className="h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 dark:text-white">Loading...</div>;
 
   // 🚪 LOGGED OUT STATE
   if (!session) {
@@ -69,8 +97,15 @@ const App: React.FC = () => {
 
     // PUBLIC LAYOUT WRAPPER
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col">
-        <Navbar session={null} onNavigate={navigate} isLanding={true} />
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 flex flex-col">
+        {/* Pass Dark Mode props to Navbar */}
+        <Navbar 
+          session={null} 
+          onNavigate={navigate} 
+          isLanding={true} 
+          isDarkMode={isDarkMode} 
+          toggleTheme={toggleTheme} 
+        />
         
         <div className="flex-grow pt-20"> 
           {(() => {
@@ -78,10 +113,7 @@ const App: React.FC = () => {
               // --- MARKETING / PUBLIC PAGES ---
               case '/pricing': return <PricingPage />;
               case '/analytics': return <AnalyticsPage />; 
-              
-              // ✅ SWAP: Now '/sourcing' goes directly to the tool!
               case '/sourcing': return <SourcingPage />;
-              
               case '/doctor': return <StaleListingsPage />;
               case '/contact': return <ContactPage />;
               case '/privacy': return <PrivacyPage />;
@@ -93,7 +125,7 @@ const App: React.FC = () => {
               
               // --- HEADER/FOOTER LINKS ---
               case '/inventory': return <InventoryPage onNavigate={navigate} />;
-              case '/builder': return <BuilderPage />; // "Listing Generator" link
+              case '/builder': return <BuilderPage />; 
 
               default: return <LandingPage onNavigate={navigate} />;
             }
@@ -129,8 +161,14 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar session={session} onNavigate={navigate} />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+      {/* Pass Dark Mode props to Navbar */}
+      <Navbar 
+        session={session} 
+        onNavigate={navigate} 
+        isDarkMode={isDarkMode} 
+        toggleTheme={toggleTheme} 
+      />
       <div className="pt-20">
         {renderContent()}
       </div>
