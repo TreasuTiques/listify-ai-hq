@@ -77,7 +77,51 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     }
   ];
 
-  const rawHtml = `... (HTML Content omitted for brevity, logic remains the same) ...`;
+  const rawHtml = `
+<div class="listing-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #000000; line-height: 1.6;">
+  <style>
+    .listing-container h1, .listing-container h2, .listing-container h3, .listing-container strong { color: #003366 !important; }
+    .listing-container p, .listing-container li, .listing-container span { color: #111827 !important; }
+    .listing-container table td { color: #000000 !important; }
+  </style>
+  <div style="text-align: center; border-bottom: 2px solid #0053A0; padding-bottom: 20px; margin-bottom: 30px;">
+    <h1 style="font-size: 28px; font-weight: bold; margin: 0;">Canon AE-1 Program 35mm SLR Camera</h1>
+    <h2 style="font-size: 18px; font-weight: normal; margin: 10px 0 0 0; color: #333 !important;">with Canon FD 50mm f/1.8 Lens | Tested & Working</h2>
+  </div>
+  <p style="font-size: 16px; margin-bottom: 25px;">
+    <strong>Capture the golden age of photography.</strong> The Canon AE-1 Program isn't just a camera; it's a legend. Introduced in 1981, this camera offers the perfect balance of manual control for purists and "Program" automation for spontaneous shooting. Whether you are a film student or a seasoned collector, the tactile click of the shutter and the bright viewfinder will remind you why film is timeless.
+  </p>
+  <div style="background-color: #F8F9FA; border-radius: 8px; padding: 20px; margin-bottom: 30px; border: 1px solid #E9ECEF;">
+    <h3 style="margin-top: 0; font-size: 18px; border-bottom: 1px solid #CED4DA; padding-bottom: 10px; font-weight: bold;">Technical Specifications</h3>
+    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+      <tr>
+        <td style="padding: 5px 0; width: 50%; vertical-align: top;"><strong>Type:</strong> 35mm SLR</td>
+        <td style="padding: 5px 0; width: 50%; vertical-align: top;"><strong>Mount:</strong> Canon FD</td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; vertical-align: top;"><strong>Shutter:</strong> 2s - 1/1000s + Bulb</td>
+        <td style="padding: 5px 0; vertical-align: top;"><strong>ISO Range:</strong> 12 - 3200</td>
+      </tr>
+      <tr>
+        <td style="padding: 5px 0; vertical-align: top;"><strong>Metering:</strong> TTL Center-Weighted</td>
+        <td style="padding: 5px 0; vertical-align: top;"><strong>Battery:</strong> 4LR44 (Included)</td>
+      </tr>
+    </table>
+  </div>
+  <div style="margin-bottom: 30px;">
+    <h3 style="font-size: 18px; margin-bottom: 15px; font-weight: bold;">Condition Report: Excellent (A)</h3>
+    <p style="margin-bottom: 15px;">This camera has been professionally inspected and tested.</p>
+    <ul style="list-style: none; padding-left: 0;">
+      <li style="margin-bottom: 8px;">✅ <strong>Mechanics:</strong> Shutter fires accurately at all speeds. No "Canon Squeak".</li>
+      <li style="margin-bottom: 8px;">✅ <strong>Optics:</strong> Lens is clean and clear. No fungus, haze, or separation.</li>
+      <li style="margin-bottom: 8px;">✅ <strong>Light Seals:</strong> Recently replaced foam seals. Light-tight.</li>
+      <li style="margin-bottom: 8px;">✅ <strong>Cosmetics:</strong> Minimal signs of wear. Chrome finish is bright and clean.</li>
+    </ul>
+  </div>
+  <div style="background-color: #EFF6FF; color: #1E40AF !important; padding: 15px; text-align: center; border-radius: 6px; font-weight: bold; font-size: 14px; border: 1px solid #DBEAFE;">
+    📦 Fast Shipping: Orders ship within 24 hours via USPS Priority Mail with Tracking.
+  </div>
+</div>`;
 
   const handleCopy = async () => {
     try {
@@ -90,7 +134,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   return (
     <div className="bg-white dark:bg-slate-900 selection:bg-blue-100 dark:selection:bg-blue-900 font-sans antialiased text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
-      {/* NOTE: Navbar is now handled by App.tsx to ensure Global Dark Mode works! */}
+      {/* 🛑 NAVBAR REMOVED HERE (Handled by App.tsx) */}
 
       {/* HERO SECTION */}
       <section id="hero" className="relative pt-12 sm:pt-20 pb-8 sm:pb-12 bg-[#F8FAFC] dark:bg-slate-900 overflow-hidden transition-colors duration-300">
@@ -180,9 +224,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* BEFORE & AFTER SLIDER (Already Dark themed by default, minor tweaks) */}
+      {/* BEFORE & AFTER SLIDER */}
       <section className="py-24 bg-[#0F172A] dark:bg-black relative overflow-hidden transition-colors duration-300">
-        {/* ... (Slider code is mostly image/dark based, so it looks good in both) ... */}
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none"></div>
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
         <div className="max-w-4xl mx-auto px-4 relative z-10">
@@ -190,7 +233,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             <h2 className="text-3xl font-bold text-white tracking-tight">AI That Sees Details You Miss</h2>
             <p className="text-slate-400 mt-4 text-lg">Our vision engine identifies defects, model numbers, and value—instantly.</p>
           </div>
-          {/* ... Slider Component (No changes needed, already dark styled) ... */}
           <div className="relative rounded-[24px] overflow-hidden border border-slate-700 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] h-[500px] group">
             <div className="absolute inset-0">
                <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover opacity-60 mix-blend-luminosity" alt="Analyzed" />
@@ -315,7 +357,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               <div className="h-[550px] overflow-y-auto scrollbar-hide text-left relative bg-white dark:bg-slate-900">
                 {activeTab === 'preview' ? (
                   <div className="p-8 sm:p-12 animate-in fade-in duration-500 pb-28 text-slate-900 dark:text-slate-200">
-                    {/* Note: Inserted HTML content might need specific dark mode styling, but basic text will inherit */}
                     <div dangerouslySetInnerHTML={{ __html: rawHtml }} />
                   </div>
                 ) : (
@@ -444,9 +485,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
       
-      {/* NOTE: Footer is now handled by App.tsx */}
+      {/* 🛑 FOOTER REMOVED HERE (Handled by App.tsx) */}
 
-      {/* CHAT WIDGET */}
       <ChatWidget />
 
       <style>{`
