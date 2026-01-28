@@ -24,7 +24,7 @@ const fileToGenerativePart = async (file: File) => {
  */
 const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: string) => {
   const baseHelper = `Analyze these images and return valid JSON.`;
-  // ✅ NEW: Tell AI the specific condition selected by user
+  // ✅ Tell AI the specific condition selected by user
   const conditionContext = userCondition ? `IMPORTANT: The user specified the condition is "${userCondition}". Ensure the description matches this.` : '';
 
   switch (platform.toLowerCase()) {
@@ -35,7 +35,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
         CONTEXT: Poshmark is a social fashion marketplace.
         RULES:
         - TITLE: MAX 50 CHARS. Brand + Category + Style.
-        - DESCRIPTION: Friendly, emoji-friendly 💖.
+        - DESCRIPTION: Friendly, emoji-friendly 💖. Mention material, fit, and occasion.
         JSON OUTPUT: { title, description, brand, condition, estimated_price, size, tags }
       `;
     
@@ -46,7 +46,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
         CONTEXT: Mercari is for quick sales.
         RULES:
         - TITLE: MAX 80 CHARS. Keywords first.
-        - DESCRIPTION: Short, punchy.
+        - DESCRIPTION: Short, punchy. "Ships fast!" vibe.
         JSON OUTPUT: { title, description, brand, condition, estimated_price, tags }
       `;
 
@@ -57,7 +57,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
         CONTEXT: Depop is for Gen-Z/Vintage.
         RULES:
         - TITLE: Aesthetic, descriptive.
-        - DESCRIPTION: Mention Era (Y2K, 90s), Vibe.
+        - DESCRIPTION: Mention Era (Y2K, 90s), Vibe. Use slang like "sick piece" if applicable.
         JSON OUTPUT: { title, description, brand, condition, estimated_price, tags }
       `;
 
@@ -66,6 +66,8 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
         ${baseHelper}
         ${conditionContext}
         CONTEXT: Etsy is for Vintage/Handmade.
+        RULES:
+        - DESCRIPTION: Emotional storytelling. Mention history/maker.
         JSON OUTPUT: { title, description, brand, condition, estimated_price, tags }
       `;
 
@@ -75,34 +77,70 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
         ${baseHelper}
         ${conditionContext}
         CONTEXT: Standard E-Commerce.
+        RULES:
+        - DESCRIPTION: Professional paragraph + bullet points.
         JSON OUTPUT: { title, description, brand, condition, estimated_price, tags }
       `;
 
     case 'ebay':
     default:
       if (isProMode) {
+        // 🌟 JUAN ACUÑA'S PREMIUM FORMULA 🌟
         return `
           ${baseHelper}
           ${conditionContext}
-          CONTEXT: eBay Premium Listing.
-          TITLE RULES: MAX 80 CHARS. Brand + Model + Features.
-          DESCRIPTION (HTML Sales Letter):
-          - Section 1: The Hook.
-          - Section 2: The Story.
-          - Section 3: Key Features.
-          - Section 4: Condition (Must reflect: ${userCondition}).
+          CONTEXT: You are "Juan Acuña’s Premium eBay Listing Generator".
+          GOAL: Transform visual data into high-quality, themed, Cassini-optimized eBay listings.
+
+          --- TITLE RULES ---
+          - Return 1 optimized title (Max 80 chars).
+          - Structure: Brand + Item + Series + Variant + Details.
+          - No ALL CAPS. No emojis in title. No dashes (-).
+
+          --- THEME DETECTION ---
+          - AUTO-DETECT ERA/STYLE (e.g., 80s Neon, 50s Diner, Modern Tech, Rustic, Disney).
+          - The HTML styling must reflect this theme (colors, vibes).
+
+          --- PREMIUM HTML DESCRIPTION RULES ---
+          Generate a SINGLE block of clean HTML code for the 'description' field.
+          
+          **HTML STYLING:**
+          - Use a main container div: max-width: 800px; margin: auto; font-family: sans-serif; text-align: center; color: #333;
+          - **SKU BADGE:** Must include a white "Pill Shaped Badge" (Border-radius 50px, border 1px solid #ccc, padding 5px 15px, font-size 12px, background: white, display: inline-block, margin-bottom: 10px). Content: "PREMIUM LISTING" (since we don't have a real SKU yet).
+          
+          **CONTENT SECTIONS:**
+          1. **HEADER:** Item Name (Themed Color, H1).
+          2. **MICRO-LORE:** A short, italicized, era-evoking sentence bringing the item to life.
+          3. **WHY YOU'LL LOVE IT:** A section connecting emotionally/nostalgically.
+          4. **FEATURES:** <ul> list with EMOJI bullet points. Text-align: left but centered container.
+          5. **CONDITION:** Clear summary reflecting "${userCondition}".
+          6. **SHIPPING:** "Free Shipping • Sturdy Packaging • Tracking Included".
+          7. **CTA PANEL (The 1-3-1):**
+             - ⭐ Fun Headline (Themed/Humorous)
+             - 3 Conversational/Unique Bullets
+             - ✨ Warm Closing Tagline
+
+          **DO NOT:** Use cursive fonts. Do not break HTML structure. 
+          
           JSON OUTPUT: { title, description, brand, condition, estimated_price, itemSpecifics }
         `;
       } else {
+        // 🛡️ STANDARD MODE (Clean & Centered)
         return `
           ${baseHelper}
           ${conditionContext}
-          CONTEXT: eBay Standard Listing.
-          TITLE RULES: MAX 80 CHARS.
-          DESCRIPTION (Clean HTML):
-          - <h2> Product Summary
-          - <ul> Key Features
-          - <strong> Condition Note (Must reflect: ${userCondition})
+          CONTEXT: eBay Standard Listing (High Conversion).
+          
+          TITLE RULES: MAX 80 CHARS. Keyword rich.
+          
+          DESCRIPTION RULES (Clean HTML):
+          - Use a centered container div.
+          - Use <h2> for Product Summary.
+          - Use <strong> for key details.
+          - Use <ul> for features (Clean bullets).
+          - Use <strong> for Condition Note (Must reflect: ${userCondition}).
+          - Tone: Professional, clear, trustworthy.
+          
           JSON OUTPUT: { title, description, brand, condition, estimated_price, itemSpecifics }
         `;
       }
@@ -121,9 +159,12 @@ export async function generateListingFromImages(
 ) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+    // Process all images in parallel
     const imageParts = await Promise.all(imageFiles.map(file => fileToGenerativePart(file)));
+    
     const prompt = getPlatformPrompt(platform, isProMode, userCondition);
 
+    // Send prompt + all images
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
     const cleanedText = response.text().replace(/```json|```/g, '').trim();
