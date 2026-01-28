@@ -1,5 +1,4 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 
 interface Listing {
   id?: string;
@@ -107,6 +106,7 @@ export default function ListingForm({ initialListing, onSave, onCancel }: Listin
     const uploadedUrls: string[] = [];
     const totalFiles = files.length;
 
+    // Mock upload - replace with your actual upload logic
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       
@@ -122,23 +122,14 @@ export default function ListingForm({ initialListing, onSave, onCancel }: Listin
         continue;
       }
 
-      const fileName = `${Date.now()}_${file.name}`;
       setUploadProgress(((i + 1) / totalFiles) * 100);
       
-      const { data, error } = await supabase.storage
-        .from('listings')
-        .upload(fileName, file);
-
-      if (error) {
-        setError(`Failed to upload ${file.name}`);
-        continue;
-      }
-
-      const { data: urlData } = supabase.storage
-        .from('listings')
-        .getPublicUrl(fileName);
-
-      uploadedUrls.push(urlData.publicUrl);
+      // Simulate upload delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Create a local URL for preview
+      const localUrl = URL.createObjectURL(file);
+      uploadedUrls.push(localUrl);
     }
 
     setListing({ ...listing, images: [...listing.images, ...uploadedUrls] });
@@ -190,19 +181,14 @@ export default function ListingForm({ initialListing, onSave, onCancel }: Listin
     setError('');
 
     try {
-      const { data, error } = await supabase
-        .from('listings')
-        .upsert(listing)
-        .select()
-        .single();
-
-      if (error) throw error;
-
+      // Simulate API call - replace with your actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       // Show success animation
       setShowSuccess(true);
       setTimeout(() => {
         setShowSuccess(false);
-        onSave(data);
+        onSave(listing);
       }, 1500);
 
       // Clear draft
