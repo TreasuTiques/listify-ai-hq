@@ -10,8 +10,8 @@ import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import InventoryPage from './pages/InventoryPage';
 import BuilderPage from './pages/BuilderPage';
-import StaleListingsPage from './pages/StaleListingsPage'; // Listing Doctor
-import SourcingPage from './pages/SourcingPage'; // ✅ The NEW Sourcing Tool
+import StaleListingsPage from './pages/StaleListingsPage'; 
+import SourcingPage from './pages/SourcingPage'; 
 import AnalyticsPage from './pages/AnalyticsPage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
@@ -33,25 +33,22 @@ const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    // 1. Check Active Session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
 
-    // 2. Listen for Auth Changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setLoading(false);
     });
 
-    // 3. Listen for Navigation
     const handleHashChange = () => {
       setCurrentPath(window.location.hash.replace('#', '') || '/');
     };
     window.addEventListener('hashchange', handleHashChange);
 
-    // 4. 🌑 Initialize Dark Mode (Check LocalStorage or System)
+    // 🌑 Initialize Theme
     const savedTheme = localStorage.getItem('theme');
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
@@ -69,7 +66,7 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // 🌑 The Toggle Function (Passed to Navbar)
+  // 🌑 Toggle Function
   const toggleTheme = () => {
     if (isDarkMode) {
       document.documentElement.classList.remove('dark');
@@ -93,24 +90,23 @@ const App: React.FC = () => {
   if (!session) {
     if (currentPath === '/login') return <LoginPage onNavigate={navigate} />;
     if (currentPath === '/signup') return <SignUpPage onNavigate={navigate} />;
-    if (currentPath === '/') return <LandingPage onNavigate={navigate} />;
+    
+    // 🌑 Note: We pass dark mode props here, but LandingPage needs to be updated to use them!
+    if (currentPath === '/') return (
+       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 flex flex-col">
+          <Navbar session={null} onNavigate={navigate} isLanding={true} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+          <div className="flex-grow pt-20"><LandingPage onNavigate={navigate} /></div>
+          <Footer onNavigate={navigate} />
+       </div>
+    );
 
-    // PUBLIC LAYOUT WRAPPER
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 flex flex-col">
-        {/* Pass Dark Mode props to Navbar */}
-        <Navbar 
-          session={null} 
-          onNavigate={navigate} 
-          isLanding={true} 
-          isDarkMode={isDarkMode} 
-          toggleTheme={toggleTheme} 
-        />
+        <Navbar session={null} onNavigate={navigate} isLanding={true} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
         
         <div className="flex-grow pt-20"> 
           {(() => {
             switch (currentPath) {
-              // --- MARKETING / PUBLIC PAGES ---
               case '/pricing': return <PricingPage />;
               case '/analytics': return <AnalyticsPage />; 
               case '/sourcing': return <SourcingPage />;
@@ -122,16 +118,12 @@ const App: React.FC = () => {
               case '/vision': return <VisionPage />;
               case '/success': return <SuccessHub />;
               case '/partnerships': return <PartnersPage />;
-              
-              // --- HEADER/FOOTER LINKS ---
               case '/inventory': return <InventoryPage onNavigate={navigate} />;
               case '/builder': return <BuilderPage />; 
-
               default: return <LandingPage onNavigate={navigate} />;
             }
           })()}
         </div>
-
         <Footer onNavigate={navigate} />
       </div>
     );
@@ -141,34 +133,20 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (currentPath) {
       case '/':
-      case '/dashboard':
-        return <DashboardPage onNavigate={navigate} />;
-      case '/inventory':
-        return <InventoryPage onNavigate={navigate} />;
-      case '/builder':
-        return <BuilderPage />;
-      case '/doctor':
-         return <StaleListingsPage />;
-      case '/sourcing': 
-         return <SourcingPage />;
-      case '/analytics': 
-         return <AnalyticsPage />;
-      case '/pricing':
-         return <PricingPage />;
-      default:
-        return <DashboardPage onNavigate={navigate} />;
+      case '/dashboard': return <DashboardPage onNavigate={navigate} />;
+      case '/inventory': return <InventoryPage onNavigate={navigate} />;
+      case '/builder': return <BuilderPage />;
+      case '/doctor': return <StaleListingsPage />;
+      case '/sourcing': return <SourcingPage />;
+      case '/analytics': return <AnalyticsPage />;
+      case '/pricing': return <PricingPage />;
+      default: return <DashboardPage onNavigate={navigate} />;
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
-      {/* Pass Dark Mode props to Navbar */}
-      <Navbar 
-        session={session} 
-        onNavigate={navigate} 
-        isDarkMode={isDarkMode} 
-        toggleTheme={toggleTheme} 
-      />
+      <Navbar session={session} onNavigate={navigate} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
       <div className="pt-20">
         {renderContent()}
       </div>
