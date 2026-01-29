@@ -160,8 +160,8 @@ const BuilderPage: React.FC = () => {
   };
 
   return (
-    // FIX: Main Background
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative">
+    // FIX: Main Background with '!' to force override
+    <div className="min-h-screen !bg-slate-50 dark:!bg-slate-900 transition-colors duration-300 pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative">
       
       {/* SUCCESS POPUP */}
       {showSuccess && (
@@ -194,14 +194,14 @@ const BuilderPage: React.FC = () => {
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6 relative overflow-hidden group">
+          <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6 relative overflow-hidden group">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Source Media</h3>
               <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold px-2 py-1 rounded-md">Multi-Vision Ready</span>
             </div>
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*" multiple />
 
-            <div onClick={() => fileInputRef.current?.click()} onDragOver={onDragOver} onDrop={handleFileUpload} className={`border-2 border-dashed rounded-2xl h-[400px] flex flex-col transition-all cursor-pointer relative overflow-hidden ${analyzing ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-blue-400'}`}>
+            <div onClick={() => fileInputRef.current?.click()} onDragOver={onDragOver} onDrop={handleFileUpload} className={`border-2 border-dashed rounded-2xl h-[400px] flex flex-col transition-all cursor-pointer relative overflow-hidden ${analyzing ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-700 !bg-slate-50/50 dark:!bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-blue-400'}`}>
               {imagePreviews.length > 0 ? (
                 <div className="h-full flex flex-col">
                   <div className="h-2/3 w-full relative">
@@ -236,7 +236,7 @@ const BuilderPage: React.FC = () => {
         </div>
 
         <div className="lg:col-span-7 space-y-6">
-          <div className="bg-white dark:bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-8">
+          <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-8">
             <div className="mb-8">
                <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Target Marketplace</label>
                <div className="flex flex-wrap gap-2">
@@ -254,7 +254,7 @@ const BuilderPage: React.FC = () => {
                 <span className={`text-xs font-bold ${title.length > (activePlatform === 'poshmark' ? 50 : 80) ? 'text-red-500' : 'text-slate-400'}`}>{title.length} / {activePlatform === 'poshmark' ? '50' : '80'}</span>
               </div>
               <div className="relative">
-                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 pr-16 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400" placeholder="AI will generate this..." />
+                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 pr-16 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400" placeholder="AI will generate this..." />
                 <button onClick={() => copyToClipboard(title, 'title')} className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-400 p-2 rounded-lg transition-colors border border-blue-100 dark:border-blue-800" title="Copy Title">
                   {copySuccess === 'title' ? <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg> : <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>}
                 </button>
@@ -264,7 +264,7 @@ const BuilderPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-6 mb-6">
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Brand</label>
-                <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400" placeholder="Nike, Sony..." />
+                <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400" placeholder="Nike, Sony..." />
               </div>
               
               <div className="relative">
@@ -311,9 +311,6 @@ const BuilderPage: React.FC = () => {
               {activePlatform === 'ebay' ? (
                 <div className="relative">
                    {editorTab === 'visual' ? (
-                      // 🚀 THE FIX FOR THE PREVIEW
-                      // Added: dark:invert dark:hue-rotate-180
-                      // This forces the "White Paper + Black Text" to visually become "Dark Paper + White Text"
                       <div 
                          className="w-full !bg-white dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert dark:invert dark:hue-rotate-180" 
                          dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic">Select condition to generate listing...</p>' }}
@@ -323,7 +320,7 @@ const BuilderPage: React.FC = () => {
                    )}
                 </div>
               ) : (
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-[500px] resize-none" placeholder="AI will write this for you..."></textarea>
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-[500px] resize-none" placeholder="AI will write this for you..."></textarea>
               )}
             </div>
 
