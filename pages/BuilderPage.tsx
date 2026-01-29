@@ -31,7 +31,7 @@ const BuilderPage: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize User (REMOVED LOCAL DARK MODE LOGIC)
+  // Initialize User
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -160,7 +160,6 @@ const BuilderPage: React.FC = () => {
   };
 
   return (
-    // ✅ Sets White Default (bg-[#F8FAFC]) but allows Dark (dark:bg-slate-900)
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 transition-colors duration-300 pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative">
       
       {/* SUCCESS POPUP */}
@@ -183,8 +182,6 @@ const BuilderPage: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-4">
-           {/* 🛑 REMOVED LOCAL TOGGLE BUTTON HERE */}
-
            {activePlatform === 'ebay' && (
              <button onClick={handleProModeToggle} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${isProMode ? 'bg-[#0F172A] dark:bg-blue-600 text-white border-[#0F172A] dark:border-blue-600 shadow-lg' : user ? 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300' : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70'}`}>
                {!user && <span className="text-xs">🔒</span>}<span className={`w-2 h-2 rounded-full ${isProMode ? 'bg-green-400 animate-pulse' : 'bg-slate-300'}`}></span>Pro Mode: {isProMode ? 'ON' : 'OFF'}
@@ -313,7 +310,11 @@ const BuilderPage: React.FC = () => {
               {activePlatform === 'ebay' ? (
                 <div className="relative">
                    {editorTab === 'visual' ? (
-                      <div className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic">Select condition to generate listing...</p>' }}></div>
+                      // 🚀 THE FIX: Added '!bg-white' to enforce white background in Light Mode
+                      <div 
+                         className="w-full !bg-white dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert" 
+                         dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic">Select condition to generate listing...</p>' }}
+                      ></div>
                    ) : (
                       <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-slate-900 text-green-400 font-mono text-sm border border-slate-700 rounded-xl px-4 py-4 focus:outline-none focus:border-blue-500 h-[500px] resize-none" placeholder="<html>...</html>"></textarea>
                    )}
