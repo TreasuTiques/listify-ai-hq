@@ -77,6 +77,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
     }
   ];
 
+  // Note: This HTML has inline !important styles. We handle this in the render via CSS filters.
   const rawHtml = `
 <div class="listing-container" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 800px; margin: auto; color: #000000; line-height: 1.6;">
   <style>
@@ -132,12 +133,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   };
 
   return (
+    // FIX: Replaced hardcoded text/bg with Tailwind dark variants
     <div className="bg-white dark:bg-slate-900 selection:bg-blue-100 dark:selection:bg-blue-900 font-sans antialiased text-slate-900 dark:text-slate-100 transition-colors duration-300">
       
-      {/* 🛑 NAVBAR REMOVED HERE (Handled by App.tsx) */}
-
       {/* HERO SECTION */}
-      <section id="hero" className="relative pt-12 sm:pt-20 pb-8 sm:pb-12 bg-[#F8FAFC] dark:bg-slate-900 overflow-hidden transition-colors duration-300">
+      {/* FIX: Replaced bg-[#F8FAFC] with dark:bg-slate-900 */}
+      <section id="hero" className="relative pt-12 sm:pt-20 pb-8 sm:pb-12 bg-slate-50 dark:bg-slate-900 overflow-hidden transition-colors duration-300">
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-200/40 dark:bg-blue-500/10 blur-[100px] rounded-full -ml-20 -mt-20 mix-blend-multiply dark:mix-blend-screen opacity-80 animate-pulse"></div>
         <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/60 dark:bg-indigo-500/10 blur-[100px] rounded-full -mr-20 -mb-20 mix-blend-multiply dark:mix-blend-screen opacity-80"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -151,7 +152,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   </span>
                   Trusted by 7-Figure Sellers Worldwide
                 </div>
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[#0F172A] dark:text-white tracking-tight leading-[1.1] mb-6 transition-colors duration-300">
+                {/* FIX: Text color contrast for dark mode */}
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 dark:text-white tracking-tight leading-[1.1] mb-6 transition-colors duration-300">
                   Generate High-Converting Product Listings —{' '}
                   <span className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">Instantly</span>
                 </h1>
@@ -202,7 +204,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-blue-50/50 dark:bg-slate-800/30 blur-[120px] rounded-full -z-10"></div>
         <div className="max-w-7xl mx-auto px-4 text-left">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-[#0F172A] dark:text-white tracking-tight">Why Power Sellers Choose Listify</h2>
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Why Power Sellers Choose Listify</h2>
             <p className="text-slate-500 dark:text-slate-400 mt-4 text-lg">We automated the boring parts so you can focus on sourcing.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -216,7 +218,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                 <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center text-2xl text-white shadow-lg shadow-blue-200/50 dark:shadow-none mb-6 group-hover:scale-110 transition-transform duration-300`}>
                   {f.icon}
                 </div>
-                <h3 className="text-xl font-bold text-[#0F172A] dark:text-white mb-3 group-hover:text-[#2563EB] dark:group-hover:text-blue-400 transition-colors">{f.title}</h3>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-[#2563EB] dark:group-hover:text-blue-400 transition-colors">{f.title}</h3>
                 <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm">{f.text}</p>
               </div>
             ))}
@@ -225,7 +227,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* BEFORE & AFTER SLIDER */}
-      <section className="py-24 bg-[#0F172A] dark:bg-black relative overflow-hidden transition-colors duration-300">
+      {/* FIX: Ensure this section background remains dark but compatible with global theme logic (it's a dark UI component) */}
+      <section className="py-24 bg-slate-900 dark:bg-black relative overflow-hidden transition-colors duration-300">
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none"></div>
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
         <div className="max-w-4xl mx-auto px-4 relative z-10">
@@ -236,9 +239,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           <div className="relative rounded-[24px] overflow-hidden border border-slate-700 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] h-[500px] group">
             <div className="absolute inset-0">
                <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1200&auto=format&fit=crop" className="w-full h-full object-cover opacity-60 mix-blend-luminosity" alt="Analyzed" />
-               <div className="absolute inset-0 bg-[#0F172A]/80 mix-blend-multiply"></div>
+               <div className="absolute inset-0 bg-slate-900/80 mix-blend-multiply"></div>
                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-               <div className="absolute top-12 right-12 p-6 bg-[#0F172A]/80 backdrop-blur-xl rounded-2xl border border-blue-500/30 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
+               <div className="absolute top-12 right-12 p-6 bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-blue-500/30 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
                   <div className="flex items-center gap-3 mb-3">
                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                      <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Analysis Complete</span>
@@ -260,7 +263,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             </div>
             <input type="range" min="0" max="100" value={sliderVal} onChange={(e) => setSliderVal(parseInt(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-30" />
             <div className="absolute top-0 bottom-0 left-[var(--slider-pos)] w-0.5 bg-blue-500 z-20 pointer-events-none shadow-[0_0_20px_rgba(59,130,246,0.8)]" style={{ left: `${sliderVal}%` }}>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-[#0F172A] border-2 border-blue-500 rounded-full flex items-center justify-center text-white shadow-xl">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-slate-900 border-2 border-blue-500 rounded-full flex items-center justify-center text-white shadow-xl">
                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8L22 12L18 16"/><path d="M6 8L2 12L6 16"/></svg>
               </div>
             </div>
@@ -270,9 +273,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* COMPARISON TABLE */}
+      {/* FIX: Ensure table backgrounds switch properly */}
       <section className="pt-20 pb-10 bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-[#0F172A] dark:text-white mb-12">The Professional Advantage</h2>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-12">The Professional Advantage</h2>
           <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm transition-colors duration-300">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
@@ -280,7 +284,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   <th className="p-6 md:p-8 w-1/3"></th>
                   <th className="p-6 md:p-8 w-1/3 bg-blue-50/30 dark:bg-blue-900/20 border-x border-blue-100/50 dark:border-blue-800/30">
                     <div className="flex flex-col items-center">
-                       <span className="text-lg font-black text-[#0F172A] dark:text-white tracking-tight">Listify AI HQ</span>
+                       <span className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Listify AI HQ</span>
                        <span className="text-[10px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full mt-2 uppercase tracking-wide">Recommended</span>
                     </div>
                   </th>
@@ -301,7 +305,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                     <td className="p-6 md:p-8 bg-blue-50/30 dark:bg-blue-900/20 border-x border-blue-100/50 dark:border-blue-800/30 text-center relative group">
                       <div className="flex flex-col items-center gap-1">
                         <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-1"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg></div>
-                        <span className="font-bold text-[#0F172A] dark:text-white text-sm">{row.listify}</span>
+                        <span className="font-bold text-slate-900 dark:text-white text-sm">{row.listify}</span>
                       </div>
                     </td>
                     <td className="p-6 md:p-8 text-center">
@@ -323,19 +327,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-50 dark:bg-slate-800/50 rounded-full blur-[100px] -z-10"></div>
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-xs font-bold text-[#2563EB] dark:text-blue-400 uppercase tracking-[0.35em] mb-3">Output Preview</h2>
-          <h3 className="text-3xl font-semibold text-[#0F172A] dark:text-white mb-8">One click. Ready to publish anywhere.</h3>
+          <h3 className="text-3xl font-semibold text-slate-900 dark:text-white mb-8">One click. Ready to publish anywhere.</h3>
           <div className="max-w-3xl mx-auto relative group">
             <div className="flex justify-center mb-8">
               <div className="bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur p-1.5 rounded-2xl flex border border-slate-200 dark:border-slate-700 shadow-sm">
                 <button 
                   onClick={() => setActiveTab('preview')} 
-                  className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'preview' ? 'bg-white dark:bg-slate-700 text-[#0F172A] dark:text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
+                  className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${activeTab === 'preview' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
                 >
                   Visual Preview
                 </button>
                 <button 
                   onClick={() => setActiveTab('html')} 
-                  className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${activeTab === 'html' ? 'bg-[#0F172A] dark:bg-blue-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
+                  className={`px-8 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${activeTab === 'html' ? 'bg-slate-900 dark:bg-blue-600 text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white'}`}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 18L22 12L16 6"/><path d="M8 6L2 12L8 18"/></svg>
                   HTML Source
@@ -356,7 +360,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               </div>
               <div className="h-[550px] overflow-y-auto scrollbar-hide text-left relative bg-white dark:bg-slate-900">
                 {activeTab === 'preview' ? (
-                  <div className="p-8 sm:p-12 animate-in fade-in duration-500 pb-28 text-slate-900 dark:text-slate-200">
+                  // CRITICAL FIX: The dark:invert class here flips the black text/white bg to white text/dark bg
+                  // even when inline styles contain !important color: #000.
+                  <div className="p-8 sm:p-12 animate-in fade-in duration-500 pb-28 text-slate-900 dark:text-slate-200 dark:invert dark:hue-rotate-180">
                     <div dangerouslySetInnerHTML={{ __html: rawHtml }} />
                   </div>
                 ) : (
@@ -371,7 +377,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               </div>
               {activeTab === 'preview' && (
                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-40">
-                  <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/50 dark:border-slate-600 text-[#0F172A] dark:text-white px-6 py-3 rounded-full text-[12px] font-bold shadow-[0_8px_30px_rgba(0,0,0,0.12)] uppercase tracking-widest flex items-center gap-3 transition hover:scale-105 active:scale-95 cursor-pointer hover:bg-white dark:hover:bg-slate-700 group">
+                  <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/50 dark:border-slate-600 text-slate-900 dark:text-white px-6 py-3 rounded-full text-[12px] font-bold shadow-[0_8px_30px_rgba(0,0,0,0.12)] uppercase tracking-widest flex items-center gap-3 transition hover:scale-105 active:scale-95 cursor-pointer hover:bg-white dark:hover:bg-slate-700 group">
                     <span>Scroll to view full listing</span>
                     <span className="text-lg leading-none group-hover:translate-y-0.5 transition-transform">↓</span>
                   </div>
@@ -388,7 +394,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-indigo-100/50 dark:bg-indigo-900/20 rounded-full blur-[120px] -z-10"></div>
 
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold text-[#0F172A] dark:text-white mb-4">Pricing for every business size.</h2>
+          <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-white mb-4">Pricing for every business size.</h2>
           <p className="text-slate-500 dark:text-slate-400 mb-16 text-lg max-w-2xl mx-auto">Choose the plan that fits your business stage. Scale up or down anytime.</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left relative z-10">
@@ -407,15 +413,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                       <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg">Most Popular</div>
                     )}
                     <div className="mb-6">
-                      <h3 className="text-xl font-bold text-[#0F172A] dark:text-white tracking-tight mb-2">{plan.name}</h3>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">{plan.name}</h3>
                       <div className="flex items-baseline gap-1 mb-4">
-                        <span className="text-5xl font-extrabold text-[#0F172A] dark:text-white tracking-tight">{plan.price}</span>
+                        <span className="text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">{plan.price}</span>
                         <span className="text-lg font-medium text-slate-400">/mo</span>
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium h-8 leading-relaxed">{plan.summary}</p>
                     </div>
                     
-                    <div className={`rounded-xl p-4 mb-8 ${isPro ? 'bg-[#0F172A] dark:bg-slate-900 border border-slate-700' : 'bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600'}`}>
+                    <div className={`rounded-xl p-4 mb-8 ${isPro ? 'bg-slate-900 dark:bg-slate-900 border border-slate-700' : 'bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600'}`}>
                       <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${isPro ? 'text-blue-300' : 'text-slate-500 dark:text-slate-400'}`}>Platforms Included:</p>
                       <div className="flex flex-wrap gap-2">
                         {plan.platforms[0] === 'all' ? (
@@ -446,7 +452,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                         className={`w-full py-4 rounded-2xl font-bold text-sm transition-all shadow-md ${
                         isPro 
                         ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:shadow-cyan-500/25 hover:-translate-y-0.5' 
-                        : 'bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-[#0F172A] dark:text-white hover:bg-slate-50 dark:hover:bg-slate-600'
+                        : 'bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-600'
                       }`}>
                         {plan.cta}
                       </button>
@@ -463,7 +469,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
       <section className="py-24 px-4 bg-white dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-purple-600 rounded-[44px] blur opacity-50 animate-pulse"></div>
-          <div className="relative rounded-[40px] bg-[#0F172A] p-10 sm:p-20 text-center overflow-hidden border border-white/10 shadow-2xl">
+          <div className="relative rounded-[40px] bg-slate-900 p-10 sm:p-20 text-center overflow-hidden border border-white/10 shadow-2xl">
             <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-blue-500 rounded-full blur-[100px] opacity-30"></div>
             <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500 rounded-full blur-[100px] opacity-30"></div>
@@ -472,7 +478,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed">Join the thousands of professional resellers automating their inventory with Listify AI HQ.</p>
               <button 
                 onClick={() => onNavigate('/signup')} 
-                className="bg-white text-[#0F172A] px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300"
+                className="bg-white text-slate-900 px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300"
               >
                 Create My First Listing Free
               </button>
@@ -484,8 +490,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
           </div>
         </div>
       </section>
-      
-      {/* 🛑 FOOTER REMOVED HERE (Handled by App.tsx) */}
 
       <ChatWidget />
 
