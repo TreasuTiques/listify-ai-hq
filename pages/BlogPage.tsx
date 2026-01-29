@@ -27,31 +27,32 @@ const BlogPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+    // FIX: Main Background with '!' to force override
+    <div className="min-h-screen !bg-slate-50 dark:!bg-slate-900 pt-24 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto">
         
         {/* 1. Page Header */}
         <div className="text-center max-w-2xl mx-auto mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <span className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Seller Resources</span>
-          <h1 className="text-4xl md:text-5xl font-bold text-[#0F172A] tracking-tight mt-4 mb-4">Insights for the Modern Reseller</h1>
-          <p className="text-slate-500 text-lg">
+          <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Seller Resources</span>
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tight mt-4 mb-4">Insights for the Modern Reseller</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-lg">
             Expert guides, market data, and tips to help you scale your e-commerce business.
           </p>
         </div>
 
         {/* 2. Featured Card (The "Hero" Post) */}
-        <div className="bg-[#0F172A] rounded-[32px] p-8 md:p-16 text-white relative overflow-hidden mb-20 shadow-2xl group cursor-pointer animate-in zoom-in-95 duration-700">
+        <div className="bg-[#0F172A] dark:bg-blue-900 rounded-[32px] p-8 md:p-16 text-white relative overflow-hidden mb-20 shadow-2xl group cursor-pointer animate-in zoom-in-95 duration-700 border border-transparent dark:border-blue-700">
           {/* Background Glow Effect */}
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500 rounded-full blur-[120px] opacity-20 -mr-20 -mt-20 group-hover:opacity-30 transition-opacity duration-500"></div>
           
           <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <span className="text-blue-400 font-bold tracking-wider text-sm uppercase mb-4 block">Featured Series</span>
-              <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">The AI Reseller Revolution</h2>
+              <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight text-white">The AI Reseller Revolution</h2>
               <p className="text-slate-300 text-lg mb-8 leading-relaxed">
                 We are preparing a deep-dive series on how Artificial Intelligence is changing the landscape of second-hand selling forever. Learn how to stay ahead of the curve.
               </p>
-              <button className="bg-white text-[#0F172A] px-8 py-3 rounded-full font-bold hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl hover:scale-105 transform duration-200">
+              <button className="bg-white text-slate-900 px-8 py-3 rounded-full font-bold hover:bg-blue-50 transition-colors shadow-lg hover:shadow-xl hover:scale-105 transform duration-200">
                 Get Notified on Launch
               </button>
             </div>
@@ -72,7 +73,7 @@ const BlogPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
           {posts.map((post, i) => (
             <div key={i} className="group cursor-pointer flex flex-col h-full">
-              <div className="relative overflow-hidden rounded-2xl mb-4 aspect-[4/3] shadow-md">
+              <div className="relative overflow-hidden rounded-2xl mb-4 aspect-[4/3] shadow-md border border-slate-200 dark:border-slate-700">
                 <img 
                   src={post.image} 
                   alt={post.title} 
@@ -82,19 +83,19 @@ const BlogPage: React.FC = () => {
               </div>
               
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-xs font-bold text-blue-600 uppercase tracking-wider bg-blue-50 px-2 py-1 rounded-md">{post.category}</span>
-                <span className="text-xs text-slate-400 font-medium">• {post.date}</span>
+                <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md">{post.category}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">• {post.date}</span>
               </div>
               
-              <h3 className="text-xl font-bold text-[#0F172A] mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                 {post.title}
               </h3>
               
-              <p className="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-4 flex-grow">
+              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed line-clamp-3 mb-4 flex-grow">
                 {post.excerpt}
               </p>
 
-              <div className="text-blue-600 text-sm font-bold group-hover:translate-x-2 transition-transform duration-300 flex items-center gap-1">
+              <div className="text-blue-600 dark:text-blue-400 text-sm font-bold group-hover:translate-x-2 transition-transform duration-300 flex items-center gap-1">
                 Read Article <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
               </div>
             </div>
@@ -102,18 +103,18 @@ const BlogPage: React.FC = () => {
         </div>
 
         {/* 4. Newsletter Section */}
-        <div className="bg-white border border-slate-200 rounded-[24px] p-8 md:p-12 text-center shadow-sm">
-          <h2 className="text-2xl font-bold text-[#0F172A] mb-4">Don't miss the next big trend.</h2>
-          <p className="text-slate-500 mb-8 max-w-lg mx-auto">
+        <div className="!bg-white dark:!bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[24px] p-8 md:p-12 text-center shadow-sm">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Don't miss the next big trend.</h2>
+          <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-lg mx-auto">
             Join 2,000+ resellers getting weekly sourcing tips and market updates delivered to their inbox.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input 
               type="email" 
               placeholder="Enter your email" 
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"
+              className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-colors placeholder:text-slate-400"
             />
-            <button className="bg-[#0F172A] text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors shadow-lg">
+            <button className="bg-[#0F172A] dark:bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-blue-700 transition-colors shadow-lg">
               Subscribe
             </button>
           </div>
