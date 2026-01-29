@@ -160,7 +160,8 @@ const BuilderPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 transition-colors duration-300 pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative">
+    // FIX: Main Background
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative">
       
       {/* SUCCESS POPUP */}
       {showSuccess && (
@@ -174,7 +175,7 @@ const BuilderPage: React.FC = () => {
 
       <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#0F172A] dark:text-white tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
             <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
             Listing Command Center
           </h1>
@@ -310,13 +311,15 @@ const BuilderPage: React.FC = () => {
               {activePlatform === 'ebay' ? (
                 <div className="relative">
                    {editorTab === 'visual' ? (
-                      // 🚀 THE FIX: Added '!bg-white' to enforce white background in Light Mode
+                      // 🚀 THE FIX FOR THE PREVIEW
+                      // Added: dark:invert dark:hue-rotate-180
+                      // This forces the "White Paper + Black Text" to visually become "Dark Paper + White Text"
                       <div 
-                         className="w-full !bg-white dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert" 
+                         className="w-full !bg-white dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert dark:invert dark:hue-rotate-180" 
                          dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic">Select condition to generate listing...</p>' }}
                       ></div>
                    ) : (
-                      <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-slate-900 text-green-400 font-mono text-sm border border-slate-700 rounded-xl px-4 py-4 focus:outline-none focus:border-blue-500 h-[500px] resize-none" placeholder="<html>...</html>"></textarea>
+                      <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-[#1E293B] text-green-400 font-mono text-sm border border-slate-700 rounded-xl px-4 py-4 focus:outline-none focus:border-blue-500 h-[500px] resize-none" placeholder="<html>...</html>"></textarea>
                    )}
                 </div>
               ) : (
