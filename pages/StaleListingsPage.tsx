@@ -16,8 +16,8 @@ const StaleListingsPage: React.FC = () => {
   const [optimizationResult, setOptimizationResult] = useState<any>(null);
   const [saving, setSaving] = useState(false);
 
-  // 🌍 EXTERNAL ANALYSIS STATE (New!)
-  const [externalAnalysis, setExternalAnalysis] = useState<any>(null); // To store data for external analysis
+  // 🌍 EXTERNAL ANALYSIS STATE
+  const [externalAnalysis, setExternalAnalysis] = useState<any>(null); 
   const [showExternalInput, setShowExternalInput] = useState(false);
   const [extTitleInput, setExtTitleInput] = useState('');
   const [extDescInput, setExtDescInput] = useState('');
@@ -68,7 +68,7 @@ const StaleListingsPage: React.FC = () => {
         totalPenalty += (100 - itemScore);
       });
 
-      // 🩺 2. ANALYZE EXTERNAL LINKS (Placeholder Grade until Analyzed)
+      // 🩺 2. ANALYZE EXTERNAL LINKS
       externalLinks.forEach((link, index) => {
         detectedIssues.push({
           id: `ext-${index}`,
@@ -76,7 +76,7 @@ const StaleListingsPage: React.FC = () => {
           type: 'external',
           diagnosis: ['External Link', 'Needs Analysis'],
           score: 0, 
-          grade: '?' // Waiting for input
+          grade: '?' 
         });
         totalPenalty += 10; 
       });
@@ -84,7 +84,6 @@ const StaleListingsPage: React.FC = () => {
       const avgScore = Math.max(0, 100 - (totalPenalty / (detectedIssues.length || 1)));
       setHealthScore(Math.round(avgScore));
       
-      // Sort: Internal issues first, then External
       setIssues(detectedIssues.sort((a, b) => a.score - b.score));
 
     } catch (error) {
@@ -132,15 +131,12 @@ const StaleListingsPage: React.FC = () => {
     setOptimizingId(externalAnalysis.id);
 
     try {
-      // 1. Run the AI Optimization
       const optimized = await optimizeListing(extTitleInput, extDescInput, 'eBay');
-      
-      // 2. Show the Result (Simulating a "fake" original item to compare against)
       setOptimizationResult({
         original: {
           title: extTitleInput,
           description: extDescInput || "No description provided.",
-          grade: '?', // We don't grade the input, we just optimize it
+          grade: '?', 
           type: 'external'
         },
         optimized: optimized,
@@ -177,17 +173,18 @@ const StaleListingsPage: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">Loading...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-20 pt-24 px-4 sm:px-6 lg:px-8">
+    // FIX: Main Background with '!' to force override
+    <div className="min-h-screen !bg-slate-50 dark:!bg-slate-900 pb-20 pt-24 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       
       {/* 🌍 EXTERNAL INPUT MODAL */}
       {showExternalInput && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-6">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">Analyze External Listing</h3>
-            <p className="text-sm text-slate-500 mb-6">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl p-6 border border-transparent dark:border-slate-700">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Analyze External Listing</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
               Since we cannot read eBay directly yet, please paste the Title and Description from the link to analyze it.
             </p>
             
@@ -195,7 +192,7 @@ const StaleListingsPage: React.FC = () => {
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Current Title</label>
                 <input 
-                  className="w-full border p-3 rounded-lg bg-slate-50" 
+                  className="w-full border dark:border-slate-700 p-3 rounded-lg bg-slate-50 dark:bg-slate-800 dark:text-white" 
                   value={extTitleInput}
                   onChange={e => setExtTitleInput(e.target.value)}
                   placeholder="Paste eBay Title..."
@@ -204,7 +201,7 @@ const StaleListingsPage: React.FC = () => {
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Current Description</label>
                 <textarea 
-                  className="w-full border p-3 rounded-lg bg-slate-50 h-32" 
+                  className="w-full border dark:border-slate-700 p-3 rounded-lg bg-slate-50 dark:bg-slate-800 dark:text-white h-32" 
                   value={extDescInput}
                   onChange={e => setExtDescInput(e.target.value)}
                   placeholder="Paste Description..."
@@ -217,7 +214,7 @@ const StaleListingsPage: React.FC = () => {
               >
                 ✨ Analyze & Optimize
               </button>
-              <button onClick={() => setShowExternalInput(false)} className="w-full text-slate-400 font-bold py-2 mt-2">Cancel</button>
+              <button onClick={() => setShowExternalInput(false)} className="w-full text-slate-400 font-bold py-2 mt-2 hover:text-slate-600 dark:hover:text-slate-200">Cancel</button>
             </div>
           </div>
         </div>
@@ -226,48 +223,48 @@ const StaleListingsPage: React.FC = () => {
       {/* ✨ OPTIMIZATION RESULT MODAL */}
       {optimizationResult && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h3 className="text-xl font-bold text-slate-800">✨ AI Optimization Suggestion</h3>
-              <button onClick={() => setOptimizationResult(null)} className="text-slate-400 hover:text-slate-600 font-bold">Close</button>
+          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] border border-transparent dark:border-slate-700">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">✨ AI Optimization Suggestion</h3>
+              <button onClick={() => setOptimizationResult(null)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold">Close</button>
             </div>
             
-            <div className="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-8 bg-white dark:bg-slate-900">
               {/* OLD */}
               <div className="opacity-60 grayscale">
                 <h4 className="font-bold text-red-500 uppercase tracking-wider text-xs mb-4">Original (Grade: {optimizationResult.original.grade})</h4>
                 <div className="mb-4">
                   <label className="block text-xs font-bold text-slate-400 mb-1">Title</label>
-                  <p className="text-sm font-medium border p-3 rounded-lg bg-slate-50">{optimizationResult.original.title}</p>
+                  <p className="text-sm font-medium border dark:border-slate-700 p-3 rounded-lg bg-slate-50 dark:bg-slate-800 dark:text-slate-300">{optimizationResult.original.title}</p>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-1">Description</label>
-                  <p className="text-sm border p-3 rounded-lg bg-slate-50 h-32 overflow-y-auto">{optimizationResult.original.description}</p>
+                  <p className="text-sm border dark:border-slate-700 p-3 rounded-lg bg-slate-50 dark:bg-slate-800 dark:text-slate-300 h-32 overflow-y-auto">{optimizationResult.original.description}</p>
                 </div>
               </div>
 
               {/* NEW */}
               <div>
-                <h4 className="font-bold text-emerald-600 uppercase tracking-wider text-xs mb-4 flex items-center gap-2">
+                <h4 className="font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider text-xs mb-4 flex items-center gap-2">
                    ✨ AI Recommended (Grade: A+)
                 </h4>
                 <div className="mb-4">
-                  <label className="block text-xs font-bold text-emerald-600 mb-1">New Title</label>
-                  <p className="text-sm font-bold text-slate-900 border-2 border-emerald-100 p-3 rounded-lg bg-emerald-50/30">
+                  <label className="block text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">New Title</label>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white border-2 border-emerald-100 dark:border-emerald-900/50 p-3 rounded-lg bg-emerald-50/30 dark:bg-emerald-900/20">
                     {optimizationResult.optimized.optimizedTitle}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-emerald-600 mb-1">New Description</label>
-                  <p className="text-sm text-slate-700 border-2 border-emerald-100 p-3 rounded-lg bg-emerald-50/30 h-32 overflow-y-auto leading-relaxed">
+                  <label className="block text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">New Description</label>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 border-2 border-emerald-100 dark:border-emerald-900/50 p-3 rounded-lg bg-emerald-50/30 dark:bg-emerald-900/20 h-32 overflow-y-auto leading-relaxed">
                     {optimizationResult.optimized.optimizedDescription}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-              <button onClick={() => setOptimizationResult(null)} className="px-6 py-3 font-bold text-slate-500 hover:bg-slate-200 rounded-xl transition-colors">Close</button>
+            <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
+              <button onClick={() => setOptimizationResult(null)} className="px-6 py-3 font-bold text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">Close</button>
               
               {!optimizationResult.isExternal ? (
                 <button 
@@ -295,26 +292,26 @@ const StaleListingsPage: React.FC = () => {
 
       <div className="max-w-6xl mx-auto">
         <div className="mb-10 text-center">
-          <h1 className="text-3xl font-black text-[#0F172A] tracking-tight">🩺 Listing Doctor</h1>
-          <p className="text-slate-500 mt-2">Diagnose issues and rewrite listings with AI.</p>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">🩺 Listing Doctor</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-2">Diagnose issues and rewrite listings with AI.</p>
         </div>
 
         {/* HEALTH SCORE */}
-        <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-200 mb-8 text-center relative overflow-hidden">
+        <div className="!bg-white dark:!bg-slate-800 rounded-[32px] p-8 shadow-sm border border-slate-200 dark:border-slate-700 mb-8 text-center relative overflow-hidden transition-colors">
            <div className={`text-6xl font-black mb-2 ${healthScore > 80 ? 'text-emerald-500' : 'text-orange-500'}`}>{healthScore}%</div>
            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Inventory Health</p>
         </div>
 
         {/* 🔗 EXTERNAL LINK INPUT */}
-        <div className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-200 mb-12 flex flex-col md:flex-row gap-3">
+        <div className="!bg-white dark:!bg-slate-800 rounded-[24px] p-6 shadow-sm border border-slate-200 dark:border-slate-700 mb-12 flex flex-col md:flex-row gap-3 transition-colors">
              <input 
                type="text" 
                value={externalUrl}
                onChange={(e) => setExternalUrl(e.target.value)}
                placeholder="Paste eBay/Poshmark URL..."
-               className="flex-grow bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium focus:outline-none focus:border-blue-500"
+               className="flex-grow bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 font-medium focus:outline-none focus:border-blue-500 dark:text-white"
              />
-             <button onClick={handleAddLink} disabled={!externalUrl} className="bg-slate-900 text-white font-bold px-6 py-3 rounded-xl hover:bg-slate-800 disabled:opacity-50">
+             <button onClick={handleAddLink} disabled={!externalUrl} className="bg-slate-900 dark:bg-blue-600 text-white font-bold px-6 py-3 rounded-xl hover:bg-slate-800 dark:hover:bg-blue-500 disabled:opacity-50">
                + Track Listing
              </button>
         </div>
@@ -322,18 +319,18 @@ const StaleListingsPage: React.FC = () => {
         {/* 💊 PATIENT LIST */}
         <div className="space-y-4">
           {issues.map((item, index) => (
-            <div key={index} className="bg-white rounded-[20px] p-1 border border-slate-200 shadow-sm hover:shadow-md transition-all group">
+            <div key={index} className="!bg-white dark:!bg-slate-800 rounded-[20px] p-1 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group">
               <div className="flex flex-col md:flex-row items-center gap-6 p-5">
                 
                 {/* GRADE CIRCLE WITH LABEL */}
                 <div className="flex flex-col items-center shrink-0">
                   <span className="text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-wider">Grade</span>
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black ${
-                    item.grade === 'A' ? 'bg-emerald-100 text-emerald-600' :
-                    item.grade === 'B' ? 'bg-blue-100 text-blue-600' :
-                    item.grade === 'C' ? 'bg-yellow-100 text-yellow-600' :
-                    item.grade === '?' ? 'bg-slate-100 text-slate-400' :
-                    'bg-red-100 text-red-600'
+                    item.grade === 'A' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' :
+                    item.grade === 'B' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' :
+                    item.grade === 'C' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' :
+                    item.grade === '?' ? 'bg-slate-100 dark:bg-slate-700 text-slate-400' :
+                    'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                   }`}>
                     {item.grade}
                   </div>
@@ -341,10 +338,10 @@ const StaleListingsPage: React.FC = () => {
 
                 {/* INFO */}
                 <div className="flex-grow text-center md:text-left overflow-hidden">
-                  <h4 className="font-bold text-[#0F172A] mb-1 truncate">{item.title || "Untitled Draft"}</h4>
+                  <h4 className="font-bold text-slate-900 dark:text-white mb-1 truncate">{item.title || "Untitled Draft"}</h4>
                   <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-2">
                     {item.diagnosis.map((diag: string, i: number) => (
-                      <span key={i} className="text-[10px] font-bold uppercase tracking-wide text-red-500 bg-red-50 px-2 py-1 rounded-md">
+                      <span key={i} className="text-[10px] font-bold uppercase tracking-wide text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-md">
                         {diag}
                       </span>
                     ))}
@@ -373,7 +370,7 @@ const StaleListingsPage: React.FC = () => {
                     <>
                       <button 
                          onClick={() => startExternalAnalysis(item)}
-                         className="px-5 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors text-sm flex items-center gap-2"
+                         className="px-5 py-3 bg-slate-900 dark:bg-blue-600 text-white font-bold rounded-xl hover:bg-slate-800 dark:hover:bg-blue-500 transition-colors text-sm flex items-center gap-2"
                       >
                          <span>✨</span> Analyze
                       </button>
@@ -381,7 +378,7 @@ const StaleListingsPage: React.FC = () => {
                         href={item.title} 
                         target="_blank" 
                         rel="noreferrer" 
-                        className="px-4 py-3 border border-slate-200 text-slate-400 font-bold rounded-xl hover:bg-slate-50 hover:text-slate-600 transition-colors"
+                        className="px-4 py-3 border border-slate-200 dark:border-slate-600 text-slate-400 font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-white transition-colors"
                       >
                         ↗
                       </a>
