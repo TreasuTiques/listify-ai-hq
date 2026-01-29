@@ -2,9 +2,11 @@
 module.exports = {
   content: [
     "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    "./*.{js,ts,jsx,tsx}",                // ✅ Checks root files (App.tsx)
+    "./components/**/*.{js,ts,jsx,tsx}",  // ✅ Checks components folder
+    "./pages/**/*.{js,ts,jsx,tsx}"        // ✅ Checks pages folder
   ],
-  darkMode: 'class',
+  darkMode: 'class', // 🌑 This enables the toggle
   theme: {
     extend: {},
   },
