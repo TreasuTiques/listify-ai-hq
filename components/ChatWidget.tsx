@@ -55,7 +55,6 @@ export default function ChatWidget() {
 
       const data = await response.json();
 
-      // ✅ DEBUG CHANGE: If it fails, we throw the specific error code
       if (!response.ok) {
         throw new Error(`Error Code: ${response.status} (${data.error || 'Unknown'})`);
       }
@@ -67,7 +66,6 @@ export default function ChatWidget() {
       setMessages((prev) => [...prev, aiMsg]);
 
     } catch (error: any) {
-      // ✅ DEBUG CHANGE: Print the actual error to the screen
       console.error(error);
       setMessages((prev) => [...prev, { role: "assistant", content: `DEBUG ERROR: ${error.message}` }]);
     } finally {
@@ -151,7 +149,9 @@ export default function ChatWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a message..."
-              className="flex-1 bg-gray-100 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              // FIX: Added 'text-slate-900' to force text to be dark/visible against the light gray background
+              // Also added 'placeholder:text-slate-500' for better visibility
+              className="flex-1 bg-gray-100 text-slate-900 placeholder:text-slate-500 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             />
             <button className="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-blue-700 transition">
               Send
