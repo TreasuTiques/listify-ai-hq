@@ -1,12 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class', 
   content: [
     "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",        // Checks all source files
-    "./src/components/**/*.{js,ts,jsx,tsx}",
-    "./src/pages/**/*.{js,ts,jsx,tsx}"
+    "./*.{js,ts,jsx,tsx}",               // ✅ Checks root files (index.tsx, App.tsx)
+    "./components/**/*.{js,ts,jsx,tsx}", // ✅ Checks components folder
+    "./pages/**/*.{js,ts,jsx,tsx}"       // ✅ Checks pages folder
   ],
-  darkMode: 'class', // 🌑 This enables the toggle
   theme: {
     extend: {},
   },
