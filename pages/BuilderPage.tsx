@@ -31,7 +31,7 @@ const BuilderPage: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize User
+  // Initialize User (Cleaned: No Dark Mode logic here anymore!)
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -182,7 +182,7 @@ const BuilderPage: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-4">
-           {/* 🛑 DELETED LOCAL TOGGLE - Navbar now handles this! */}
+           {/* 🛑 CLEANED: No local toggle here. It uses the Navbar now! */}
 
            {activePlatform === 'ebay' && (
              <button onClick={handleProModeToggle} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${isProMode ? 'bg-[#0F172A] dark:bg-blue-600 text-white border-[#0F172A] dark:border-blue-600 shadow-lg' : user ? 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300' : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70'}`}>
