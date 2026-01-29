@@ -3,23 +3,23 @@
 @tailwind utilities;
 
 @layer base {
-  /* ☀️ LIGHT MODE DEFAULT */
+  /* ☀️ LIGHT MODE DEFAULTS */
   body {
     @apply bg-slate-50 text-slate-900 transition-colors duration-300;
   }
 
-  /* 🌑 DARK MODE DEFAULT */
+  /* 🌑 DARK MODE DEFAULTS */
   .dark body {
     @apply bg-[#0F172A] text-white;
   }
   
-  /* Make sure the root container fills the screen */
+  /* FORCE ROOT TO FILL SCREEN */
   #root {
     @apply min-h-screen w-full;
   }
 }
 
-/* Optional: Make the scrollbar look nice in dark mode */
+/* 🎨 SCROLLBAR POLISH */
 ::-webkit-scrollbar {
   width: 8px;
 }
