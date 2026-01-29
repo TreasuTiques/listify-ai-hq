@@ -91,6 +91,16 @@ const App: React.FC = () => {
     if (currentPath === '/login') return <LoginPage onNavigate={navigate} />;
     if (currentPath === '/signup') return <SignUpPage onNavigate={navigate} />;
     
+    // ✅ NEW: Enable "Teaser Mode" for Listing Doctor when logged out
+    if (currentPath === '/doctor') return (
+       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 flex flex-col">
+          <Navbar session={null} onNavigate={navigate} isLanding={false} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
+          {/* We pass isGuest={true} so the Blur & Modal appear */}
+          <div className="flex-grow pt-20"><StaleListingsPage isGuest={true} onNavigate={navigate} /></div>
+          <Footer onNavigate={navigate} />
+       </div>
+    );
+
     // FIX: Removed background classes from this wrapper so LandingPage controls its own background fully
     if (currentPath === '/') return (
        <div className="min-h-screen transition-colors duration-300 flex flex-col">
@@ -110,7 +120,7 @@ const App: React.FC = () => {
               case '/pricing': return <PricingPage />;
               case '/analytics': return <AnalyticsPage />; 
               case '/sourcing': return <SourcingPage />;
-              case '/doctor': return <StaleListingsPage />;
+              // Case '/doctor' is handled above specifically for the layout
               case '/contact': return <ContactPage />;
               case '/privacy': return <PrivacyPage />;
               case '/terms': return <TermsPage />;
@@ -136,7 +146,7 @@ const App: React.FC = () => {
       case '/dashboard': return <DashboardPage onNavigate={navigate} />;
       case '/inventory': return <InventoryPage onNavigate={navigate} />;
       case '/builder': return <BuilderPage />;
-      case '/doctor': return <StaleListingsPage />;
+      case '/doctor': return <StaleListingsPage />; // Regular access (no isGuest prop)
       case '/sourcing': return <SourcingPage />;
       case '/analytics': return <AnalyticsPage />;
       case '/pricing': return <PricingPage />;
