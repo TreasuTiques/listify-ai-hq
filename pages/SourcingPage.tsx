@@ -10,7 +10,7 @@ const SourcingPage: React.FC = () => {
   
   // 📸 IMAGE STATE
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // ✅ NEW: Stores the actual file for AI
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [showRefine, setShowRefine] = useState(false);
   const [condition, setCondition] = useState('Used');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,7 +31,7 @@ const SourcingPage: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       setError(null);
-      setSelectedFile(file); // ✅ Store file for AI
+      setSelectedFile(file);
       
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -42,10 +42,9 @@ const SourcingPage: React.FC = () => {
     }
   };
 
-  // Handle removing image
   const handleRemoveImage = () => {
     setImagePreview(null);
-    setSelectedFile(null); // ✅ Clear file
+    setSelectedFile(null);
     setShowRefine(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -64,16 +63,10 @@ const SourcingPage: React.FC = () => {
     setError(null); 
     
     try {
-      // Build a smarter query
-      const fullQuery = condition === 'New' 
-        ? `${query} new with tags` 
-        : query;
-
-      // ✅ FIX: Send the actual image file to the brain!
+      const fullQuery = condition === 'New' ? `${query} new with tags` : query;
       const data = await scoutProduct(fullQuery, selectedFile || undefined);
       setScoutResult(data);
 
-      // ✨ AUTO-FILL CALCULATOR
       const avgPrice = (data.minPrice + data.maxPrice) / 2;
       setSellPrice(avgPrice.toFixed(2));
 
@@ -85,7 +78,7 @@ const SourcingPage: React.FC = () => {
     }
   };
 
-  // 🧮 CALCULATOR ENGINE (Unchanged)
+  // 🧮 CALCULATOR ENGINE
   useEffect(() => {
     const cost = parseFloat(costPrice) || 0;
     const sell = parseFloat(sellPrice) || 0;
@@ -128,27 +121,30 @@ const SourcingPage: React.FC = () => {
     const isActive = platform === p;
     return `flex items-center justify-center py-3 rounded-xl text-xs font-bold transition-all duration-300 border ${
       isActive 
-        ? `bg-white ${activeColor} border-slate-200 shadow-md transform scale-105` 
-        : 'bg-slate-50 text-slate-400 border-transparent hover:bg-white hover:text-slate-600 hover:shadow-sm'
+        ? `bg-white dark:bg-slate-700 ${activeColor} dark:text-white border-slate-200 dark:border-slate-600 shadow-md transform scale-105` 
+        : 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-transparent hover:bg-white dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300 hover:shadow-sm'
     }`;
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 pt-24 px-4 sm:px-6 lg:px-8 font-sans">
+    // FIX: Main container background
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-24 pt-24 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-300">
       <div className="max-w-md mx-auto relative">
         
         {/* HEADER */}
         <div className="text-center mb-4 animate-in fade-in slide-in-from-top-4 duration-700">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0F172A] text-white text-[10px] font-bold uppercase tracking-wider mb-3 shadow-lg shadow-blue-900/20">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0F172A] dark:bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider mb-3 shadow-lg shadow-blue-900/20">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
             AI Market Scanner
           </div>
-          <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">Sourcing Assistant</h1>
-          <p className="text-slate-500 text-sm mt-1 font-medium">Scan items & check profitability instantly.</p>
+          {/* FIX: Text colors */}
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Sourcing Assistant</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">Scan items & check profitability instantly.</p>
         </div>
 
         {/* 🔭 PREMIUM SEARCH WIZARD */}
-        <div className="bg-white rounded-[24px] shadow-xl shadow-slate-200/50 border border-slate-100 p-2 mb-6 transition-all duration-300">
+        {/* FIX: Card BG & Border */}
+        <div className="bg-white dark:bg-slate-800 rounded-[24px] shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 p-2 mb-6 transition-all duration-300">
           
           <div className="flex gap-2">
             <div className="relative flex-grow">
@@ -158,7 +154,8 @@ const SourcingPage: React.FC = () => {
                  onChange={(e) => {setQuery(e.target.value); setError(null);}}
                  onKeyDown={(e) => e.key === 'Enter' && handleScout()}
                  placeholder={showRefine ? "Add keywords (e.g. 'Vintage Nike')" : "Search item (e.g. Nike Air Max)"}
-                 className="w-full bg-slate-50 rounded-xl pl-4 pr-12 py-3.5 font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                 // FIX: Input BG and Text
+                 className="w-full bg-slate-50 dark:bg-slate-900 rounded-xl pl-4 pr-12 py-3.5 font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                />
                <button 
                  onClick={() => fileInputRef.current?.click()}
@@ -173,7 +170,7 @@ const SourcingPage: React.FC = () => {
             <button 
               onClick={handleScout}
               disabled={loading}
-              className="bg-[#0F172A] text-white px-5 rounded-xl font-bold hover:bg-slate-800 disabled:opacity-80 transition-all flex items-center justify-center min-w-[60px] shadow-lg shadow-slate-900/20"
+              className="bg-[#0F172A] dark:bg-blue-600 text-white px-5 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-blue-700 disabled:opacity-80 transition-all flex items-center justify-center min-w-[60px] shadow-lg shadow-slate-900/20"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -184,17 +181,17 @@ const SourcingPage: React.FC = () => {
           </div>
 
           {error && (
-            <div className="mt-3 p-3 bg-red-50 text-red-600 text-sm font-medium rounded-xl flex items-center gap-2 animate-in slide-in-from-top-1">
+            <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-medium rounded-xl flex items-center gap-2 animate-in slide-in-from-top-1">
               <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
               {error}
             </div>
           )}
 
           {showRefine && !error && (
-            <div className="mt-3 pt-3 border-t border-slate-100 animate-in slide-in-from-top-2 duration-300">
+            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 animate-in slide-in-from-top-2 duration-300">
               <div className="flex gap-3">
                  {imagePreview && (
-                   <div className="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex-shrink-0 relative group">
+                   <div className="w-16 h-16 rounded-lg bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 overflow-hidden flex-shrink-0 relative group">
                       <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                       <button onClick={handleRemoveImage} className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center font-bold text-xs transition-opacity">Remove</button>
                    </div>
@@ -206,7 +203,7 @@ const SourcingPage: React.FC = () => {
                          <button 
                            key={c}
                            onClick={() => setCondition(c)}
-                           className={`flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all ${condition === c ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-500 hover:border-blue-200'}`}
+                           className={`flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all ${condition === c ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300' : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 hover:border-blue-200'}`}
                          >
                            {c}
                          </button>
@@ -220,7 +217,8 @@ const SourcingPage: React.FC = () => {
 
         {/* 📉 AI RESULT CARD */}
         {scoutResult && !loading && !error && (
-          <div className="bg-white rounded-[24px] p-6 shadow-xl border border-slate-100 text-center relative overflow-hidden mb-6 animate-in slide-in-from-top-4 duration-500">
+          // FIX: Card BG
+          <div className="bg-white dark:bg-slate-800 rounded-[24px] p-6 shadow-xl border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 animate-in slide-in-from-top-4 duration-500">
              <div className={`absolute top-0 left-0 w-full h-1.5 ${scoutResult.verdict === 'BUY' ? 'bg-green-500' : 'bg-red-500'}`}></div>
              
              <div className="flex justify-between items-start mb-4">
@@ -232,33 +230,34 @@ const SourcingPage: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Est. Value</div>
-                  <div className="text-xl font-black text-[#0F172A]">${scoutResult.minPrice}-${scoutResult.maxPrice}</div>
+                  <div className="text-xl font-black text-slate-900 dark:text-white">${scoutResult.minPrice}-${scoutResult.maxPrice}</div>
                 </div>
              </div>
              
-             <p className="text-sm font-medium text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed">
+             <p className="text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-700 leading-relaxed">
                "{scoutResult.reason}"
              </p>
           </div>
         )}
 
         {/* 3. CALCULATOR INPUTS */}
-        <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 p-6 mb-6">
+        {/* FIX: Card BG & Border */}
+        <div className="bg-white dark:bg-slate-800 rounded-[32px] border border-slate-100 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none p-6 mb-6">
           <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Select Platform</label>
-          <div className="grid grid-cols-3 gap-2 mb-8 p-1.5 bg-slate-50 rounded-2xl border border-slate-100">
+          <div className="grid grid-cols-3 gap-2 mb-8 p-1.5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-700">
             <button onClick={() => setPlatform('ebay')} className={getButtonClass('ebay', 'text-blue-600')}>eBay</button>
             <button onClick={() => setPlatform('posh')} className={getButtonClass('posh', 'text-red-600')}>Posh</button>
             <button onClick={() => setPlatform('mercari')} className={getButtonClass('mercari', 'text-purple-600')}>Mercari</button>
             <button onClick={() => setPlatform('shopify')} className={getButtonClass('shopify', 'text-green-600')}>Shopify</button>
             <button onClick={() => setPlatform('etsy')} className={getButtonClass('etsy', 'text-orange-600')}>Etsy</button>
-            <button onClick={() => setPlatform('depop')} className={getButtonClass('depop', 'text-slate-800')}>Depop</button>
+            <button onClick={() => setPlatform('depop')} className={getButtonClass('depop', 'text-slate-800 dark:text-slate-200')}>Depop</button>
           </div>
 
           <div className="space-y-5">
             <div className="group">
-              <label className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+              <label className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
                 Item Cost
-                {costPrice && <span className="text-emerald-600 text-[10px] bg-emerald-50 px-1.5 rounded">Investment</span>}
+                {costPrice && <span className="text-emerald-600 text-[10px] bg-emerald-50 dark:bg-emerald-900/30 px-1.5 rounded">Investment</span>}
               </label>
               <div className="relative">
                 <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">$</span>
@@ -267,14 +266,15 @@ const SourcingPage: React.FC = () => {
                   inputMode="decimal"
                   value={costPrice}
                   onChange={(e) => setCostPrice(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-4 text-xl font-bold text-slate-900 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
+                  // FIX: Input Styles
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl pl-10 pr-4 py-4 text-xl font-bold text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
                   placeholder="0.00"
                 />
               </div>
             </div>
 
             <div className="group">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Target Price</label>
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Target Price</label>
               <div className="relative">
                 <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">$</span>
                 <input 
@@ -282,14 +282,14 @@ const SourcingPage: React.FC = () => {
                   inputMode="decimal"
                   value={sellPrice}
                   onChange={(e) => setSellPrice(e.target.value)}
-                  className="w-full bg-emerald-50 border border-emerald-200 rounded-2xl pl-10 pr-4 py-4 text-xl font-bold text-emerald-900 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-inner placeholder:text-emerald-300"
+                  className="w-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl pl-10 pr-4 py-4 text-xl font-bold text-emerald-900 dark:text-emerald-400 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-inner placeholder:text-emerald-300"
                   placeholder="0.00"
                 />
               </div>
             </div>
             
             <div className="group">
-               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Shipping</label>
+               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Shipping</label>
                <div className="relative">
                 <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</span>
                 <input 
@@ -297,7 +297,7 @@ const SourcingPage: React.FC = () => {
                   inputMode="decimal"
                   value={shipping}
                   onChange={(e) => setShipping(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-3 text-lg font-bold text-slate-900 focus:outline-none focus:border-blue-500 transition-all shadow-inner"
+                  className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl pl-10 pr-4 py-3 text-lg font-bold text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all shadow-inner"
                   placeholder="0.00"
                 />
                </div>
@@ -308,7 +308,7 @@ const SourcingPage: React.FC = () => {
         {/* 4. RESULTS CARD */}
         {profit !== null && !loading ? (
           <div className={`relative overflow-hidden rounded-[32px] p-8 text-center shadow-2xl transition-all duration-500 transform animate-in slide-in-from-bottom-8 ${
-             roi && roi < 20 ? 'bg-red-600' : 'bg-[#0F172A]'
+             roi && roi < 20 ? 'bg-red-600' : 'bg-[#0F172A] dark:bg-slate-800'
           }`}>
              {/* Dynamic Glow Background */}
              <div className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[80px] opacity-40 pointer-events-none ${
