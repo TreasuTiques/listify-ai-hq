@@ -9,8 +9,7 @@ const BuilderPage: React.FC = () => {
   const [isProMode, setIsProMode] = useState(false);
   const [editorTab, setEditorTab] = useState<'visual' | 'html'>('visual');
   const [copySuccess, setCopySuccess] = useState(''); 
-  const [isDarkMode, setIsDarkMode] = useState(false); // 🌑 Dark Mode State
-
+  
   // Form Fields
   const [title, setTitle] = useState('');
   const [brand, setBrand] = useState('');
@@ -32,34 +31,14 @@ const BuilderPage: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize User & Dark Mode
+  // Initialize User
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
     };
     getUser();
-
-    // Check Local Storage for Dark Mode preference
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
-    }
   }, []);
-
-  // 🌑 Toggle Dark Mode Function
-  const toggleDarkMode = () => {
-    if (isDarkMode) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      setIsDarkMode(false);
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-      setIsDarkMode(true);
-    }
-  };
 
   const platforms = [
     { id: 'ebay', label: 'eBay', color: 'bg-blue-600' },
@@ -181,7 +160,7 @@ const BuilderPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 transition-colors duration-300 pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900 transition-colors duration-300 pb-24 pt-24 px-4 sm:px-6 lg:px-8 relative">
       
       {/* SUCCESS POPUP */}
       {showSuccess && (
@@ -203,14 +182,7 @@ const BuilderPage: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-4">
-           {/* 🌑 DARK MODE TOGGLE */}
-           <button 
-             onClick={toggleDarkMode}
-             className="p-2 rounded-full bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700 transition-all hover:scale-110"
-             title="Toggle Dark Mode"
-           >
-             {isDarkMode ? '☀️' : '🌑'}
-           </button>
+           {/* 🛑 DELETED LOCAL TOGGLE - Navbar now handles this! */}
 
            {activePlatform === 'ebay' && (
              <button onClick={handleProModeToggle} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${isProMode ? 'bg-[#0F172A] dark:bg-blue-600 text-white border-[#0F172A] dark:border-blue-600 shadow-lg' : user ? 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300' : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70'}`}>
@@ -283,7 +255,6 @@ const BuilderPage: React.FC = () => {
                 <span className={`text-xs font-bold ${title.length > (activePlatform === 'poshmark' ? 50 : 80) ? 'text-red-500' : 'text-slate-400'}`}>{title.length} / {activePlatform === 'poshmark' ? '50' : '80'}</span>
               </div>
               <div className="relative">
-                {/* ✅ FIX: Increased right padding to pr-16 */}
                 <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 pr-16 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400" placeholder="AI will generate this..." />
                 <button onClick={() => copyToClipboard(title, 'title')} className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-400 p-2 rounded-lg transition-colors border border-blue-100 dark:border-blue-800" title="Copy Title">
                   {copySuccess === 'title' ? <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg> : <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>}
@@ -332,7 +303,6 @@ const BuilderPage: React.FC = () => {
                        </button>
                     </div>
                  ) : (
-                    // ✅ FIX: Added Copy Button for NON-eBay platforms
                     <button onClick={() => copyToClipboard(description, 'desc')} className="bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all border border-blue-100 dark:border-blue-800">
                         {copySuccess === 'desc' ? <span>✓ Copied</span> : <><span>📋</span> Copy Text</>}
                     </button>
@@ -342,14 +312,12 @@ const BuilderPage: React.FC = () => {
               {activePlatform === 'ebay' ? (
                 <div className="relative">
                    {editorTab === 'visual' ? (
-                      // ✅ FIX: Height increased to h-[500px]
                       <div className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic">Select condition to generate listing...</p>' }}></div>
                    ) : (
                       <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-slate-900 text-green-400 font-mono text-sm border border-slate-700 rounded-xl px-4 py-4 focus:outline-none focus:border-blue-500 h-[500px] resize-none" placeholder="<html>...</html>"></textarea>
                    )}
                 </div>
               ) : (
-                // ✅ FIX: Height increased to h-[500px]
                 <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-[500px] resize-none" placeholder="AI will write this for you..."></textarea>
               )}
             </div>
