@@ -3,9 +3,7 @@ module.exports = {
   darkMode: 'class', 
   content: [
     "./index.html",
-    "./*.{js,ts,jsx,tsx}",               // ✅ Checks root files (index.tsx, App.tsx)
-    "./components/**/*.{js,ts,jsx,tsx}", // ✅ Checks components folder
-    "./pages/**/*.{js,ts,jsx,tsx}"       // ✅ Checks pages folder
+    "./src/**/*.{js,ts,jsx,tsx}"  // ✅ This one line checks EVERYTHING inside the src folder
   ],
   theme: {
     extend: {},
