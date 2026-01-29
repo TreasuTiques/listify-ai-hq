@@ -64,20 +64,21 @@ const ProfitScoutPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-24 pt-20 px-4 sm:px-6 lg:px-8">
+    // FIX: Main Background with '!' to force override
+    <div className="min-h-screen !bg-slate-50 dark:!bg-slate-900 pb-24 pt-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="max-w-3xl mx-auto">
         
         {/* HEADER */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl mb-4 shadow-sm">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl mb-4 shadow-sm">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           </div>
-          <h1 className="text-3xl font-bold text-[#0F172A] tracking-tight">Profit Scout</h1>
-          <p className="text-slate-500 mt-2">Snap a photo to instantly check real market value.</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Profit Scout</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-2">Snap a photo to instantly check real market value.</p>
         </div>
 
         {/* SCANNER CARD */}
-        <div className="bg-white rounded-[32px] shadow-xl shadow-slate-200/50 overflow-hidden border border-slate-100 relative">
+        <div className="!bg-white dark:!bg-slate-800 rounded-[32px] shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 relative overflow-hidden transition-colors">
           
           {/* CAMERA / DROP ZONE */}
           <div 
@@ -85,7 +86,7 @@ const ProfitScoutPage: React.FC = () => {
             onDragOver={onDragOver}
             onDrop={handleFileUpload}
             className={`relative min-h-[400px] flex flex-col items-center justify-center cursor-pointer transition-all ${
-              !imagePreview ? 'bg-slate-50 hover:bg-slate-100' : 'bg-black'
+              !imagePreview ? 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-900/80' : 'bg-black'
             }`}
           >
             <input 
@@ -108,11 +109,11 @@ const ProfitScoutPage: React.FC = () => {
               </>
             ) : (
               <div className="text-center p-6">
-                <div className="w-20 h-20 bg-white rounded-full shadow-md flex items-center justify-center mx-auto mb-4">
+                <div className="w-20 h-20 bg-white dark:bg-slate-700 rounded-full shadow-md flex items-center justify-center mx-auto mb-4 transition-colors">
                   <span className="text-4xl">📸</span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-700">Tap to Scan Item</h3>
-                <p className="text-slate-400 mt-2 text-sm">or drop a file here</p>
+                <h3 className="text-xl font-bold text-slate-700 dark:text-white">Tap to Scan Item</h3>
+                <p className="text-slate-400 dark:text-slate-500 mt-2 text-sm">or drop a file here</p>
               </div>
             )}
 
@@ -128,16 +129,16 @@ const ProfitScoutPage: React.FC = () => {
 
           {/* RESULTS PANEL (Visible after analysis) */}
           {result && !analyzing && (
-            <div className="p-8 bg-white animate-in slide-in-from-bottom-10 duration-500">
+            <div className="p-8 bg-white dark:bg-slate-800 animate-in slide-in-from-bottom-10 duration-500 border-t border-slate-100 dark:border-slate-700">
               
               <div className="flex items-start justify-between gap-4 mb-6">
                 <div>
-                  <div className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">AI Identified</div>
-                  <h2 className="text-2xl font-bold text-[#0F172A] leading-tight">{result.title}</h2>
+                  <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">AI Identified</div>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight">{result.title}</h2>
                 </div>
-                <div className="bg-slate-100 px-4 py-2 rounded-xl text-center min-w-[100px]">
-                  <div className="text-[10px] font-bold text-slate-500 uppercase">Est. Value</div>
-                  <div className="text-lg font-bold text-[#0F172A]">{result.estimated_price}</div>
+                <div className="bg-slate-100 dark:bg-slate-700 px-4 py-2 rounded-xl text-center min-w-[100px]">
+                  <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Est. Value</div>
+                  <div className="text-lg font-bold text-slate-900 dark:text-white">{result.estimated_price}</div>
                 </div>
               </div>
 
@@ -145,22 +146,22 @@ const ProfitScoutPage: React.FC = () => {
               <div className="grid grid-cols-1 gap-4">
                 <button 
                   onClick={openEbayComps}
-                  className="w-full bg-[#2563EB] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/20 hover:bg-blue-600 hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
+                  className="w-full bg-[#2563EB] dark:bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/20 hover:bg-blue-600 dark:hover:bg-blue-500 hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
                 >
                   <span>🔎</span> See eBay Sold Comps
                 </button>
                 
                 <button 
                   onClick={openGoogleSearch}
-                  className="w-full bg-white border-2 border-slate-200 text-slate-700 py-4 rounded-xl font-bold text-lg hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-3"
+                  className="w-full bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-white py-4 rounded-xl font-bold text-lg hover:bg-slate-50 dark:hover:bg-slate-600 hover:border-slate-300 transition-all flex items-center justify-center gap-3"
                 >
                   <span>🛍️</span> Check Google Shopping
                 </button>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-slate-100 text-center">
-                <p className="text-sm text-slate-400">
-                  Ready to sell? <span className="text-blue-600 font-bold cursor-pointer hover:underline" onClick={() => window.location.hash = '/builder'}>Create Listing Now &rarr;</span>
+              <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700 text-center">
+                <p className="text-sm text-slate-400 dark:text-slate-500">
+                  Ready to sell? <span className="text-blue-600 dark:text-blue-400 font-bold cursor-pointer hover:underline" onClick={() => window.location.hash = '/builder'}>Create Listing Now &rarr;</span>
                 </p>
               </div>
 
