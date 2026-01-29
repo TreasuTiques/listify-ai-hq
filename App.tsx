@@ -91,9 +91,9 @@ const App: React.FC = () => {
     if (currentPath === '/login') return <LoginPage onNavigate={navigate} />;
     if (currentPath === '/signup') return <SignUpPage onNavigate={navigate} />;
     
-    // 🌑 Note: We pass dark mode props here, but LandingPage needs to be updated to use them!
+    // FIX: Removed background classes from this wrapper so LandingPage controls its own background fully
     if (currentPath === '/') return (
-       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 flex flex-col">
+       <div className="min-h-screen transition-colors duration-300 flex flex-col">
           <Navbar session={null} onNavigate={navigate} isLanding={true} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
           <div className="flex-grow pt-20"><LandingPage onNavigate={navigate} /></div>
           <Footer onNavigate={navigate} />
