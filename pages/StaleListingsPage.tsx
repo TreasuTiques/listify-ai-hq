@@ -18,9 +18,9 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
   // 🎛️ INPUT MODES
   const [inputMode, setInputMode] = useState<'xray' | 'text'>('xray');
   
-  // 📸 X-RAY STATE (Screenshot)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // 📸 X-RAY STATE (Multi-Image Support)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   
   // 📝 TEXT LAB STATE
   const [manualTitle, setManualTitle] = useState('');
@@ -42,27 +42,37 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Simulate loading vitals
     setTimeout(() => setLoading(false), 800);
   }, []);
 
-  // 📸 HANDLE IMAGE UPLOAD
+  // 📸 HANDLE MULTI-IMAGE UPLOAD
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
-    let file: File | undefined;
+    let files: File[] = [];
+    
     if ((e as React.DragEvent).dataTransfer) {
       e.preventDefault();
-      file = (e as React.DragEvent).dataTransfer.files[0];
+      files = Array.from((e as React.DragEvent).dataTransfer.files);
     } else if ((e as React.ChangeEvent<HTMLInputElement>).target.files) {
-      file = (e as React.ChangeEvent<HTMLInputElement>).target.files![0];
+      files = Array.from((e as React.ChangeEvent<HTMLInputElement>).target.files!);
     }
 
-    if (file) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => setPreviewUrl(e.target?.result as string);
-      reader.readAsDataURL(file);
-      setReport(null); // Reset previous report
+    if (files.length > 0) {
+      // Limit to 4 images max for X-Ray
+      const newFiles = [...selectedFiles, ...files].slice(0, 4);
+      setSelectedFiles(newFiles);
+      setReport(null); // Reset report
+
+      // Generate previews
+      const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+      setPreviewUrls(newPreviews);
     }
+  };
+
+  const removeImage = (index: number) => {
+    const updatedFiles = selectedFiles.filter((_, i) => i !== index);
+    const updatedPreviews = previewUrls.filter((_, i) => i !== index);
+    setSelectedFiles(updatedFiles);
+    setPreviewUrls(updatedPreviews);
   };
 
   const toggleTreatment = (key: keyof typeof treatments) => {
@@ -71,7 +81,7 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
 
   // 🧠 THE BRAIN: ANALYZE LISTING
   const runDiagnosis = async () => {
-    if (inputMode === 'xray' && !selectedFile) return;
+    if (inputMode === 'xray' && selectedFiles.length === 0) return;
     if (inputMode === 'text' && !manualTitle) return;
 
     setIsAnalyzing(true);
@@ -81,20 +91,19 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
       // 1. PREPARE DATA
       let analysisResult;
       
-      if (inputMode === 'xray' && selectedFile) {
-        // 📸 VISION MODE: Use existing vision service to "read" the screenshot
-        // We trick the generator to extract info instead of creating new
+      if (inputMode === 'xray' && selectedFiles.length > 0) {
+        // 📸 VISION MODE: Send ALL images
         try {
-           const result = await generateListingFromImages([selectedFile], 'ebay', false, 'used');
+           // We pass the array of files to the AI service
+           const result = await generateListingFromImages(selectedFiles, 'ebay', false, 'used');
            analysisResult = {
-             oldTitle: "Detected from Screenshot...", 
-             oldDesc: "Extracted from image...",
+             oldTitle: "Detected from Screenshots...", 
+             oldDesc: `Analyzed ${selectedFiles.length} images...`,
              newTitle: result.title,
              newDesc: result.description,
-             grade: 'C' // Screenshots usually imply a check is needed
+             grade: 'C' 
            };
         } catch (err) {
-           // Fallback if Vision fails (or for demo speed)
            console.warn("Vision Fallback Triggered");
            analysisResult = {
              oldTitle: "Vintage Item (Read from Image)",
@@ -105,21 +114,21 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
            };
         }
       } else {
-        // 📝 TEXT MODE: Use text optimizer
+        // 📝 TEXT MODE
         const optimized = await optimizeListing(manualTitle, manualDesc, 'eBay');
         analysisResult = {
           oldTitle: manualTitle,
           oldDesc: manualDesc,
           newTitle: optimized.optimizedTitle,
           newDesc: optimized.optimizedDescription,
-          grade: 'C' // Assume manual input needs help
+          grade: 'C'
         };
       }
 
       // 2. GENERATE REPORT CARD
       setTimeout(() => {
         setReport({
-          grade: 'A+', // Target Grade
+          grade: 'A+', 
           prevGrade: analysisResult.grade,
           before: {
             title: analysisResult.oldTitle,
@@ -136,7 +145,7 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
           ]
         });
         setIsAnalyzing(false);
-      }, 1500); // Cinematic delay
+      }, 1500); 
 
     } catch (error) {
       console.error("Diagnosis Failed", error);
@@ -158,7 +167,7 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
       <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-500/10 rounded-full blur-[120px] translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
 
-      {/* 🔒 GATEKEEPER MODAL (Guest) */}
+      {/* 🔒 GATEKEEPER MODAL */}
       {isGuest && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-500">
            <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl p-8 border border-white/20 text-center relative overflow-hidden">
@@ -208,43 +217,44 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
            
            {/* TABS */}
            <div className="flex border-b border-slate-100 dark:border-slate-700">
-              <button 
-                onClick={() => setInputMode('xray')}
-                className={`flex-1 py-5 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${inputMode === 'xray' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
-              >
-                <span>📸</span> X-Ray Scan <span className="bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-white text-[9px] px-1.5 py-0.5 rounded ml-1">New</span>
-              </button>
-              <button 
-                onClick={() => setInputMode('text')}
-                className={`flex-1 py-5 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${inputMode === 'text' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
-              >
-                <span>📝</span> Text Lab
-              </button>
+              <button onClick={() => setInputMode('xray')} className={`flex-1 py-5 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${inputMode === 'xray' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'}`}><span>📸</span> X-Ray Scan</button>
+              <button onClick={() => setInputMode('text')} className={`flex-1 py-5 text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${inputMode === 'text' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-b-2 border-blue-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'}`}><span>📝</span> Text Lab</button>
            </div>
 
            <div className="p-8">
-              {/* 📸 X-RAY MODE */}
+              {/* 📸 X-RAY MODE (Multi-Image) */}
               {inputMode === 'xray' && (
                 <div 
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => selectedFiles.length < 4 && fileInputRef.current?.click()}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleFileUpload}
-                  className="border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900/50 rounded-2xl h-64 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all group relative overflow-hidden"
+                  className={`border-2 border-dashed rounded-2xl h-64 flex flex-col items-center justify-center cursor-pointer transition-all group relative overflow-hidden ${selectedFiles.length < 4 ? 'hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/10' : 'cursor-default border-slate-200 dark:border-slate-700'}`}
                 >
-                   <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*" />
+                   <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*" multiple />
                    
-                   {previewUrl ? (
-                     <div className="relative w-full h-full">
-                       <img src={previewUrl} className="w-full h-full object-contain p-4" />
-                       <div className="absolute inset-0 bg-black/40 group-hover:bg-transparent transition-colors flex items-center justify-center">
-                          <span className="bg-white/90 text-slate-900 px-4 py-2 rounded-lg font-bold shadow-lg group-hover:opacity-0 transition-opacity">Change Image</span>
-                       </div>
+                   {previewUrls.length > 0 ? (
+                     <div className="w-full h-full p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                       {previewUrls.map((url, idx) => (
+                         <div key={idx} className="relative w-full h-full rounded-xl overflow-hidden shadow-sm group/image">
+                            <img src={url} className="w-full h-full object-cover" />
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover/image:opacity-100 transition-opacity"
+                            >✕</button>
+                         </div>
+                       ))}
+                       {previewUrls.length < 4 && (
+                         <div className="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                            <span className="text-2xl text-slate-400">+</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase mt-1">Add</span>
+                         </div>
+                       )}
                      </div>
                    ) : (
                      <>
                         <div className="w-16 h-16 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center text-4xl mb-4 shadow-sm group-hover:scale-110 transition-transform">📸</div>
-                        <h3 className="text-lg font-bold text-slate-700 dark:text-white">Drop Listing Screenshot</h3>
-                        <p className="text-sm text-slate-400 mt-2">or click to upload</p>
+                        <h3 className="text-lg font-bold text-slate-700 dark:text-white">Drop Listing Screenshots</h3>
+                        <p className="text-sm text-slate-400 mt-2">Up to 4 images supported</p>
                      </>
                    )}
                 </div>
@@ -255,21 +265,11 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                    <div>
                       <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Title</label>
-                      <input 
-                        value={manualTitle}
-                        onChange={(e) => setManualTitle(e.target.value)}
-                        placeholder="Paste listing title..."
-                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                      />
+                      <input value={manualTitle} onChange={(e) => setManualTitle(e.target.value)} placeholder="Paste listing title..." className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" />
                    </div>
                    <div>
                       <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Description</label>
-                      <textarea 
-                        value={manualDesc}
-                        onChange={(e) => setManualDesc(e.target.value)}
-                        placeholder="Paste current description..."
-                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none h-32"
-                      />
+                      <textarea value={manualDesc} onChange={(e) => setManualDesc(e.target.value)} placeholder="Paste current description..." className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none h-32" />
                    </div>
                 </div>
               )}
@@ -278,19 +278,11 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
               <div className="mt-8">
                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Select Treatments</p>
                  <div className="flex flex-wrap gap-3">
-                    <button onClick={() => toggleTreatment('fixTitle')} className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${treatments.fixTitle ? 'bg-blue-600 border-blue-600 text-white' : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>
-                       {treatments.fixTitle && <span>✓</span>} SEO Title Fix
-                    </button>
-                    <button onClick={() => toggleTreatment('fixDesc')} className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${treatments.fixDesc ? 'bg-blue-600 border-blue-600 text-white' : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>
-                       {treatments.fixDesc && <span>✓</span>} Rewrite Description
-                    </button>
-                    <button onClick={() => toggleTreatment('priceCheck')} className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${treatments.priceCheck ? 'bg-blue-600 border-blue-600 text-white' : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>
-                       {treatments.priceCheck && <span>✓</span>} Price Check
-                    </button>
+                    <button onClick={() => toggleTreatment('fixTitle')} className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${treatments.fixTitle ? 'bg-blue-600 border-blue-600 text-white' : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>{treatments.fixTitle && <span>✓</span>} SEO Title Fix</button>
+                    <button onClick={() => toggleTreatment('fixDesc')} className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${treatments.fixDesc ? 'bg-blue-600 border-blue-600 text-white' : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>{treatments.fixDesc && <span>✓</span>} Rewrite Description</button>
+                    <button onClick={() => toggleTreatment('priceCheck')} className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${treatments.priceCheck ? 'bg-blue-600 border-blue-600 text-white' : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>{treatments.priceCheck && <span>✓</span>} Price Check</button>
                     {inputMode === 'xray' && (
-                      <button onClick={() => toggleTreatment('photoAudit')} className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${treatments.photoAudit ? 'bg-purple-600 border-purple-600 text-white' : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>
-                         {treatments.photoAudit && <span>✓</span>} Photo Audit
-                      </button>
+                      <button onClick={() => toggleTreatment('photoAudit')} className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${treatments.photoAudit ? 'bg-purple-600 border-purple-600 text-white' : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>{treatments.photoAudit && <span>✓</span>} Photo Audit</button>
                     )}
                  </div>
               </div>
@@ -298,7 +290,7 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
               {/* ACTION BUTTON */}
               <button 
                 onClick={runDiagnosis}
-                disabled={isAnalyzing || (inputMode === 'xray' && !selectedFile) || (inputMode === 'text' && !manualTitle)}
+                disabled={isAnalyzing || (inputMode === 'xray' && selectedFiles.length === 0) || (inputMode === 'text' && !manualTitle)}
                 className="w-full mt-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold py-4 rounded-xl text-lg shadow-lg hover:scale-[1.01] active:scale-95 transition-all disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-3"
               >
                 {isAnalyzing ? (
@@ -315,13 +307,9 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
            <div className="animate-in slide-in-from-top-10 duration-700 fade-in">
               <div className="bg-white dark:bg-slate-800 rounded-[32px] shadow-2xl border border-emerald-500/30 overflow-hidden relative">
                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-blue-500"></div>
-                 
-                 {/* HEADER */}
                  <div className="p-8 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div>
-                       <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-                          🩺 Diagnosis Complete
-                       </h2>
+                       <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">🩺 Diagnosis Complete</h2>
                        <p className="text-slate-500 dark:text-slate-400 mt-1">We found <span className="font-bold text-emerald-500">{report.improvements.length} optimization opportunities</span>.</p>
                     </div>
                     <div className="flex items-center gap-4">
@@ -336,15 +324,9 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
                        </div>
                     </div>
                  </div>
-
-                 {/* BEFORE / AFTER GRID */}
                  <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-700">
-                    
-                    {/* BEFORE */}
                     <div className="p-8 bg-slate-50/50 dark:bg-slate-900/30">
-                       <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-red-500"></span> Original
-                       </h3>
+                       <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-red-500"></span> Original</h3>
                        <div className="space-y-6 opacity-70">
                           <div>
                              <p className="text-[10px] font-bold text-slate-400 mb-1">TITLE</p>
@@ -356,12 +338,8 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
                           </div>
                        </div>
                     </div>
-
-                    {/* AFTER */}
                     <div className="p-8 bg-white dark:bg-slate-800">
-                       <h3 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-6 flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Optimized
-                       </h3>
+                       <h3 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-6 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Optimized</h3>
                        <div className="space-y-6">
                           <div>
                              <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 mb-1">OPTIMIZED TITLE</p>
@@ -373,24 +351,16 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
                           <div>
                              <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 mb-1">SALES COPY</p>
                              <div className="relative group">
-                                <div className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-600">
-                                   {report.after.description}
-                                </div>
-                                <button onClick={() => copyToClipboard(report.after.description)} className="absolute top-0 right-0 bg-white dark:bg-slate-700 shadow-md p-2 rounded-lg text-slate-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all">
-                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                </button>
+                                <div className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-600">{report.after.description}</div>
+                                <button onClick={() => copyToClipboard(report.after.description)} className="absolute top-0 right-0 bg-white dark:bg-slate-700 shadow-md p-2 rounded-lg text-slate-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button>
                              </div>
                           </div>
                        </div>
                     </div>
                  </div>
-
-                 {/* FOOTER ACTIONS */}
                  <div className="p-6 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3">
                     <button onClick={() => setReport(null)} className="px-6 py-3 font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">Close</button>
-                    <button className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-500 hover:-translate-y-1 transition-all flex items-center gap-2">
-                       <span>💾</span> Save to Inventory
-                    </button>
+                    <button className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-500 hover:-translate-y-1 transition-all flex items-center gap-2"><span>💾</span> Save to Inventory</button>
                  </div>
               </div>
            </div>
