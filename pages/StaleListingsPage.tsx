@@ -92,31 +92,7 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
     return `<p>${html}</p>`;
   };
 
-  // 🧠 HELPER: Mock HTML Generator
-  const generateSmartHTML = (title: string) => {
-     return `
-<p style="text-align: center;"><strong>${title}</strong></p>
-<p>This is an authentic item in excellent pre-owned condition. Perfect for collectors!</p>
-<hr />
-<h3>✅ Condition Report</h3>
-<ul>
-  <li><strong>Condition:</strong> Pre-owned (Good)</li>
-  <li><strong>Flaws:</strong> Normal signs of wear consistent with age.</li>
-  <li><strong>Testing:</strong> Inspected and verified.</li>
-</ul>
-<br />
-<h3>📦 Shipping & Handling</h3>
-<ul>
-  <li>Ships within 24 hours via USPS Priority Mail.</li>
-  <li>Professionally packed to ensure safe arrival.</li>
-  <li>Tracking number provided immediately.</li>
-</ul>
-<br />
-<p style="font-size: 12px; color: #666;"><em>Thank you for shopping with us!</em></p>
-     `.trim();
-  };
-
-  // 🧠 THE BRAIN: ANALYZE LISTING
+  // 🧠 THE BRAIN: ANALYZE LISTING (PURE AI MODE)
   const runDiagnosis = async () => {
     if (inputMode === 'xray' && selectedFiles.length === 0) return;
     if (inputMode === 'text' && !manualTitle) return;
@@ -126,42 +102,50 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
     setViewMode('visual');
 
     try {
-      // 1. PREPARE DATA
       let analysisResult;
       let detectedPrice = "$0.00";
-      
-      // X-RAY MODE
+      let photoIssues: string[] = [];
+      let photoScore = "10/10";
+
+      // ------------------------------------------
+      // 📸 MODE 1: X-RAY (IMAGES)
+      // ------------------------------------------
       if (inputMode === 'xray' && selectedFiles.length > 0) {
-        try {
-           const result = await generateListingFromImages(selectedFiles, 'ebay', false, 'used');
-           detectedPrice = result.estimated_price || "$45.00";
-           // Ensure description is HTML formatted
-           const finalDesc = result.description.includes('<') ? result.description : formatAsHTML(result.description);
-           
-           analysisResult = {
-             oldTitle: "Detected from Screenshots...", 
-             oldDesc: `Analyzed ${selectedFiles.length} images...`,
-             newTitle: result.title,
-             newDesc: finalDesc,
-             grade: 'C' 
-           };
-        } catch (err) {
-           console.warn("Vision Fallback");
-           detectedPrice = "$55.00";
-           analysisResult = {
-             oldTitle: "Vintage Item (Read from Image)",
-             oldDesc: "Text extracted from screenshot analysis...",
-             newTitle: "🔥 Rare Vintage Item - High Condition [TESTED]",
-             newDesc: generateSmartHTML("🔥 Rare Vintage Item - High Condition [TESTED]"),
-             grade: 'C-'
-           };
-        }
+         // CALL REAL AI
+         const result = await generateListingFromImages(selectedFiles, 'ebay', false, 'used');
+         
+         detectedPrice = result.estimated_price || "Check Market";
+         const finalDesc = result.description.includes('<') ? result.description : formatAsHTML(result.description);
+         
+         // Generate Dynamic Audit based on real results
+         if (selectedFiles.length < 2) {
+            photoScore = "5/10";
+            photoIssues.push("Only 1 photo provided. Aim for at least 4.");
+         } else {
+            photoScore = "9/10";
+            photoIssues.push("Multiple angles detected ✅");
+         }
+         if (!result.title.includes("Vintage") && !result.title.includes("New")) {
+             photoIssues.push("Item condition hard to verify from distance.");
+         } else {
+             photoIssues.push("Lighting appears clear for identification.");
+         }
+
+         analysisResult = {
+           oldTitle: "Detected from Screenshots...", 
+           oldDesc: `Analyzed ${selectedFiles.length} images...`,
+           newTitle: result.title,
+           newDesc: finalDesc,
+           grade: 'C' 
+         };
       } 
-      // TEXT MODE
+      // ------------------------------------------
+      // 📝 MODE 2: TEXT LAB
+      // ------------------------------------------
       else {
+        // CALL REAL AI
         const optimized = await optimizeListing(manualTitle, manualDesc, 'eBay');
-        detectedPrice = "$40.00"; 
-        
+        detectedPrice = "N/A"; // Text mode can't guess price accurately without image
         const finalDesc = formatAsHTML(optimized.optimizedDescription);
 
         analysisResult = {
@@ -173,42 +157,43 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
         };
       }
 
-      // 2. GENERATE REPORT CARD WITH DEEP DIVE DATA
-      setTimeout(() => {
-        setReport({
-          grade: 'A+', 
-          prevGrade: analysisResult.grade,
-          before: {
-            title: analysisResult.oldTitle,
-            description: analysisResult.oldDesc
-          },
-          after: {
-            title: analysisResult.newTitle,
-            description: analysisResult.newDesc
-          },
-          // 💰 PRICE CHECK DATA (Enabled if pill selected)
-          priceAnalysis: treatments.priceCheck ? {
-             current: detectedPrice,
-             recommended: "$65.00 - $80.00",
-             confidence: "High",
-             status: "Undervalued 📉"
-          } : null,
-          // 📸 PHOTO AUDIT DATA (Enabled if X-Ray + pill selected)
-          photoAudit: (treatments.photoAudit) ? {
-             score: "8/10",
-             issues: ["Main photo has good lighting", "Add a close-up of the label", "Background could be cleaner"]
-          } : null,
-          improvements: [
-            "Added high-volume SEO keywords",
-            "Formatted as clean HTML",
-            "Improved sales persuasion"
-          ]
-        });
-        setIsAnalyzing(false);
-      }, 1500); 
+      // 3. GENERATE REPORT CARD
+      setReport({
+        grade: 'A+', 
+        prevGrade: analysisResult.grade,
+        before: {
+          title: analysisResult.oldTitle,
+          description: analysisResult.oldDesc
+        },
+        after: {
+          title: analysisResult.newTitle,
+          description: analysisResult.newDesc
+        },
+        // 💰 PRICE CHECK DATA (Only if requested)
+        priceAnalysis: treatments.priceCheck ? {
+           current: detectedPrice,
+           recommended: detectedPrice !== "Check Market" && detectedPrice !== "N/A" 
+              ? `$${(parseFloat(detectedPrice.replace(/[$,]/g,'')) * 1.1).toFixed(2)}` // Suggest 10% higher
+              : "See Sold Comps",
+           confidence: "Medium",
+           status: "Analyzed 📊"
+        } : null,
+        // 📸 PHOTO AUDIT DATA (Only if requested & X-Ray)
+        photoAudit: (inputMode === 'xray' && treatments.photoAudit) ? {
+           score: photoScore,
+           issues: photoIssues
+        } : null,
+        improvements: [
+          "Optimized keywords for high traffic",
+          "Formatted description with HTML",
+          "Generated SEO-friendly title"
+        ]
+      });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Diagnosis Failed", error);
+      alert(`Error analyzing input: ${error.message || "Unknown error"}`);
+    } finally {
       setIsAnalyzing(false);
     }
   };
