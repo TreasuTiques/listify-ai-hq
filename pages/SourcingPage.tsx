@@ -51,13 +51,11 @@ const SourcingPage: React.FC = () => {
     }
   };
 
-  // 🛡️ HELPER: SAFE NUMBER PARSER (Prevents the Crash)
+  // 🛡️ HELPER: SAFE NUMBER PARSER (Prevents Math Crashes)
   const safeParse = (val: any) => {
     if (!val) return 0;
-    // 1. Force to String (Fixes ".replace is not a function" crash)
-    const str = String(val);
-    // 2. Remove $ and , and convert to float
-    const num = parseFloat(str.replace(/[^0-9.]/g, ''));
+    const str = String(val); // Force string
+    const num = parseFloat(str.replace(/[^0-9.]/g, '')); // Remove $ and ,
     return isNaN(num) ? 0 : num;
   };
 
@@ -74,12 +72,12 @@ const SourcingPage: React.FC = () => {
     
     try {
       const fullQuery = condition === 'New' ? `${query} new with tags` : query;
-      const data = await scoutProduct(fullQuery, selectedFile || undefined);
       
-      // ✅ Store Result
+      // Call the Fixed Brain
+      const data = await scoutProduct(fullQuery, selectedFile || undefined);
       setScoutResult(data);
 
-      // ✅ Use Safe Parsing logic for Price Math
+      // Safe Math for Calculator Auto-Fill
       const min = safeParse(data.minPrice);
       const max = safeParse(data.maxPrice);
       
@@ -87,12 +85,11 @@ const SourcingPage: React.FC = () => {
          const avgPrice = (min + max) / 2;
          setSellPrice(avgPrice.toFixed(2));
       } else {
-         setSellPrice("0.00");
+         setSellPrice(max > 0 ? max.toFixed(2) : '');
       }
 
     } catch (err: any) {
       console.error(err);
-      // More descriptive error if possible, otherwise generic
       setError(`Scanner Error: ${err.message || "Please try again."}`);
     } finally {
       setLoading(false);
@@ -148,7 +145,6 @@ const SourcingPage: React.FC = () => {
   };
 
   return (
-    // FIX: Added '!' to bg classes to override global CSS conflicts
     <div className="min-h-screen !bg-slate-50 dark:!bg-slate-900 pb-24 pt-24 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-300">
       <div className="max-w-md mx-auto relative">
         
@@ -162,8 +158,7 @@ const SourcingPage: React.FC = () => {
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">Scan items & check profitability instantly.</p>
         </div>
 
-        {/* 🔭 PREMIUM SEARCH WIZARD */}
-        {/* FIX: Added '!' to force card background color */}
+        {/* 🔭 SEARCH WIZARD */}
         <div className="!bg-white dark:!bg-slate-800 rounded-[24px] shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 p-2 mb-6 transition-all duration-300">
           
           <div className="flex gap-2">
@@ -174,7 +169,6 @@ const SourcingPage: React.FC = () => {
                  onChange={(e) => {setQuery(e.target.value); setError(null);}}
                  onKeyDown={(e) => e.key === 'Enter' && handleScout()}
                  placeholder={showRefine ? "Add keywords (e.g. 'Vintage Nike')" : "Search item (e.g. Nike Air Max)"}
-                 // FIX: Added '!' to input background
                  className="w-full !bg-slate-50 dark:!bg-slate-900 rounded-xl pl-4 pr-12 py-3.5 font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                />
                <button 
