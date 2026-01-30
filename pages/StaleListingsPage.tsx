@@ -30,13 +30,14 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
   const [treatments, setTreatments] = useState({
     fixTitle: true,
     fixDesc: true,
-    priceCheck: true, // Default to true so you see the feature
+    priceCheck: true,
     photoAudit: true
   });
 
   // 🩺 DIAGNOSIS STATE
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [report, setReport] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
   
   // 👁️ PREVIEW STATE
   const [viewMode, setViewMode] = useState<'visual' | 'html'>('visual');
@@ -117,11 +118,14 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
          
          const finalDesc = result.description.includes('<') ? result.description : formatAsHTML(result.description);
          
-         // 🧮 DYNAMIC PRICE LOGIC
+         // 🧮 DYNAMIC PRICE LOGIC (FIXED)
          if (result.estimated_price) {
-            detectedPrice = result.estimated_price;
+            // Force to string first to prevent .replace crash on numbers
+            const priceStr = String(result.estimated_price);
+            detectedPrice = priceStr;
+            
             // Clean string to get number (remove '$' and ',')
-            const priceNum = parseFloat(result.estimated_price.replace(/[^0-9.]/g, ''));
+            const priceNum = parseFloat(priceStr.replace(/[^0-9.]/g, ''));
             if (!isNaN(priceNum)) {
                 const min = (priceNum * 0.9).toFixed(2);
                 const max = (priceNum * 1.15).toFixed(2);
@@ -140,7 +144,6 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
             photoIssues.push("Excellent photo quantity (4+) ✅");
          }
 
-         // Check if AI struggled to write a long title (implies photo was unclear)
          if (result.title.length < 30) {
              photoScoreNum -= 2;
              photoIssues.push("Subject detection was weak. Try a cleaner background.");
