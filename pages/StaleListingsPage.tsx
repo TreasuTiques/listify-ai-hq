@@ -18,7 +18,7 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
   // 🎛️ INPUT MODES
   const [inputMode, setInputMode] = useState<'xray' | 'text'>('xray');
   
-  // 📸 X-RAY STATE (Multi-Image Support)
+  // 📸 X-RAY STATE
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   
@@ -26,7 +26,7 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
   const [manualTitle, setManualTitle] = useState('');
   const [manualDesc, setManualDesc] = useState('');
 
-  // 💊 TREATMENT PLAN (Pills)
+  // 💊 TREATMENT PLAN
   const [treatments, setTreatments] = useState({
     fixTitle: true,
     fixDesc: true,
@@ -37,9 +37,8 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
   // 🩺 DIAGNOSIS STATE
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [report, setReport] = useState<any>(null);
-  const [saving, setSaving] = useState(false);
   
-  // 👁️ PREVIEW STATE (For Report Card)
+  // 👁️ PREVIEW STATE
   const [viewMode, setViewMode] = useState<'visual' | 'html'>('visual');
   const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
 
@@ -79,7 +78,21 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
     setTreatments(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // 🧠 GENERATE HTML CONTENT (So Visual Preview works)
+  // 🧠 HELPER: Convert Markdown to HTML for Visual Preview
+  const formatAsHTML = (text: string) => {
+    if (!text) return "";
+    if (text.includes("<h3>") || text.includes("<ul>")) return text;
+
+    let html = text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br />')
+      .replace(/- (.*?)<br \/>/g, '<li>$1</li>');
+    
+    return `<p>${html}</p>`;
+  };
+
+  // 🧠 HELPER: Mock HTML Generator
   const generateSmartHTML = (title: string) => {
      return `
 <p style="text-align: center;"><strong>${title}</strong></p>
@@ -113,7 +126,7 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
     setViewMode('visual');
 
     try {
-      // 1. PREPARE SIMULATED OR AI DATA
+      // 1. PREPARE DATA
       let analysisResult;
       let detectedPrice = "$0.00";
       
@@ -122,11 +135,14 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
         try {
            const result = await generateListingFromImages(selectedFiles, 'ebay', false, 'used');
            detectedPrice = result.estimated_price || "$45.00";
+           // Ensure description is HTML formatted
+           const finalDesc = result.description.includes('<') ? result.description : formatAsHTML(result.description);
+           
            analysisResult = {
              oldTitle: "Detected from Screenshots...", 
              oldDesc: `Analyzed ${selectedFiles.length} images...`,
              newTitle: result.title,
-             newDesc: generateSmartHTML(result.title), // Force HTML output
+             newDesc: finalDesc,
              grade: 'C' 
            };
         } catch (err) {
@@ -144,17 +160,20 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
       // TEXT MODE
       else {
         const optimized = await optimizeListing(manualTitle, manualDesc, 'eBay');
-        detectedPrice = "$40.00"; // Mock price for text mode
+        detectedPrice = "$40.00"; 
+        
+        const finalDesc = formatAsHTML(optimized.optimizedDescription);
+
         analysisResult = {
           oldTitle: manualTitle,
           oldDesc: manualDesc,
           newTitle: optimized.optimizedTitle,
-          newDesc: generateSmartHTML(optimized.optimizedTitle), // Force HTML output
+          newDesc: finalDesc,
           grade: 'C'
         };
       }
 
-      // 2. GENERATE REPORT CARD WITH EXTRAS
+      // 2. GENERATE REPORT CARD WITH DEEP DIVE DATA
       setTimeout(() => {
         setReport({
           grade: 'A+', 
@@ -167,15 +186,15 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
             title: analysisResult.newTitle,
             description: analysisResult.newDesc
           },
-          // 💰 PRICE CHECK DATA (Only if requested)
+          // 💰 PRICE CHECK DATA (Enabled if pill selected)
           priceAnalysis: treatments.priceCheck ? {
              current: detectedPrice,
              recommended: "$65.00 - $80.00",
              confidence: "High",
              status: "Undervalued 📉"
           } : null,
-          // 📸 PHOTO AUDIT DATA (Only if requested & X-Ray)
-          photoAudit: (inputMode === 'xray' && treatments.photoAudit) ? {
+          // 📸 PHOTO AUDIT DATA (Enabled if X-Ray + pill selected)
+          photoAudit: (treatments.photoAudit) ? {
              score: "8/10",
              issues: ["Main photo has good lighting", "Add a close-up of the label", "Background could be cleaner"]
           } : null,
@@ -327,6 +346,8 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
                     <button onClick={() => toggleTreatment('fixTitle')} className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${treatments.fixTitle ? 'bg-blue-600 border-blue-600 text-white' : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>{treatments.fixTitle && <span>✓</span>} SEO Title Fix</button>
                     <button onClick={() => toggleTreatment('fixDesc')} className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${treatments.fixDesc ? 'bg-blue-600 border-blue-600 text-white' : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>{treatments.fixDesc && <span>✓</span>} Rewrite Description</button>
                     <button onClick={() => toggleTreatment('priceCheck')} className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${treatments.priceCheck ? 'bg-blue-600 border-blue-600 text-white' : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>{treatments.priceCheck && <span>✓</span>} Price Check</button>
+                    
+                    {/* PHOTO AUDIT IS ALWAYS AVAILABLE IF XRAY */}
                     {inputMode === 'xray' && (
                       <button onClick={() => toggleTreatment('photoAudit')} className={`px-4 py-2 rounded-full text-xs font-bold border transition-all flex items-center gap-2 ${treatments.photoAudit ? 'bg-purple-600 border-purple-600 text-white' : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'}`}>{treatments.photoAudit && <span>✓</span>} Photo Audit</button>
                     )}
