@@ -15,6 +15,10 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
   const [criticalCount, setCriticalCount] = useState(3);
   const [revenueAtRisk, setRevenueAtRisk] = useState(450);
   
+  // 🛡️ SECURITY & USAGE STATE
+  const [scanCount, setScanCount] = useState(0);
+  const SESSION_LIMIT = 50; // Safety cap for QA session
+  
   // 🎛️ INPUT MODES
   const [inputMode, setInputMode] = useState<'xray' | 'text'>('xray');
   
@@ -37,6 +41,7 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
   // 🩺 DIAGNOSIS STATE
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [report, setReport] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
   
   // 👁️ PREVIEW STATE
   const [viewMode, setViewMode] = useState<'visual' | 'html'>('visual');
@@ -92,8 +97,19 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
     return `<p>${html}</p>`;
   };
 
+  // 🛡️ SECURITY CHECK
+  const checkUsageLimit = () => {
+    if (scanCount >= SESSION_LIMIT) {
+      alert("⚠️ QA Safety Limit Reached. Please refresh to reset or contact Admin.");
+      return false;
+    }
+    return true;
+  };
+
   // 🧠 THE BRAIN: ANALYZE LISTING
   const runDiagnosis = async () => {
+    if (!checkUsageLimit()) return; // 🛑 STOP IF OVER LIMIT
+
     if (inputMode === 'xray' && selectedFiles.length === 0) return;
     if (inputMode === 'text' && !manualTitle) return;
 
@@ -108,6 +124,9 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
       let photoIssues: string[] = [];
       let photoScoreNum = 10;
 
+      // Increment Usage Counter
+      setScanCount(prev => prev + 1);
+
       // ------------------------------------------
       // 📸 MODE 1: X-RAY (IMAGES)
       // ------------------------------------------
@@ -117,25 +136,18 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
          
          const finalDesc = result.description.includes('<') ? result.description : formatAsHTML(result.description);
          
-         // 🧮 DYNAMIC PRICE LOGIC (CRASH FIXED)
          if (result.estimated_price) {
-            // 1. Force to String (Fixes the crash)
             const priceStr = String(result.estimated_price);
             detectedPrice = priceStr;
-            
-            // 2. Clean numeric value
             const priceNum = parseFloat(priceStr.replace(/[^0-9.]/g, ''));
-            
             if (!isNaN(priceNum)) {
-                // Create a range based on the AI's estimate
                 const min = (priceNum * 0.9).toFixed(2);
                 const max = (priceNum * 1.15).toFixed(2);
                 recommendedPriceRange = `$${min} - $${max}`;
             }
          }
 
-         // 📷 REAL PHOTO AUDIT LOGIC (Not Generic)
-         // 1. Quantity Check
+         // Photo Audit Logic
          if (selectedFiles.length === 1) {
             photoScoreNum -= 2;
             photoIssues.push(`Only 1 image processed. eBay recommends 4+ for better SEO.`);
@@ -143,8 +155,6 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
             photoIssues.push(`Analyzed ${selectedFiles.length} images successfully.`);
          }
 
-         // 2. Content Check (Did AI recognize the item?)
-         // We look at the Title the AI generated. If it found a Brand, that means the photo was clear.
          const titleWords = result.title.split(' ');
          if (titleWords.length > 5) {
              const brandOrKey = titleWords[0] + " " + titleWords[1];
@@ -154,7 +164,6 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
              photoIssues.push("Subject identification weak. Ensure lighting is bright and clear.");
          }
 
-         // 3. Condition Check (Did AI see flaws?)
          const lowerDesc = result.description.toLowerCase();
          if (lowerDesc.includes('scratches') || lowerDesc.includes('wear') || lowerDesc.includes('vintage')) {
              photoIssues.push("Visual texture/condition detected correctly.");
@@ -187,7 +196,6 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
         };
       }
 
-      // 3. GENERATE REPORT CARD
       setReport({
         grade: 'A+', 
         prevGrade: analysisResult.grade,
@@ -199,14 +207,12 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
           title: analysisResult.newTitle,
           description: analysisResult.newDesc
         },
-        // 💰 PRICE CHECK DATA
         priceAnalysis: treatments.priceCheck ? {
            current: "AI Estimate",
            recommended: recommendedPriceRange,
            confidence: recommendedPriceRange !== "Check Comps" ? "High" : "Low",
-           status: "Visual Est."
+           status: "Market Value"
         } : null,
-        // 📸 PHOTO AUDIT DATA
         photoAudit: (inputMode === 'xray' && treatments.photoAudit) ? {
            score: `${photoScoreNum}/10`,
            issues: photoIssues
@@ -220,7 +226,6 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
 
     } catch (error: any) {
       console.error("Diagnosis Failed", error);
-      // More friendly error message
       alert(`Optimization Issue: ${error.message || "Please check your inputs and try again."}`);
     } finally {
       setIsAnalyzing(false);
@@ -489,7 +494,7 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
                                 </div>
                                 <div className="space-y-2">
                                    <div className="flex justify-between text-sm border-b border-slate-100 dark:border-slate-700 pb-2">
-                                      <span className="text-slate-500">Source</span>
+                                      <span className="text-slate-500">Current Price</span>
                                       <span className="font-mono text-slate-700 dark:text-slate-300">{report.priceAnalysis.current}</span>
                                    </div>
                                    <div className="flex justify-between text-sm">
