@@ -6,8 +6,8 @@ if (!apiKey) console.error("Missing Gemini API Key! Check .env or Vercel setting
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// 🛑 RESTORED TO YOUR WORKING MODEL
-const MODEL_NAME = "gemini-flash-latest"; 
+// 🛑 MODEL LOCKED TO YOUR PREFERENCE
+const MODEL_NAME = "gemini-flash-latest";
 
 // Helper: Convert File to Base64
 const fileToGenerativePart = async (file: File) => {
@@ -23,7 +23,7 @@ const fileToGenerativePart = async (file: File) => {
 
 /**
  * 🧼 THE CLEANER: Extracts JSON from Chatty AI Responses
- * This fixes the "Unexpected identifier 'This'" crash by ignoring conversational text.
+ * Fixes "Unexpected identifier 'This'" by finding the first '{' and last '}'
  */
 const cleanAndParseJSON = (text: string) => {
   try {
@@ -37,6 +37,10 @@ const cleanAndParseJSON = (text: string) => {
     if (firstBrace !== -1 && lastBrace !== -1) {
       // Keep ONLY the data between the brackets
       clean = clean.substring(firstBrace, lastBrace + 1);
+    } else {
+      // If no brackets found, the AI failed to generate JSON. Throw error to UI.
+      console.warn("AI Raw Response (No JSON found):", text);
+      throw new Error("AI returned text instead of data.");
     }
 
     // 3. Parse and return
@@ -186,8 +190,6 @@ export async function generateListingFromImages(
     const prompt = getPlatformPrompt(platform, isProMode, userCondition);
 
     const result = await model.generateContent([prompt, ...imageParts]);
-    
-    // 🛡️ USE THE CLEANER (Fixes JSON crash)
     return cleanAndParseJSON(result.response.text());
 
   } catch (error) {
@@ -202,30 +204,50 @@ export async function generateListingFromImages(
 export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-    const prompt = `Act as an expert reseller on ${platform}. Improve this listing: Title: "${currentTitle}", Desc: "${currentDescription}". Return JSON: { "optimizedTitle": "...", "optimizedDescription": "..." }`;
+    const prompt = `Act as an expert reseller on ${platform}. Improve this listing: Title: "${currentTitle}", Desc: "${currentDescription}". Return ONLY valid JSON: { "optimizedTitle": "...", "optimizedDescription": "..." }`;
     const result = await model.generateContent(prompt);
-    
-    // 🛡️ USE THE CLEANER (Fixes JSON crash)
     return cleanAndParseJSON(result.response.text());
   } catch (error) { console.error("Optimization Error:", error); throw error; }
 }
 
 /**
- * 🔭 BRAIN 3: THE SCOUT
+ * 🔭 BRAIN 3: THE SCOUT (UPDATED TO PREVENT CRASH)
  */
 export async function scoutProduct(productName: string, imageFile?: File) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     let requestParts: any[] = [];
+    
+    // 🛡️ STRICT PROMPT: Forces AI to ignore "Chat" and just output JSON
+    const instruction = `
+      Act as an expert antique and resale appraiser. 
+      Identify this item: "${productName}". 
+      Estimate current resale value and demand. 
+      
+      CRITICAL INSTRUCTION: You must return ONLY raw JSON. Do not write any introduction, no markdown, no 'Here is the JSON'. Just the object.
+      
+      JSON FORMAT: 
+      { 
+        "minPrice": number, 
+        "maxPrice": number, 
+        "demand": "High" | "Medium" | "Low", 
+        "verdict": "BUY" | "PASS", 
+        "reason": "Short explanation (max 15 words)" 
+      }
+    `;
+
     if (imageFile) {
       const imagePart = await fileToGenerativePart(imageFile);
-      requestParts = [imagePart, `Act as an expert reseller. Identify item: "${productName}". Estimate Value & Demand. JSON: { "minPrice": 10, "maxPrice": 20, "demand": "High", "verdict": "BUY", "reason": "..." }`];
+      requestParts = [imagePart, instruction];
     } else {
-      requestParts = [`Act as an expert reseller. Look at "${productName}". JSON: { "minPrice": 10, "maxPrice": 20, "demand": "High", "verdict": "BUY", "reason": "..." }`];
+      requestParts = [instruction];
     }
-    const result = await model.generateContent(requestParts);
     
-    // 🛡️ USE THE CLEANER (Fixes JSON crash)
+    const result = await model.generateContent(requestParts);
     return cleanAndParseJSON(result.response.text());
-  } catch (error) { console.error("Scout Error:", error); throw error; }
+    
+  } catch (error) { 
+    console.error("Scout Error:", error); 
+    throw error; 
+  }
 }
