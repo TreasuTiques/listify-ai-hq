@@ -37,7 +37,10 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
   // 🩺 DIAGNOSIS STATE
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [report, setReport] = useState<any>(null);
-  const [saving, setSaving] = useState(false);
+  
+  // 👁️ PREVIEW STATE (For Report Card)
+  const [viewMode, setViewMode] = useState<'visual' | 'html'>('visual');
+  const [copyStatus, setCopyStatus] = useState<'Copy Code' | 'Copied!'>('Copy Code');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -57,12 +60,10 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
     }
 
     if (files.length > 0) {
-      // Limit to 4 images max for X-Ray
       const newFiles = [...selectedFiles, ...files].slice(0, 4);
       setSelectedFiles(newFiles);
-      setReport(null); // Reset report
+      setReport(null); 
 
-      // Generate previews
       const newPreviews = newFiles.map(file => URL.createObjectURL(file));
       setPreviewUrls(newPreviews);
     }
@@ -86,15 +87,14 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
 
     setIsAnalyzing(true);
     setReport(null);
+    setViewMode('visual'); // Reset view mode
 
     try {
       // 1. PREPARE DATA
       let analysisResult;
       
       if (inputMode === 'xray' && selectedFiles.length > 0) {
-        // 📸 VISION MODE: Send ALL images
         try {
-           // We pass the array of files to the AI service
            const result = await generateListingFromImages(selectedFiles, 'ebay', false, 'used');
            analysisResult = {
              oldTitle: "Detected from Screenshots...", 
@@ -109,12 +109,11 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
              oldTitle: "Vintage Item (Read from Image)",
              oldDesc: "Text extracted from screenshot analysis...",
              newTitle: "🔥 Rare Vintage Item - High Condition [TESTED]",
-             newDesc: "✅ CONDITION REPORT: Excellent condition.\n\n📦 SHIPPING: Fast shipping via USPS.",
+             newDesc: "<h1>Vintage Collector's Item</h1><p>This is a fantastic example of a vintage collectible. Please see photos for condition details.</p><ul><li>Authentic</li><li>Rare Find</li><li>Fast Shipping</li></ul>",
              grade: 'C-'
            };
         }
       } else {
-        // 📝 TEXT MODE
         const optimized = await optimizeListing(manualTitle, manualDesc, 'eBay');
         analysisResult = {
           oldTitle: manualTitle,
@@ -153,9 +152,14 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
     }
   };
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, type: 'title' | 'desc') => {
     navigator.clipboard.writeText(text);
-    alert("Copied to clipboard!");
+    if (type === 'desc') {
+        setCopyStatus('Copied!');
+        setTimeout(() => setCopyStatus('Copy Code'), 2000);
+    } else {
+        alert("Title Copied!");
+    }
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 dark:text-white">Booting Diagnostics...</div>;
@@ -307,6 +311,8 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
            <div className="animate-in slide-in-from-top-10 duration-700 fade-in">
               <div className="bg-white dark:bg-slate-800 rounded-[32px] shadow-2xl border border-emerald-500/30 overflow-hidden relative">
                  <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-400 to-blue-500"></div>
+                 
+                 {/* HEADER */}
                  <div className="p-8 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div>
                        <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">🩺 Diagnosis Complete</h2>
@@ -324,7 +330,11 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
                        </div>
                     </div>
                  </div>
+
+                 {/* BEFORE / AFTER GRID */}
                  <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-700">
+                    
+                    {/* BEFORE */}
                     <div className="p-8 bg-slate-50/50 dark:bg-slate-900/30">
                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-red-500"></span> Original</h3>
                        <div className="space-y-6 opacity-70">
@@ -338,6 +348,8 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
                           </div>
                        </div>
                     </div>
+
+                    {/* AFTER */}
                     <div className="p-8 bg-white dark:bg-slate-800">
                        <h3 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-6 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Optimized</h3>
                        <div className="space-y-6">
@@ -345,22 +357,49 @@ const StaleListingsPage: React.FC<StaleListingsProps> = ({ isGuest = false, onNa
                              <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 mb-1">OPTIMIZED TITLE</p>
                              <div className="flex gap-2">
                                 <p className="flex-grow text-sm font-bold text-slate-900 dark:text-white border-b-2 border-emerald-500/20 pb-2">{report.after.title}</p>
-                                <button onClick={() => copyToClipboard(report.after.title)} className="text-slate-400 hover:text-blue-500 transition-colors"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button>
+                                <button onClick={() => copyToClipboard(report.after.title, 'title')} className="text-slate-400 hover:text-blue-500 transition-colors bg-slate-100 dark:bg-slate-700 p-2 rounded-lg"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button>
                              </div>
                           </div>
                           <div>
-                             <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 mb-1">SALES COPY</p>
+                             <div className="flex justify-between items-center mb-2">
+                                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500">SALES COPY</p>
+                                {/* 🛠️ ACTION BAR (Visual / HTML / Copy) */}
+                                <div className="flex gap-2">
+                                   <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                                      <button onClick={() => setViewMode('visual')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${viewMode === 'visual' ? 'bg-white dark:bg-slate-600 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600'}`}>Visual</button>
+                                      <button onClick={() => setViewMode('html')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${viewMode === 'html' ? 'bg-white dark:bg-slate-600 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600'}`}>HTML</button>
+                                   </div>
+                                   <button onClick={() => copyToClipboard(report.after.description, 'desc')} className="bg-blue-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase hover:bg-blue-500 transition-colors shadow-md">
+                                      {copyStatus}
+                                   </button>
+                                </div>
+                             </div>
+                             
                              <div className="relative group">
-                                <div className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-600">{report.after.description}</div>
-                                <button onClick={() => copyToClipboard(report.after.description)} className="absolute top-0 right-0 bg-white dark:bg-slate-700 shadow-md p-2 rounded-lg text-slate-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-all"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg></button>
+                                {viewMode === 'visual' ? (
+                                   <div 
+                                     className="text-sm text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-600 border border-slate-100 dark:border-slate-700 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-900/50"
+                                     dangerouslySetInnerHTML={{ __html: report.after.description }}
+                                   ></div>
+                                ) : (
+                                   <textarea 
+                                     readOnly 
+                                     className="w-full h-64 text-xs font-mono text-blue-600 dark:text-blue-400 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 resize-none focus:outline-none"
+                                     value={report.after.description}
+                                   ></textarea>
+                                )}
                              </div>
                           </div>
                        </div>
                     </div>
                  </div>
+
+                 {/* FOOTER ACTIONS */}
                  <div className="p-6 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3">
                     <button onClick={() => setReport(null)} className="px-6 py-3 font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors">Close</button>
-                    <button className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-500 hover:-translate-y-1 transition-all flex items-center gap-2"><span>💾</span> Save to Inventory</button>
+                    <button className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-500 hover:-translate-y-1 transition-all flex items-center gap-2">
+                       <span>💾</span> Save to Inventory
+                    </button>
                  </div>
               </div>
            </div>
