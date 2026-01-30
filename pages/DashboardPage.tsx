@@ -66,11 +66,25 @@ const DashboardPage: React.FC<any> = ({ onNavigate }) => {
       let cumulativeValue = 0;
 
       listings?.forEach(item => {
-        // Price Calc
+        // 🧠 SMARTER PRICE CALCULATION
         let price = 0;
         if (item.price) {
           const cleanPrice = item.price.replace(/[$,]/g, '');
-          price = parseFloat(cleanPrice);
+          
+          // Check if it's a range (e.g. "5 - 15")
+          if (cleanPrice.includes('-')) {
+             const parts = cleanPrice.split('-').map((p: string) => parseFloat(p.trim()));
+             if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                // Calculate the Average
+                price = (parts[0] + parts[1]) / 2;
+             } else {
+                price = parseFloat(cleanPrice);
+             }
+          } else {
+             // It's a single price (e.g. "50")
+             price = parseFloat(cleanPrice);
+          }
+
           if (!isNaN(price)) {
             totalValue += price;
             cumulativeValue += price;
