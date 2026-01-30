@@ -51,6 +51,16 @@ const SourcingPage: React.FC = () => {
     }
   };
 
+  // 🛡️ HELPER: SAFE NUMBER PARSER (Prevents the Crash)
+  const safeParse = (val: any) => {
+    if (!val) return 0;
+    // 1. Force to String (Fixes ".replace is not a function" crash)
+    const str = String(val);
+    // 2. Remove $ and , and convert to float
+    const num = parseFloat(str.replace(/[^0-9.]/g, ''));
+    return isNaN(num) ? 0 : num;
+  };
+
   // 🤖 AI SCOUT HANDLER
   const handleScout = async () => {
     if (!query && !selectedFile) {
@@ -65,14 +75,25 @@ const SourcingPage: React.FC = () => {
     try {
       const fullQuery = condition === 'New' ? `${query} new with tags` : query;
       const data = await scoutProduct(fullQuery, selectedFile || undefined);
+      
+      // ✅ Store Result
       setScoutResult(data);
 
-      const avgPrice = (data.minPrice + data.maxPrice) / 2;
-      setSellPrice(avgPrice.toFixed(2));
+      // ✅ Use Safe Parsing logic for Price Math
+      const min = safeParse(data.minPrice);
+      const max = safeParse(data.maxPrice);
+      
+      if (min > 0 && max > 0) {
+         const avgPrice = (min + max) / 2;
+         setSellPrice(avgPrice.toFixed(2));
+      } else {
+         setSellPrice("0.00");
+      }
 
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("The market scanner is busy or hit a limit. Please wait a minute and try again.");
+      // More descriptive error if possible, otherwise generic
+      setError(`Scanner Error: ${err.message || "Please try again."}`);
     } finally {
       setLoading(false);
     }
