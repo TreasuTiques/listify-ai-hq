@@ -22,7 +22,7 @@ const VisionPage: React.FC = () => {
         <section>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 text-left">The Problem We're Solving</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
-            For too long, high-fidelity e-commerce tools were reserved for 8-figure corporations. Small and medium-sized resellers were left with manual typing and "flowery" AI that didn't understand the **Cassini algorithm**.
+            For too long, high-fidelity e-commerce tools were reserved for 8-figure corporations. Small and medium-sized resellers were left with manual typing and "flowery" AI that didn't understand the <strong className="text-slate-900 dark:text-white font-bold">Cassini algorithm</strong>.
           </p>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
             Our vision is simple: To give every reseller a "proprietary vision engine" that turns a raw photo into a high-converting listing in seconds.
@@ -39,11 +39,13 @@ const VisionPage: React.FC = () => {
           <div className="p-8 bg-slate-50 dark:bg-slate-800 rounded-[32px] border border-slate-100 dark:border-slate-700">
             <div className="text-3xl mb-4">🔍</div>
             <h4 className="font-bold text-slate-900 dark:text-white mb-2">Algorithmic Edge</h4>
-            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">Our AI is specifically tuned to extract the **Item Specifics** that drive search rankings on major marketplaces.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              Our AI is specifically tuned to extract the <strong className="text-slate-900 dark:text-white font-bold">Item Specifics</strong> that drive search rankings on major marketplaces.
+            </p>
           </div>
         </section>
 
-        {/* Privacy & Trust - Strategic Audit Fix */}
+        {/* Privacy & Trust */}
         <section className="bg-[#0F172A] dark:bg-black p-10 rounded-[40px] text-white">
           <h2 className="text-2xl font-bold mb-6">The Trust Foundation</h2>
           <p className="text-slate-300 mb-6 leading-relaxed">
