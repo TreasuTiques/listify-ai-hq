@@ -50,10 +50,11 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </ul>
           </div>
 
-          {/* Resources Links */}
+          {/* Resources Links - UPDATED WITH ABOUT US */}
           <div>
             <h3 className="font-bold text-slate-900 dark:text-white mb-4">Resources</h3>
             <ul className="space-y-3 text-sm text-slate-500 dark:text-slate-400">
+              <li><button onClick={() => onNavigate('/about')} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-left font-medium">About Us</button></li>
               <li><button onClick={() => onNavigate('/blog')} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-left">Blog & Guides</button></li>
               <li><button onClick={() => onNavigate('/vision')} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-left">Our Vision</button></li>
               <li><button onClick={() => onNavigate('/success')} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-left">Success Stories</button></li>
