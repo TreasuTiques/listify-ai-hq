@@ -297,8 +297,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   { feature: "Listing Speed", Description: "10x Faster (Instant)", standard: "Manual Typing" },
                   { feature: "Platform Support", Description: "Shopify, eBay, Poshmark, Mercari", standard: "Single Platform Only" },
                   { feature: "SEO Optimization", Description: "Multi-Marketplace Keywords", standard: "None" },
-                  { feature: "Format Output", : "HTML, Plain Text, Tables", standard: "Plain Text Only" },
-                  { feature: "Return on Investment", : "High (Scale Inventory)", standard: "Low (Time Consuming)" }
+                  { feature: "Format Output", Description: "HTML, Plain Text, Tables", standard: "Plain Text Only" },
+                  { feature: "Return on Investment", Description: "High (Scale Inventory)", standard: "Low (Time Consuming)" }
                 ].map((row, i) => (
                   <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors">
                     <td className="p-6 md:p-8 font-bold text-slate-700 dark:text-slate-300 text-sm md:text-base">{row.feature}</td>
