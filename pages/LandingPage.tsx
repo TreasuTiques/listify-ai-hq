@@ -293,10 +293,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {[
-                  { feature: "AI Model Depth", : "GPT-4o Vision (Deep Analysis)", standard: "Basic OCR / Text Scan" },
-                  { feature: "Listing Speed", : "10x Faster (Instant)", standard: "Manual Typing" },
-                  { feature: "Platform Support", : "Shopify, eBay, Poshmark, Mercari", standard: "Single Platform Only" },
-                  { feature: "SEO Optimization", : "Multi-Marketplace Keywords", standard: "None" },
+                  { feature: "AI Model Depth", Description: "GPT-4o Vision (Deep Analysis)", standard: "Basic OCR / Text Scan" },
+                  { feature: "Listing Speed", Description: "10x Faster (Instant)", standard: "Manual Typing" },
+                  { feature: "Platform Support", Description: "Shopify, eBay, Poshmark, Mercari", standard: "Single Platform Only" },
+                  { feature: "SEO Optimization", Description: "Multi-Marketplace Keywords", standard: "None" },
                   { feature: "Format Output", : "HTML, Plain Text, Tables", standard: "Plain Text Only" },
                   { feature: "Return on Investment", : "High (Scale Inventory)", standard: "Low (Time Consuming)" }
                 ].map((row, i) => (
