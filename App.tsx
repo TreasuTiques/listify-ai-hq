@@ -5,7 +5,7 @@ import { supabase } from './supabaseClient';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
-// 2. IMPORT ALL PAGES
+// 2. IMPORT PAGES
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import InventoryPage from './pages/InventoryPage';
@@ -23,14 +23,12 @@ import BlogPage from './pages/BlogPage';
 import VisionPage from './pages/VisionPage';
 import SuccessHub from './pages/SuccessHub';
 import PartnersPage from './pages/PartnersPage';
-import AboutPage from './pages/AboutPage'; // ✅ ADDED ABOUT PAGE IMPORT
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentPath, setCurrentPath] = useState(window.location.hash.replace('#', '') || '/');
 
-  // 🌑 GLOBAL DARK MODE STATE
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
@@ -49,7 +47,6 @@ const App: React.FC = () => {
     };
     window.addEventListener('hashchange', handleHashChange);
 
-    // 🌑 Initialize Theme
     const savedTheme = localStorage.getItem('theme');
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
@@ -67,7 +64,6 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // 🌑 Toggle Function
   const toggleTheme = () => {
     if (isDarkMode) {
       document.documentElement.classList.remove('dark');
@@ -123,9 +119,8 @@ const App: React.FC = () => {
               case '/terms': return <TermsPage />;
               case '/blog': return <BlogPage />;
               case '/vision': return <VisionPage />;
-              case '/success-hub': return <SuccessHub />; // ✅ UPDATED TO MATCH BUTTONS
-              case '/partners': return <PartnersPage />; // ✅ UPDATED TO MATCH BUTTONS
-              case '/about': return <AboutPage />; // ✅ ADDED ABOUT PAGE ROUTE
+              case '/success-hub': return <SuccessHub />; // Fixed Route
+              case '/partners': return <PartnersPage />;
               case '/inventory': return <InventoryPage onNavigate={navigate} />;
               case '/builder': return <BuilderPage />; 
               default: return <LandingPage onNavigate={navigate} />;
@@ -148,8 +143,7 @@ const App: React.FC = () => {
       case '/sourcing': return <SourcingPage />;
       case '/analytics': return <AnalyticsPage />;
       case '/pricing': return <PricingPage />;
-      case '/success-hub': return <SuccessHub />; // ✅ ALLOW LOGGED IN USERS TO SEE HUB
-      case '/about': return <AboutPage />; // ✅ ALLOW LOGGED IN USERS TO SEE ABOUT
+      case '/success-hub': return <SuccessHub />; // Allow logged-in access
       default: return <DashboardPage onNavigate={navigate} />;
     }
   };
