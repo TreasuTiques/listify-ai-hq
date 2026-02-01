@@ -114,8 +114,8 @@ const PrivacyPage: React.FC = () => {
           <p className="text-slate-500 dark:text-slate-400 mb-8">
             We are here to help. If you have any concerns about your privacy, just shoot us an email.
           </p>
-          <a href="mailto:privacy@ Sellistio.com" className="text-[#2563EB] dark:text-blue-400 font-bold text-lg hover:underline underline-offset-4">
-            privacy@ Sellistio.com
+          <a href="mailto:privacy@Sellistio.com" className="text-[#2563EB] dark:text-blue-400 font-bold text-lg hover:underline underline-offset-4">
+            privacy@Sellistio.com
           </a>
         </section>
 

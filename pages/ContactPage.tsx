@@ -44,7 +44,7 @@ const ContactPage: React.FC = () => {
               </div>
               <h3 className="font-bold text-slate-900 dark:text-white text-lg">Email Support</h3>
               <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 mb-4">For general inquiries and account help.</p>
-              <a href="mailto:support@ Sellistio.com" className="text-blue-600 dark:text-blue-400 font-bold text-sm hover:underline">support@ Sellistio.com</a>
+              <a href="mailto:support@Sellistio.com" className="text-blue-600 dark:text-blue-400 font-bold text-sm hover:underline">support@Sellistio.com</a>
             </div>
 
             {/* Live Chat / Community Card */}
