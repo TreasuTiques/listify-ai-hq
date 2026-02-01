@@ -23,7 +23,7 @@ const Navbar: React.FC<NavbarProps> = ({ session, onNavigate, isDarkMode, toggle
           {/* LOGO */}
           <div className="flex items-center gap-2 cursor-pointer group" onClick={() => onNavigate('/')}>
             <div className="w-9 h-9 bg-slate-900 dark:bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-sm transition-all group-hover:scale-105">L</div>
-            <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight transition-colors">Listify <span className="text-blue-600 dark:text-blue-400">AI HQ</span></span>
+            <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight transition-colors"> <span className="text-blue-600 dark:text-blue-400"></span></span>
           </div>
 
           {/* DESKTOP LINKS */}

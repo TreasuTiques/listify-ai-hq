@@ -21,7 +21,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <div className="w-8 h-8 flex items-center justify-center bg-[#0F172A] dark:bg-blue-600 rounded-lg shadow-sm">
                 <span className="text-white font-bold text-xl">L</span>
               </div>
-              <span className="text-lg font-bold text-slate-900 dark:text-white">Listify AI HQ</span>
+              <span className="text-lg font-bold text-slate-900 dark:text-white"> </span>
             </div>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-xs">
               The all-in-one AI command center for serious resellers. Scale your business faster.
@@ -75,7 +75,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         <div className="border-t border-slate-200 dark:border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-slate-400 dark:text-slate-500">
-            © 2026 Listify AI HQ. All rights reserved.
+            © 2026  . All rights reserved.
           </p>
           <div className="flex gap-6 text-xs text-slate-400 dark:text-slate-500">
             <button onClick={() => onNavigate('/privacy')} className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Privacy</button>

@@ -23,15 +23,15 @@ const VisionPage: React.FC<VisionPageProps> = ({ onNavigate }) => {
 
       <div className="max-w-4xl mx-auto px-4 mt-20 space-y-24">
         
-        {/* Section: Why We Built Listify AI HQ */}
+        {/* Section: Why We Built   */}
         <section>
-          <h2 className="text-3xl font-semibold text-slate-900 dark:text-white mb-6">Why We Built Listify AI HQ</h2>
+          <h2 className="text-3xl font-semibold text-slate-900 dark:text-white mb-6">Why We Built  </h2>
           <div className="prose prose-slate lg:prose-lg text-slate-600 dark:text-slate-300 space-y-4">
             <p>
               If you’ve ever sat in a garage surrounded by storage bins at 11 PM, you know the "Listing Wall." It’s that moment when you have great items to sell, but you’re just too tired to type another description or think of a search-friendly title.
             </p>
             <p>
-              We built Listify because we saw resellers spending 80% of their time on paperwork and only 20% on the parts of the business they actually love—like the hunt. We wanted to flip that. We wanted to give you your time back so you can focus on growing your income and spending time with your family.
+              We built  because we saw resellers spending 80% of their time on paperwork and only 20% on the parts of the business they actually love—like the hunt. We wanted to flip that. We wanted to give you your time back so you can focus on growing your income and spending time with your family.
             </p>
           </div>
         </section>
@@ -84,7 +84,7 @@ const VisionPage: React.FC<VisionPageProps> = ({ onNavigate }) => {
           </div>
           <div className="bg-blue-600 p-8 rounded-[40px] text-white rotate-1 shadow-xl">
              <h3 className="text-xl font-bold mb-4">"Reselling is hard work. Technology should make it easier, not more complicated."</h3>
-             <p className="text-blue-100 text-sm opacity-80">— The Listify Team</p>
+             <p className="text-blue-100 text-sm opacity-80">— The  Team</p>
           </div>
         </section>
 
@@ -122,7 +122,7 @@ const VisionPage: React.FC<VisionPageProps> = ({ onNavigate }) => {
            <div>
               <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-6">Looking Ahead</h2>
               <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                We're just getting started. In the future, Listify will help you analyze your sales data, optimize your pricing across different marketplaces, and even suggest which items you should be looking for based on current trends. 
+                We're just getting started. In the future,  will help you analyze your sales data, optimize your pricing across different marketplaces, and even suggest which items you should be looking for based on current trends. 
               </p>
               <p className="text-slate-600 dark:text-slate-300 leading-relaxed mt-4">
                 Our goal is to be the brain behind your reselling business.

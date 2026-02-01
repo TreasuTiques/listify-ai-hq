@@ -13,7 +13,7 @@ const TermsPage: React.FC = () => {
           Terms of Use
         </h1>
         <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto">
-          Welcome to Listify AI HQ. These rules keep our platform safe and helpful for every reseller in our community.
+          Welcome to  . These rules keep our platform safe and helpful for every reseller in our community.
         </p>
       </section>
 
@@ -24,15 +24,15 @@ const TermsPage: React.FC = () => {
         <section>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">The Agreement</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            By using Listify AI HQ, you’re agreeing to these terms. If you don’t agree, that’s okay—but you won't be able to use the tool. We’ve written this in plain English because we believe you should actually understand the rules of the road.
+            By using  , you’re agreeing to these terms. If you don’t agree, that’s okay—but you won't be able to use the tool. We’ve written this in plain English because we believe you should actually understand the rules of the road.
           </p>
         </section>
 
         {/* 2. Eligibility */}
         <section>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 text-left">Who Can Use Listify</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 text-left">Who Can Use </h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            You must be at least 18 years old (or the age of majority in your area) and legally allowed to enter into contracts to use our service. Basically, if you can legally have an eBay store, you can use Listify.
+            You must be at least 18 years old (or the age of majority in your area) and legally allowed to enter into contracts to use our service. Basically, if you can legally have an eBay store, you can use .
           </p>
         </section>
 
@@ -63,7 +63,7 @@ const TermsPage: React.FC = () => {
             Our AI is very smart, but it’s still a robot. Occasionally, it might get a brand name wrong or miss a detail in a photo. 
           </p>
           <p className="text-slate-900 dark:text-white font-bold">
-            CRITICAL: You are the human in charge. You must review and verify every listing before you post it to eBay or any other marketplace. Listify is not responsible for any marketplace strikes or buyer disputes resulting from unedited AI output.
+            CRITICAL: You are the human in charge. You must review and verify every listing before you post it to eBay or any other marketplace.  is not responsible for any marketplace strikes or buyer disputes resulting from unedited AI output.
           </p>
         </section>
 
@@ -71,7 +71,7 @@ const TermsPage: React.FC = () => {
         <section>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">We Aren't eBay</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            Listify AI HQ is an independent tool. We are not affiliated with, endorsed by, or partnered with eBay, Etsy, Poshmark, or any other marketplace. We’re just fans of their platforms who wanted to make them easier to use.
+              is an independent tool. We are not affiliated with, endorsed by, or partnered with eBay, Etsy, Poshmark, or any other marketplace. We’re just fans of their platforms who wanted to make them easier to use.
           </p>
         </section>
 
@@ -105,7 +105,7 @@ const TermsPage: React.FC = () => {
         <section>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 text-left">The Legal Safety Net</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
-            To the maximum extent permitted by law, Listify AI HQ is provided "as-is" without any warranties. We aren't liable for lost profits, missed sales, or any indirect damages that might happen while using our tool. We do our best to stay online 24/7, but we don't guarantee perfect uptime.
+            To the maximum extent permitted by law,   is provided "as-is" without any warranties. We aren't liable for lost profits, missed sales, or any indirect damages that might happen while using our tool. We do our best to stay online 24/7, but we don't guarantee perfect uptime.
           </p>
         </section>
 
@@ -115,8 +115,8 @@ const TermsPage: React.FC = () => {
           <p className="text-slate-500 dark:text-slate-400 mb-8">
             If something in here isn't clear, please reach out. We're happy to chat.
           </p>
-          <a href="mailto:support@listifyaihq.com" className="bg-[#2563EB] dark:bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-700 dark:hover:bg-blue-500 transition-all inline-block shadow-lg">
-            support@listifyaihq.com
+          <a href="mailto:support@sellistio.com.com" className="bg-[#2563EB] dark:bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-700 dark:hover:bg-blue-500 transition-all inline-block shadow-lg">
+            support@sellistio.com.com
           </a>
         </section>
 

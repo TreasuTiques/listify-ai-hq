@@ -13,7 +13,7 @@ const PrivacyPage: React.FC = () => {
           Privacy Policy
         </h1>
         <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto">
-          We hate legalese as much as you do. Here is a simple, honest breakdown of how we handle your data at Listify AI HQ.
+          We hate legalese as much as you do. Here is a simple, honest breakdown of how we handle your data at  .
         </p>
       </section>
 
@@ -23,7 +23,7 @@ const PrivacyPage: React.FC = () => {
         <section>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 text-left">The Short Version</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            Listify AI HQ is a tool built to help you clear your "death pile" and sell more on eBay. To do that, we need to handle some of your data. Our promise is simple: <strong>We treat your data the way we want our own data treated.</strong> We don't sell it, we don't spy on you, and we don't make fake claims.
+              is a tool built to help you clear your "death pile" and sell more on eBay. To do that, we need to handle some of your data. Our promise is simple: <strong>We treat your data the way we want our own data treated.</strong> We don't sell it, we don't spy on you, and we don't make fake claims.
           </p>
         </section>
 
@@ -114,8 +114,8 @@ const PrivacyPage: React.FC = () => {
           <p className="text-slate-500 dark:text-slate-400 mb-8">
             We are here to help. If you have any concerns about your privacy, just shoot us an email.
           </p>
-          <a href="mailto:privacy@listifyaihq.com" className="text-[#2563EB] dark:text-blue-400 font-bold text-lg hover:underline underline-offset-4">
-            privacy@listifyaihq.com
+          <a href="mailto:privacy@sellistio.com.com" className="text-[#2563EB] dark:text-blue-400 font-bold text-lg hover:underline underline-offset-4">
+            privacy@sellistio.com.com
           </a>
         </section>
 
