@@ -35,9 +35,13 @@ const Navbar: React.FC<NavbarProps> = ({ session, onNavigate, isDarkMode, toggle
                 <NavButton onClick={() => onNavigate('/sourcing')} label="Profit Scout" highlight />
                 <NavButton onClick={() => onNavigate('/doctor')} label="Listing Doctor" />
                 <NavButton onClick={() => onNavigate('/analytics')} label="Analytics" />
+                <NavButton onClick={() => onNavigate('/about')} label="About" />
               </>
             ) : (
               <>
+                {/* ✅ ADDED ABOUT BUTTON HERE FOR LOGGED OUT USERS */}
+                <button onClick={() => onNavigate('/about')} className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">About</button>
+                
                 <button onClick={() => onNavigate('/pricing')} className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">Pricing</button>
                 <button onClick={() => onNavigate('/analytics')} className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">Analytics</button>
                 
