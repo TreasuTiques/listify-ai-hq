@@ -186,7 +186,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               <div className="relative perspective-1000 w-full flex justify-center items-center z-10 -mt-8 lg:-mt-16">
                 <img 
                   src="/hero-dashboard.png" 
-                  alt="Listify AI Dashboard Interface" 
+                  alt=" AI Dashboard Interface" 
                   className="w-full max-w-[900px] object-contain drop-shadow-2xl transform hover:scale-[1.02] transition-transform duration-700 ease-in-out scale-[1.1]"
                   style={{
                     WebkitMaskImage: 'radial-gradient(ellipse at center, black 50%, transparent 100%)',
@@ -204,7 +204,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-blue-50/50 dark:bg-slate-800/30 blur-[120px] rounded-full -z-10"></div>
         <div className="max-w-7xl mx-auto px-4 text-left">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Why Power Sellers Choose Listify</h2>
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Why Power Sellers Choose </h2>
             <p className="text-slate-500 dark:text-slate-400 mt-4 text-lg">We automated the boring parts so you can focus on sourcing.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -284,7 +284,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
                   <th className="p-6 md:p-8 w-1/3"></th>
                   <th className="p-6 md:p-8 w-1/3 bg-blue-50/30 dark:bg-blue-900/20 border-x border-blue-100/50 dark:border-blue-800/30">
                     <div className="flex flex-col items-center">
-                       <span className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Listify AI HQ</span>
+                       <span className="text-lg font-black text-slate-900 dark:text-white tracking-tight"> </span>
                        <span className="text-[10px] font-bold text-white bg-blue-600 px-2 py-0.5 rounded-full mt-2 uppercase tracking-wide">Recommended</span>
                     </div>
                   </th>
@@ -293,19 +293,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {[
-                  { feature: "AI Model Depth", listify: "GPT-4o Vision (Deep Analysis)", standard: "Basic OCR / Text Scan" },
-                  { feature: "Listing Speed", listify: "10x Faster (Instant)", standard: "Manual Typing" },
-                  { feature: "Platform Support", listify: "Shopify, eBay, Poshmark, Mercari", standard: "Single Platform Only" },
-                  { feature: "SEO Optimization", listify: "Multi-Marketplace Keywords", standard: "None" },
-                  { feature: "Format Output", listify: "HTML, Plain Text, Tables", standard: "Plain Text Only" },
-                  { feature: "Return on Investment", listify: "High (Scale Inventory)", standard: "Low (Time Consuming)" }
+                  { feature: "AI Model Depth", : "GPT-4o Vision (Deep Analysis)", standard: "Basic OCR / Text Scan" },
+                  { feature: "Listing Speed", : "10x Faster (Instant)", standard: "Manual Typing" },
+                  { feature: "Platform Support", : "Shopify, eBay, Poshmark, Mercari", standard: "Single Platform Only" },
+                  { feature: "SEO Optimization", : "Multi-Marketplace Keywords", standard: "None" },
+                  { feature: "Format Output", : "HTML, Plain Text, Tables", standard: "Plain Text Only" },
+                  { feature: "Return on Investment", : "High (Scale Inventory)", standard: "Low (Time Consuming)" }
                 ].map((row, i) => (
                   <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors">
                     <td className="p-6 md:p-8 font-bold text-slate-700 dark:text-slate-300 text-sm md:text-base">{row.feature}</td>
                     <td className="p-6 md:p-8 bg-blue-50/30 dark:bg-blue-900/20 border-x border-blue-100/50 dark:border-blue-800/30 text-center relative group">
                       <div className="flex flex-col items-center gap-1">
                         <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-1"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg></div>
-                        <span className="font-bold text-slate-900 dark:text-white text-sm">{row.listify}</span>
+                        <span className="font-bold text-slate-900 dark:text-white text-sm">{row.}</span>
                       </div>
                     </td>
                     <td className="p-6 md:p-8 text-center">
@@ -475,7 +475,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
             <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500 rounded-full blur-[100px] opacity-30"></div>
             <div className="relative z-10">
               <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6 tracking-tight">Stop typing. Start scaling.</h2>
-              <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed">Join the thousands of professional resellers automating their inventory with Listify AI HQ.</p>
+              <p className="text-lg text-slate-300 mb-10 max-w-xl mx-auto leading-relaxed">Join the thousands of professional resellers automating their inventory with  .</p>
               <button 
                 onClick={() => onNavigate('/signup')} 
                 className="bg-white text-slate-900 px-12 py-5 rounded-full text-xl font-bold shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:scale-105 hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.5)] transition-all duration-300"

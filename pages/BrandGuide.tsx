@@ -10,7 +10,7 @@ const BrandGuide: React.FC = () => {
           Internal Strategy
         </div>
         <h1 className="text-4xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tight mb-6">
-          The Listify AI HQ <br /> Brand Voice Guide
+          The   <br /> Brand Voice Guide
         </h1>
         <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto">
           How we talk to our community. We aren't a software company; we're a teammate for the modern reseller.

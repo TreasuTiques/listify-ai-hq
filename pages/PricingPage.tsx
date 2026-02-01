@@ -83,7 +83,7 @@ const PricingPage: React.FC = () => {
     { q: "Can I change or cancel my plan later?", a: "Yes. You can upgrade, downgrade, or cancel your subscription at any time from your dashboard." },
     { q: "What counts as a single listing?", a: "A listing is counted when the AI successfully generates a title and description for a unique item." },
     { q: "Do I need a credit card to sign up for the Free plan?", a: "No. We only ask for payment details when you are ready to move to a high-volume paid plan." },
-    { q: "Does Listify work for international eBay sites?", a: "Yes. We support all major eBay locales, including UK, Canada, Australia, and Germany." },
+    { q: "Does  work for international eBay sites?", a: "Yes. We support all major eBay locales, including UK, Canada, Australia, and Germany." },
     { q: "Are the descriptions really mobile-friendly?", a: "Absolutely. We know over 60% of eBay sales happen on mobile. Our HTML templates are designed to look clean inside the eBay app." },
     { q: "What is the difference between 'Standard' and 'Premium Collector Mode'?", a: "Standard mode focuses on facts and speed. Premium Collector Mode creates a more immersive narrative for high-value items." },
     { q: "Can I use my own custom HTML code?", a: "Yes. You can either use our pre-built templates or export the raw text to use with your own custom designs." }
@@ -190,9 +190,9 @@ const PricingPage: React.FC = () => {
       <section className="bg-slate-900 dark:bg-black py-24 text-white relative overflow-hidden transition-colors duration-300">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px]"></div>
         <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8 tracking-tight">Why sellers choose Listify</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-8 tracking-tight">Why sellers choose </h2>
           <p className="text-xl text-slate-400 leading-relaxed font-light">
-            Listify AI HQ isn’t just a tool; it’s a teammate. We built this platform because we know the "listing wall" is the biggest hurdle to growth. By combining deep marketplace data with advanced image recognition, we handle the administrative heavy lifting so you can stay in the field finding the next big score.
+              isn’t just a tool; it’s a teammate. We built this platform because we know the "listing wall" is the biggest hurdle to growth. By combining deep marketplace data with advanced image recognition, we handle the administrative heavy lifting so you can stay in the field finding the next big score.
           </p>
         </div>
       </section>
@@ -209,7 +209,7 @@ const PricingPage: React.FC = () => {
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                 <th className="p-8 text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest w-1/3">Feature</th>
-                <th className="p-8 text-sm font-bold text-white bg-slate-900 dark:bg-blue-600 w-1/3 text-center border-x border-slate-700 dark:border-blue-500">Listify AI HQ</th>
+                <th className="p-8 text-sm font-bold text-white bg-slate-900 dark:bg-blue-600 w-1/3 text-center border-x border-slate-700 dark:border-blue-500"> </th>
                 <th className="p-8 text-sm font-bold text-slate-400 dark:text-slate-500 w-1/3 text-center">Snap2List</th>
               </tr>
             </thead>
