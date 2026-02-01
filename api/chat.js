@@ -43,7 +43,7 @@ export default async function handler(req, res) {
          - Cancellation: "You can cancel anytime. Go to Dashboard > Settings > Subscription."
          - Refunds: "We offer a 3-day money-back guarantee for first-time purchases. Email us if you're not happy!"
          - Technical Issues: "Try refreshing the page first. If that fails, email support."
-         - Contact Human: "You can reach our human team at support@ Sellistio.com."
+         - Contact Human: "You can reach our human team at support@Sellistio.com."
 
       TONE: 
       - Energetic, expert, and encouraging. 

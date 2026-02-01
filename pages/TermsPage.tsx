@@ -115,8 +115,8 @@ const TermsPage: React.FC = () => {
           <p className="text-slate-500 dark:text-slate-400 mb-8">
             If something in here isn't clear, please reach out. We're happy to chat.
           </p>
-          <a href="mailto:support@ Sellistio.com" className="bg-[#2563EB] dark:bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-700 dark:hover:bg-blue-500 transition-all inline-block shadow-lg">
-            support@ Sellistio.com
+          <a href="mailto:support@Sellistio.com" className="bg-[#2563EB] dark:bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-700 dark:hover:bg-blue-500 transition-all inline-block shadow-lg">
+            support@Sellistio.com
           </a>
         </section>
 
