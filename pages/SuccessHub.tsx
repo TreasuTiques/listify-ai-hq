@@ -70,9 +70,12 @@ const SuccessHub: React.FC = () => {
           <div className="relative z-10">
             <h3 className="text-2xl font-semibold mb-4">Stop Typing. Start Scaling.</h3>
             <p className="text-slate-400 dark:text-blue-200 mb-8 max-w-md mx-auto">Unlock your full potential with a professional plan and list up to 1,000 items per month.</p>
-            <button className="bg-blue-600 dark:bg-white dark:text-blue-900 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 dark:hover:bg-blue-50 transition-all shadow-lg">
-              Unlock My Growth Plan
-            </button>
+            <button 
+  onClick={() => window.location.href = '/signup'} 
+  className="bg-blue-600 dark:bg-white dark:text-blue-900 text-white px-8 py-3 rounded-full font-bold hover:bg-blue-700 dark:hover:bg-blue-50 transition-all shadow-lg"
+>
+  Unlock My Growth Plan
+</button>
           </div>
         </div>
       </div>
