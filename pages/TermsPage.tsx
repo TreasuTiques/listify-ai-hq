@@ -2,18 +2,17 @@ import React from 'react';
 
 const TermsPage: React.FC = () => {
   return (
-    // FIX: Main Background with '!' to force override
     <div className="!bg-white dark:!bg-slate-900 min-h-screen pb-32 font-sans transition-colors duration-300">
       {/* Header */}
       <section className="pt-24 pb-16 px-4 text-center max-w-4xl mx-auto border-b border-slate-100 dark:border-slate-800">
         <div className="inline-block px-4 py-1.5 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-full text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-4">
-          Effective: May 2024
+          Effective: February 2026
         </div>
         <h1 className="text-4xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tight mb-6">
           Terms of Use
         </h1>
         <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto">
-          Welcome to  . These rules keep our platform safe and helpful for every reseller in our community.
+          Built by veteran resellers for the power-seller community. These rules ensure a professional environment for all our users.
         </p>
       </section>
 
@@ -24,79 +23,79 @@ const TermsPage: React.FC = () => {
         <section>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">The Agreement</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            By using  , you’re agreeing to these terms. If you don’t agree, that’s okay—but you won't be able to use the tool. We’ve written this in plain English because we believe you should actually understand the rules of the road.
+            By accessing Sellistio, you are entering into a legal agreement with us. We have drafted these terms in plain language because, as fellow business owners, we believe in transparency and direct communication.
           </p>
         </section>
 
         {/* 2. Eligibility */}
         <section>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 text-left">Who Can Use </h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 text-left">Professional Eligibility</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            You must be at least 18 years old (or the age of majority in your area) and legally allowed to enter into contracts to use our service. Basically, if you can legally have an eBay store, you can use .
+            Sellistio is designed for professional e-commerce use. You must be at least 18 years old and have the legal capacity to enter into binding contracts. If you are operating a marketplace store, you are responsible for ensuring your use of our tool complies with those platforms' specific rules.
           </p>
         </section>
 
         {/* 3. Acceptable Use */}
         <section className="bg-slate-50 dark:bg-slate-800 p-10 rounded-[32px] border border-slate-100 dark:border-slate-700 transition-colors">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Play Fair</h2>
-          <p className="text-slate-600 dark:text-slate-300 mb-6">To keep the HQ running smoothly, you agree not to:</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">The Professional Standard</h2>
+          <p className="text-slate-600 dark:text-slate-300 mb-6">To maintain the integrity of our AI engine, you agree to the following:</p>
           <ul className="space-y-4">
             <li className="flex gap-4 items-start">
               <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 font-bold text-xs">1</div>
-              <p className="text-sm text-slate-600 dark:text-slate-300"><strong>Don't lie.</strong> Don't use our AI to create intentionally misleading listings or hide defects.</p>
+              <p className="text-sm text-slate-600 dark:text-slate-300"><strong>Accuracy Matters.</strong> Do not use our tool to generate intentionally misleading descriptions or to hide significant product defects.</p>
             </li>
             <li className="flex gap-4 items-start">
               <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 font-bold text-xs">2</div>
-              <p className="text-sm text-slate-600 dark:text-slate-300"><strong>Don't break the tech.</strong> No scraping, hacking, or trying to overload our servers.</p>
+              <p className="text-sm text-slate-600 dark:text-slate-300"><strong>System Integrity.</strong> Any attempt to scrape, reverse-engineer, or overload our AI processing infrastructure is strictly prohibited.</p>
             </li>
             <li className="flex gap-4 items-start">
               <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 font-bold text-xs">3</div>
-              <p className="text-sm text-slate-600 dark:text-slate-300"><strong>Don't steal.</strong> Only upload photos you own or have permission to use.</p>
+              <p className="text-sm text-slate-600 dark:text-slate-300"><strong>Content Rights.</strong> Only upload product photography that you own or have the explicit legal right to use for commercial listings.</p>
             </li>
           </ul>
         </section>
 
-        {/* 4. AI Disclaimer */}
-        <section className="border-l-4 border-amber-400 pl-8">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">The "Robot Assistant" Disclaimer</h2>
+        {/* 4. AI Disclaimer - CRITICAL FOR ACCURACY SHIELD */}
+        <section className="border-l-4 border-blue-600 pl-8">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Human-in-the-Loop Requirement</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-            Our AI is very smart, but it’s still a robot. Occasionally, it might get a brand name wrong or miss a detail in a photo. 
+            Sellistio utilizes high-fidelity AI models (including the Gemini API) for vision processing. While our technology is optimized for Cassini SEO and technical accuracy, AI can occasionally generate "hallucinations" or errors.
           </p>
           <p className="text-slate-900 dark:text-white font-bold">
-            CRITICAL: You are the human in charge. You must review and verify every listing before you post it to eBay or any other marketplace.  is not responsible for any marketplace strikes or buyer disputes resulting from unedited AI output.
+            LIABILITY SHIELD: You are the final authority. You are strictly required to verify all item specifics, condition reports, and descriptions before publishing to any marketplace. Sellistio is not liable for marketplace suspensions, buyer disputes, or "Item Not As Described" returns resulting from unverified AI output.
           </p>
         </section>
 
         {/* 5. Affiliation */}
         <section>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">We Aren't eBay</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Independent Status</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-              is an independent tool. We are not affiliated with, endorsed by, or partnered with eBay, Etsy, Poshmark, or any other marketplace. We’re just fans of their platforms who wanted to make them easier to use.
+            Sellistio is an independent software tool. We are not affiliated with, endorsed by, or partnered with eBay, Amazon, Shopify, or any other e-commerce platform. We built this tool to help professional sellers navigate these platforms more efficiently.
           </p>
         </section>
 
         {/* 6. Payments & Plans */}
         <section>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Subscriptions & Payments</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Billing & Subscriptions</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
-            Our paid plans are subscription-based. You can cancel anytime. If you cancel, you'll still have access until the end of your current billing cycle. 
+            Our paid tiers are billed on a subscription basis. You may cancel at any time via your dashboard. Access continues until the end of the current paid billing cycle.
           </p>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            Because we offer a generous Free plan to test the service, we generally do not offer refunds once a paid billing cycle has started.
+            Given our Free tier allows for extensive testing of our Gemini-powered vision engine, we do not typically offer refunds once a paid cycle has commenced.
           </p>
         </section>
 
         {/* 7. Intellectual Property */}
         <section>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 text-left">What’s Yours & What’s Ours</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 text-left">Ownership and Assets</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
             <div className="p-6 border border-slate-100 dark:border-slate-700 rounded-2xl">
-              <h4 className="font-bold text-slate-900 dark:text-white mb-2">Yours</h4>
-              <p className="text-sm text-slate-500 dark:text-slate-400">You keep 100% ownership of your photos and your finished listing descriptions.</p>
+              <h4 className="font-bold text-slate-900 dark:text-white mb-2">Reseller Assets</h4>
+              <p className="text-sm text-slate-500 dark:text-slate-400">You maintain 100% ownership of your inventory photos and the descriptions generated by our tool.</p>
             </div>
             <div className="p-6 border border-slate-100 dark:border-slate-700 rounded-2xl">
-              <h4 className="font-bold text-slate-900 dark:text-white mb-2">Ours</h4>
-              <p className="text-sm text-slate-500 dark:text-slate-400">We own the software, the logo, the code, and the specific AI workflows we built.</p>
+              <h4 className="font-bold text-slate-900 dark:text-white mb-2">Sellistio Assets</h4>
+              <p className="text-sm text-slate-500 dark:text-slate-400">We retain ownership of all code, custom AI workflows, proprietary branding, and software architecture.</p>
             </div>
           </div>
         </section>
@@ -105,18 +104,18 @@ const TermsPage: React.FC = () => {
         <section>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4 text-left">The Legal Safety Net</h2>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
-            To the maximum extent permitted by law,   is provided "as-is" without any warranties. We aren't liable for lost profits, missed sales, or any indirect damages that might happen while using our tool. We do our best to stay online 24/7, but we don't guarantee perfect uptime.
+            To the maximum extent permitted by law, Sellistio is provided "as-is." While we strive for 100% uptime and professional-grade accuracy, we do not guarantee that the service will be error-free or uninterrupted. We are not liable for lost profits or indirect business damages.
           </p>
         </section>
 
         {/* 9. Contact */}
         <section className="pt-16 border-t border-slate-100 dark:border-slate-800 text-center">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Still have questions?</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Need Clarification?</h2>
           <p className="text-slate-500 dark:text-slate-400 mb-8">
-            If something in here isn't clear, please reach out. We're happy to chat.
+            Sellistio is built for the reselling community. If you have questions about these terms, our support team is ready to help.
           </p>
-          <a href="mailto:support@Sellistio.com" className="bg-[#2563EB] dark:bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-700 dark:hover:bg-blue-500 transition-all inline-block shadow-lg">
-            support@Sellistio.com
+          <a href="mailto:support@sellistio.com" className="bg-[#2563EB] dark:bg-blue-600 text-white px-8 py-4 rounded-full font-bold hover:bg-blue-700 dark:hover:bg-blue-500 transition-all inline-block shadow-lg">
+            support@sellistio.com
           </a>
         </section>
 
