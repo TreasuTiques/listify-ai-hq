@@ -8,7 +8,7 @@ const BuilderPage: React.FC = () => {
   const [activePlatform, setActivePlatform] = useState('ebay');
   const [isProMode, setIsProMode] = useState(false);
   
-  // 🛠️ Updated to support 3 modes: Visual, HTML, and Text
+  // 🛠️ Editor Modes
   const [editorTab, setEditorTab] = useState<'visual' | 'html' | 'text'>('visual');
   const [copySuccess, setCopySuccess] = useState(''); 
   
@@ -54,11 +54,28 @@ const BuilderPage: React.FC = () => {
   // 🛡️ Helper to check if platform supports HTML
   const isHtmlPlatform = activePlatform === 'ebay' || activePlatform === 'shopify';
 
-  // 🧹 Helper to strip HTML for Plain Text View
-  const stripHtml = (html: string) => {
+  // 🧹 SMART TEXT FORMATTER (Premium "Document" Look)
+  const formatPlainText = (html: string) => {
+    if (!html) return "";
+    
+    // 1. Convert HTML Structure to Clean Text Structure
+    let text = html
+      .replace(/<br\s*\/?>/gi, '\n')         // Breaks to single newline
+      .replace(/<\/p>/gi, '\n')            // End paragraph = single newline
+      .replace(/<\/div>/gi, '\n')          // End div = single newline
+      .replace(/<li[^>]*>/gi, '• ')        // List items start with bullet
+      .replace(/<\/li>/gi, '\n')           // End list item = newline
+      .replace(/<\/ul>/gi, '\n')           // End list = extra newline for spacing
+      .replace(/<h[1-6][^>]*>/gi, '\n\n')  // Headers get double spacing above
+      .replace(/<\/h[1-6]>/gi, ':\n');     // Header endings get a colon and newline
+
+    // 2. Strip remaining tags (like <strong>, <ul> opening tags)
     const tmp = document.createElement("DIV");
-    tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || "";
+    tmp.innerHTML = text;
+    const cleanText = tmp.textContent || tmp.innerText || "";
+    
+    // 3. Clean up excessive whitespace (max 2 newlines) and trim
+    return cleanText.replace(/\n\s*\n\s*\n/g, '\n\n').trim();
   };
 
   const runAIAnalysis = async (files: File[], platform: string, proMode: boolean, cond: string) => {
@@ -73,7 +90,7 @@ const BuilderPage: React.FC = () => {
       setDescription(result.description || '');
       setPrice(result.estimated_price || '');
       setTags(result.tags || []);
-      setEditorTab('visual'); // Default to visual
+      setEditorTab('visual'); 
     } catch (error) {
       console.error("AI Error:", error);
       alert("AI could not analyze images. Try again!");
@@ -145,9 +162,9 @@ const BuilderPage: React.FC = () => {
   };
 
   const copyToClipboard = (text: string, type: 'title' | 'desc') => {
-    // If we are in "Plain Text" mode, we want to copy the stripped text
+    // Copy the formatted plain text if we are in text mode, otherwise raw
     const textToCopy = (type === 'desc' && editorTab === 'text' && isHtmlPlatform) 
-      ? stripHtml(text) 
+      ? formatPlainText(text) 
       : text;
 
     navigator.clipboard.writeText(textToCopy);
@@ -307,7 +324,7 @@ const BuilderPage: React.FC = () => {
               <div className="flex justify-between items-center mb-2">
                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description</label>
                  
-                 {/* 🛠️ UPDATED: 3-TAB SYSTEM FOR HTML PLATFORMS */}
+                 {/* 🛠️ 3-TAB SWITCHER */}
                  {isHtmlPlatform ? (
                     <div className="flex gap-2">
                        <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
@@ -326,7 +343,7 @@ const BuilderPage: React.FC = () => {
                  )}
               </div>
 
-              {/* 🛠️ EDITOR VIEW LOGIC */}
+              {/* 🛠️ EDITOR VIEWS */}
               <div className="relative">
                  {isHtmlPlatform && editorTab === 'visual' ? (
                     <div 
@@ -334,10 +351,11 @@ const BuilderPage: React.FC = () => {
                        dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic">Select condition to generate listing...</p>' }}
                     ></div>
                  ) : isHtmlPlatform && editorTab === 'text' ? (
+                    // 💎 PREMIUM TEXT VIEW: Sans-serif, larger font, relaxed spacing
                     <textarea 
                       readOnly 
-                      value={stripHtml(description)} 
-                      className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 focus:outline-none h-[500px] resize-none font-mono text-sm text-slate-600 dark:text-slate-400"
+                      value={formatPlainText(description)} 
+                      className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-6 py-6 focus:outline-none h-[500px] resize-none text-left font-sans text-[15px] leading-relaxed text-slate-800 dark:text-slate-200"
                     ></textarea>
                  ) : isHtmlPlatform && editorTab === 'html' ? (
                     <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-[#1E293B] text-green-400 font-mono text-sm border border-slate-700 rounded-xl px-4 py-4 focus:outline-none focus:border-blue-500 h-[500px] resize-none" placeholder="<html>...</html>"></textarea>
