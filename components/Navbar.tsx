@@ -20,10 +20,13 @@ const Navbar: React.FC<NavbarProps> = ({ session, onNavigate, isDarkMode, toggle
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           
-          {/* LOGO */}
-          <div className="flex items-center gap-2 cursor-pointer group" onClick={() => onNavigate('/')}>
-            <div className="w-9 h-9 bg-slate-900 dark:bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-sm transition-all group-hover:scale-105">L</div>
-            <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight transition-colors"> <span className="text-blue-600 dark:text-blue-400"></span></span>
+          {/* 🆕 LOGO - Replaced Text/Icon with Premium Image */}
+          <div className="flex items-center cursor-pointer group" onClick={() => onNavigate('/')}>
+            <img 
+              src="/sellistio-logo-new.PNG" 
+              alt="Sellistio" 
+              className="h-12 w-auto object-contain transition-transform group-hover:scale-105" 
+            />
           </div>
 
           {/* DESKTOP LINKS */}
@@ -39,9 +42,7 @@ const Navbar: React.FC<NavbarProps> = ({ session, onNavigate, isDarkMode, toggle
               </>
             ) : (
               <>
-                {/* ✅ ADDED ABOUT BUTTON HERE FOR LOGGED OUT USERS */}
                 <button onClick={() => onNavigate('/about')} className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">About</button>
-                
                 <button onClick={() => onNavigate('/pricing')} className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">Pricing</button>
                 <button onClick={() => onNavigate('/analytics')} className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">Analytics</button>
                 
