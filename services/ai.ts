@@ -6,7 +6,7 @@ if (!apiKey) console.error("Missing Gemini API Key! Check .env or Vercel setting
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// 🛑 MODEL LOCKED (Using your working model)
+// 🛑 MODEL LOCKED
 const MODEL_NAME = "gemini-flash-latest";
 
 // Helper: Convert File to Base64
@@ -22,7 +22,7 @@ const fileToGenerativePart = async (file: File) => {
 };
 
 /**
- * 🧼 THE CLEANER: Extracts JSON from Chatty AI Responses
+ * 🧼 THE CLEANER
  */
 const cleanAndParseJSON = (text: string) => {
   try {
@@ -41,7 +41,6 @@ const cleanAndParseJSON = (text: string) => {
 
 /**
  * 🧠 DEEP VISION PROTOCOL
- * This instruction block is injected into every request to ensure high accuracy.
  */
 const DEEP_VISION_PROTOCOL = `
   **CRITICAL IMAGE ANALYSIS PROTOCOL:**
@@ -52,37 +51,55 @@ const DEEP_VISION_PROTOCOL = `
 `;
 
 /**
+ * 🚫 NO MARKDOWN PROTOCOL
+ */
+const NO_MARKDOWN_PROTOCOL = `
+  **FORMATTING RULES - STRICT:**
+  - OUTPUT MUST BE PLAIN TEXT ONLY.
+  - DO NOT use markdown characters like asterisks (** or *).
+  - DO NOT use hash signs (#) for headers.
+  - To emphasize a header, use UPPERCASE (e.g. "CONDITION:" instead of "**Condition:**").
+  - Use standard hyphens (-) for bullet points.
+`;
+
+/**
  * 🎨 MARKETPLACE PROMPT ENGINEER
  */
 const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: string) => {
   const baseHelper = `Analyze these images and return valid JSON.`;
   const conditionContext = userCondition ? `IMPORTANT: User says condition is "${userCondition}". Ensure description reflects this honesty.` : '';
 
-  // 🔵 EBAY HTML TEMPLATE (Visual Card Style)
+  // 🔵 EBAY HTML TEMPLATE (Updated: Cleaner, No "Authenticated" Badge)
   const EBAY_HTML_TEMPLATE = `
     <div style="font-family: sans-serif; max-width: 900px; margin: 0 auto; color: #1a1a1a; line-height: 1.6;">
       <div style="text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px;">
-        <span style="background: #000; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase;">Authenticated</span>
-        <h1 style="font-size: 28px; margin: 15px 0 10px;">{{TITLE}}</h1>
-        <p style="color: #666; font-style: italic;">{{MICRO_LORE_HOOK}}</p>
+        <h1 style="font-size: 24px; margin: 10px 0;">{{TITLE}}</h1>
+        <p style="color: #555; font-size: 16px;">{{SEMANTIC_INTRO}}</p>
       </div>
-      <div style="background: #f9fafb; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
-        <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666;">Item Specifics</h3>
-        <ul style="list-style: none; padding: 0;">
+      
+      <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e5e7eb;">
+        <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666; letter-spacing: 1px;">Item Specifics</h3>
+        <ul style="list-style: none; padding: 0; margin: 0;">
           <li style="margin-bottom: 8px;"><strong>Brand:</strong> {{BRAND}}</li>
           <li style="margin-bottom: 8px;"><strong>Material:</strong> {{MATERIAL}}</li>
           <li style="margin-bottom: 8px;"><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
         </ul>
       </div>
+
       <div style="margin-bottom: 30px;">
-        <h3 style="font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px;">About This Item</h3>
-        <p>{{EMOTIONAL_DESCRIPTION}}</p>
+        <h3 style="font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px; margin-bottom: 10px;">Expert Analysis</h3>
+        <p>{{DETAILED_ANALYSIS}}</p>
+        <br>
         <p><strong>Defects/Notes:</strong> {{DEFECT_REPORT}}</p>
+      </div>
+
+      <div style="text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #f0f0f0; padding-top: 20px;">
+        <p>⚡ Fast Shipping • 📦 Professional Packaging</p>
       </div>
     </div>
   `;
 
-  // 🟢 SHOPIFY HTML TEMPLATE (Semantic SEO Style)
+  // 🟢 SHOPIFY HTML TEMPLATE
   const SHOPIFY_HTML_TEMPLATE = `
     <div class="product-description" style="font-family: inherit;">
       <p class="intro">{{SEMANTIC_INTRO}}</p>
@@ -110,44 +127,49 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
   switch (platform.toLowerCase()) {
     case 'poshmark':
       return `
-        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
+        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
         **ROLE:** Poshmark SEO Stylist.
         **RULES:**
-        1. **NO MARKDOWN:** Do NOT use asterisks (**). Use UPPERCASE for headers.
-        2. **Format:** Vertical list layout. Use Emojis as bullets.
-        3. **Keywords:** Integrate "Aesthetics" (e.g., #Boho, #Y2K).
-        **JSON OUTPUT:** { "title": "...", "description": "EMOJI BULLETS HERE...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
+        1. Vertical list layout. Use Emojis as bullets.
+        2. Integrate "Aesthetics" (e.g., #Boho, #Y2K).
+        **JSON OUTPUT:** { "title": "...", "description": "PLAIN TEXT WITH EMOJIS...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
       `;
     
     case 'depop':
       return `
-        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
+        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
         **ROLE:** Depop Trend Curator.
         **RULES:**
-        1. **NO MARKDOWN:** Do NOT use asterisks (**).
-        2. **Title:** Aesthetic Hook.
-        3. **Description:** Casual tone. Lowercase allowed.
-        **JSON OUTPUT:** { "title": "...", "description": "Casual vibe text...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
+        1. Title: Aesthetic Hook.
+        2. Description: Casual tone. Lowercase allowed.
+        **JSON OUTPUT:** { "title": "...", "description": "CASUAL TEXT...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
       `;
 
     case 'mercari':
       return `
-        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
+        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
         **ROLE:** Mercari Quick-Flip Assistant.
         **RULES:**
-        1. **NO MARKDOWN:** Do NOT use asterisks (**).
-        2. **Description:** Short paragraphs. "Ships Fast" mention.
-        **JSON OUTPUT:** { "title": "...", "description": "Punchy text...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
+        1. Short paragraphs. "Ships Fast" mention.
+        **JSON OUTPUT:** { "title": "...", "description": "PUNCHY TEXT...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
       `;
 
     case 'etsy':
       return `
-        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
+        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
         **ROLE:** Etsy Artisan Guide.
         **RULES:**
-        1. **NO MARKDOWN:** Do NOT use asterisks (**).
-        2. **Description:** Storytelling. Focus on "Maker", "History".
-        **JSON OUTPUT:** { "title": "...", "description": "Story text...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
+        1. Description: Storytelling. Focus on "Maker", "History".
+        **JSON OUTPUT:** { "title": "...", "description": "STORY TEXT...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
+      `;
+
+    case 'facebook':
+      return `
+        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
+        **ROLE:** Local Commerce Connector.
+        **RULES:**
+        1. Focus: "Proximity" keywords. Simple and direct.
+        **JSON OUTPUT:** { "title": "...", "description": "SIMPLE TEXT...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
       `;
 
     case 'shopify':
@@ -157,21 +179,11 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
         **GOAL:** Semantic Richness for Google SGE.
         **RULES:**
         1. Use the provided HTML Template.
-        2. Replace {{SEMANTIC_INTRO}} with a context-rich intro (e.g. "Designed for...").
-        3. Replace {{SIZE_ANSWER}} and {{DEFECT_REPORT}} with data from image analysis.
+        2. Replace {{SEMANTIC_INTRO}} with a context-rich intro.
+        3. Replace {{SIZE_ANSWER}} and {{DEFECT_REPORT}} with data.
         **HTML TEMPLATE:**
         ${SHOPIFY_HTML_TEMPLATE}
         **JSON OUTPUT:** { "title": "...", "description": "FULL_HTML_CODE...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
-      `;
-
-    case 'facebook':
-      return `
-        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
-        **ROLE:** Local Commerce Connector.
-        **RULES:**
-        1. **NO MARKDOWN:** Do NOT use asterisks (**).
-        2. **Focus:** "Proximity" keywords. Simple and direct.
-        **JSON OUTPUT:** { "title": "...", "description": "Simple text...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
       `;
 
     case 'ebay':
@@ -181,7 +193,11 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
         **ROLE:** eBay Cassini Algorithm Specialist.
         **RULES:**
         1. **Title:** STRICT 80 chars. Brand + Gender + Item + Material + Size.
-        2. **Description:** Use the provided HTML Template. Fill in {{TITLE}}, {{MICRO_LORE_HOOK}}, {{BRAND}}, etc.
+        2. **Description:** Use the provided HTML Template.
+           - Replace {{TITLE}} with optimized title.
+           - Replace {{SEMANTIC_INTRO}} with a professional summary (no fluff).
+           - Replace {{DETAILED_ANALYSIS}} with expert insights on quality/style.
+           - Replace {{DEFECT_REPORT}} with honest defect scan.
         **HTML TEMPLATE:**
         ${EBAY_HTML_TEMPLATE}
         **JSON OUTPUT:** { "title": "...", "description": "FULL_HTML_CODE...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
