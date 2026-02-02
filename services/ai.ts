@@ -58,40 +58,52 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
   const baseHelper = `Analyze these images and return valid JSON.`;
   const conditionContext = userCondition ? `IMPORTANT: User says condition is "${userCondition}". Ensure description reflects this honesty.` : '';
 
-  // 💎 PREMIUM EBAY HTML TEMPLATE (Modern, Mobile-Responsive)
+  // 🔵 EBAY HTML TEMPLATE (Visual Card Style)
   const EBAY_HTML_TEMPLATE = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 900px; margin: 0 auto; color: #1a1a1a; line-height: 1.6;">
+    <div style="font-family: sans-serif; max-width: 900px; margin: 0 auto; color: #1a1a1a; line-height: 1.6;">
       <div style="text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px;">
-        <span style="background: #000; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">Authenticated</span>
-        <h1 style="font-size: 28px; margin: 15px 0 10px; letter-spacing: -0.5px;">{{TITLE}}</h1>
-        <p style="color: #666; font-style: italic; font-size: 16px;">{{MICRO_LORE_HOOK}}</p>
+        <span style="background: #000; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase;">Authenticated</span>
+        <h1 style="font-size: 28px; margin: 15px 0 10px;">{{TITLE}}</h1>
+        <p style="color: #666; font-style: italic;">{{MICRO_LORE_HOOK}}</p>
       </div>
-      
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
-        <div style="background: #f9fafb; padding: 20px; border-radius: 12px;">
-          <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666; letter-spacing: 1px;">Item Specifics</h3>
-          <ul style="list-style: none; padding: 0; margin: 0;">
-            <li style="margin-bottom: 8px;"><strong>Brand:</strong> {{BRAND}}</li>
-            <li style="margin-bottom: 8px;"><strong>Size:</strong> {{SIZE}}</li>
-            <li style="margin-bottom: 8px;"><strong>Material:</strong> {{MATERIAL}}</li>
-            <li style="margin-bottom: 8px;"><strong>Color:</strong> {{COLOR}}</li>
-          </ul>
-        </div>
-        <div style="background: #fff; border: 1px solid #e5e7eb; padding: 20px; border-radius: 12px;">
-          <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666; letter-spacing: 1px;">Condition Report</h3>
-          <p style="font-size: 18px; font-weight: bold; margin: 5px 0;">{{CONDITION_GRADE}}</p>
-          <p style="color: #4b5563; font-size: 14px;">{{DEFECT_REPORT}}</p>
-        </div>
+      <div style="background: #f9fafb; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666;">Item Specifics</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;"><strong>Brand:</strong> {{BRAND}}</li>
+          <li style="margin-bottom: 8px;"><strong>Material:</strong> {{MATERIAL}}</li>
+          <li style="margin-bottom: 8px;"><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
+        </ul>
       </div>
-
       <div style="margin-bottom: 30px;">
-        <h3 style="font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px;">Why You'll Love It</h3>
+        <h3 style="font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px;">About This Item</h3>
         <p>{{EMOTIONAL_DESCRIPTION}}</p>
+        <p><strong>Defects/Notes:</strong> {{DEFECT_REPORT}}</p>
       </div>
+    </div>
+  `;
 
-      <div style="text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #f0f0f0; padding-top: 20px;">
-        <p>⚡ Fast Shipping • 📦 Professional Packaging • 🛡️ 30-Day Returns</p>
-      </div>
+  // 🟢 SHOPIFY HTML TEMPLATE (Semantic SEO Style)
+  const SHOPIFY_HTML_TEMPLATE = `
+    <div class="product-description" style="font-family: inherit;">
+      <p class="intro">{{SEMANTIC_INTRO}}</p>
+      
+      <h2>Product Specifications</h2>
+      <ul>
+        <li><strong>Material:</strong> {{MATERIAL}}</li>
+        <li><strong>Color:</strong> {{COLOR}}</li>
+        <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
+      </ul>
+
+      <h2>Expert Analysis</h2>
+      <p>{{DETAILED_ANALYSIS}}</p>
+
+      <h2>Frequently Asked Questions</h2>
+      <dl>
+        <dt><strong>Is this item true to size?</strong></dt>
+        <dd>{{SIZE_ANSWER}}</dd>
+        <dt><strong>Any notable flaws?</strong></dt>
+        <dd>{{DEFECT_REPORT}}</dd>
+      </dl>
     </div>
   `;
 
@@ -99,134 +111,80 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     case 'poshmark':
       return `
         ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
-        
         **ROLE:** Poshmark SEO Stylist.
-        **GOAL:** Trigger "For You" algorithm & Social Sharing.
-        
         **RULES:**
-        1. **Title:** Brand + Style Name + Category + Size (Max 50 chars).
-        2. **Description:** Vertical list layout. Use Emojis as bullets.
+        1. **NO MARKDOWN:** Do NOT use asterisks (**). Use UPPERCASE for headers.
+        2. **Format:** Vertical list layout. Use Emojis as bullets.
         3. **Keywords:** Integrate "Aesthetics" (e.g., #Boho, #Y2K).
-        
-        **JSON OUTPUT MUST BE:**
-        {
-          "title": "Strict Poshmark Title",
-          "description": "Emoji-rich description text...",
-          "brand": "Detected Brand",
-          "condition": "Detected Condition",
-          "estimated_price": "$0.00",
-          "tags": ["#Tag1", "#Tag2", "#Tag3"]
-        }
+        **JSON OUTPUT:** { "title": "...", "description": "EMOJI BULLETS HERE...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
       `;
     
     case 'depop':
       return `
         ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
-        
-        **ROLE:** Depop Trend Curator (Gen-Z Focus).
-        **GOAL:** Aesthetic appeal & Vibe check.
-        
+        **ROLE:** Depop Trend Curator.
         **RULES:**
-        1. **Title:** Hook-style. Keep it "Clickbaity" but accurate.
-        2. **Description:** Casual tone. Lowercase allowed. Use slang like "sick piece" only if item is streetwear/vintage.
-        3. **Hashtags:** 5 specific subculture tags (e.g. #gorpcore #coquette).
-        
-        **JSON OUTPUT MUST BE:**
-        {
-          "title": "Aesthetic Hook Title",
-          "description": "Casual vibe description...",
-          "brand": "Brand",
-          "condition": "Condition",
-          "estimated_price": "$0.00",
-          "tags": ["#tag1", "#tag2", "#tag3", "#tag4", "#tag5"]
-        }
+        1. **NO MARKDOWN:** Do NOT use asterisks (**).
+        2. **Title:** Aesthetic Hook.
+        3. **Description:** Casual tone. Lowercase allowed.
+        **JSON OUTPUT:** { "title": "...", "description": "Casual vibe text...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
       `;
 
     case 'mercari':
       return `
         ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
-        
         **ROLE:** Mercari Quick-Flip Assistant.
-        **GOAL:** Speed & Friction-free reading.
-        
         **RULES:**
-        1. **Title:** Utilitarian. Brand + Item + Size + Condition.
+        1. **NO MARKDOWN:** Do NOT use asterisks (**).
         2. **Description:** Short paragraphs. "Ships Fast" mention.
-        3. **Hashtags:** Exactly 3 tags.
-        
-        **JSON OUTPUT MUST BE:**
-        {
-          "title": "Utilitarian Title",
-          "description": "Short punchy description...",
-          "brand": "Brand",
-          "condition": "Condition",
-          "estimated_price": "$0.00",
-          "tags": ["#tag1", "#tag2", "#tag3"]
-        }
+        **JSON OUTPUT:** { "title": "...", "description": "Punchy text...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
       `;
 
     case 'etsy':
       return `
         ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
-        
         **ROLE:** Etsy Artisan Guide.
-        **GOAL:** Human-Centric Storytelling.
-        
         **RULES:**
-        1. **Title:** Long-tail. Product Identity first. "Handmade Ceramic Mug..."
-        2. **Description:** Emotional storytelling. Focus on "Maker", "Material", "History".
-        3. **Vintage Check:** If age > 20 years, explicitly state flaws as "character".
-        
-        **JSON OUTPUT MUST BE:**
-        {
-          "title": "Long Conversational Title",
-          "description": "Storytelling description...",
-          "brand": "Maker/Brand",
-          "condition": "Vintage/Handmade",
-          "estimated_price": "$0.00",
-          "tags": ["tag1", "tag2", "tag3"]
-        }
+        1. **NO MARKDOWN:** Do NOT use asterisks (**).
+        2. **Description:** Storytelling. Focus on "Maker", "History".
+        **JSON OUTPUT:** { "title": "...", "description": "Story text...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
       `;
 
     case 'shopify':
+      return `
+        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
+        **ROLE:** Shopify SEO Architect.
+        **GOAL:** Semantic Richness for Google SGE.
+        **RULES:**
+        1. Use the provided HTML Template.
+        2. Replace {{SEMANTIC_INTRO}} with a context-rich intro (e.g. "Designed for...").
+        3. Replace {{SIZE_ANSWER}} and {{DEFECT_REPORT}} with data from image analysis.
+        **HTML TEMPLATE:**
+        ${SHOPIFY_HTML_TEMPLATE}
+        **JSON OUTPUT:** { "title": "...", "description": "FULL_HTML_CODE...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
+      `;
+
     case 'facebook':
       return `
         ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
-        **ROLE:** E-Commerce SEO Architect.
-        **RULES:** Semantic richness. Focus on "Use Case" (e.g. "Perfect for winter...").
-        **JSON OUTPUT:** Standard JSON with professional description.
+        **ROLE:** Local Commerce Connector.
+        **RULES:**
+        1. **NO MARKDOWN:** Do NOT use asterisks (**).
+        2. **Focus:** "Proximity" keywords. Simple and direct.
+        **JSON OUTPUT:** { "title": "...", "description": "Simple text...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
       `;
 
     case 'ebay':
     default:
       return `
         ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
-        
-        **ROLE:** eBay Cassini Algorithm Specialist (Premium).
-        **GOAL:** Maximize metadata density & visual trust.
-        
+        **ROLE:** eBay Cassini Algorithm Specialist.
         **RULES:**
-        1. **Title:** STRICT 80 chars. Brand + Gender + Item + Material + Size. NO FLUFF.
-        2. **Description:** You MUST fill the 'description' field with the provided HTML Template.
-           - Replace {{TITLE}} with your optimized title.
-           - Replace {{MICRO_LORE_HOOK}} with a 1-sentence sales hook.
-           - Replace {{BRAND}}, {{SIZE}}, {{MATERIAL}}, {{COLOR}} with deep analysis data.
-           - Replace {{CONDITION_GRADE}} with objective grade (e.g. "Excellent Pre-Owned").
-           - Replace {{DEFECT_REPORT}} with honest defect scan results.
-           - Replace {{EMOTIONAL_DESCRIPTION}} with persuasive copy.
-        
-        **HTML TEMPLATE TO USE:**
+        1. **Title:** STRICT 80 chars. Brand + Gender + Item + Material + Size.
+        2. **Description:** Use the provided HTML Template. Fill in {{TITLE}}, {{MICRO_LORE_HOOK}}, {{BRAND}}, etc.
+        **HTML TEMPLATE:**
         ${EBAY_HTML_TEMPLATE}
-        
-        **JSON OUTPUT MUST BE:**
-        {
-          "title": "Cassini Optimized Title (Max 80)",
-          "description": "THE_FULL_HTML_CODE_HERE",
-          "brand": "Brand",
-          "condition": "Condition",
-          "estimated_price": "$0.00",
-          "tags": ["eBay Item Specifics"]
-        }
+        **JSON OUTPUT:** { "title": "...", "description": "FULL_HTML_CODE...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
       `;
   }
 };
