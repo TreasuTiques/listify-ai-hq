@@ -7,7 +7,9 @@ const BuilderPage: React.FC = () => {
   // 1. STATE MANAGEMENT
   const [activePlatform, setActivePlatform] = useState('ebay');
   const [isProMode, setIsProMode] = useState(false);
-  const [editorTab, setEditorTab] = useState<'visual' | 'html'>('visual');
+  
+  // 🛠️ Updated to support 3 modes: Visual, HTML, and Text
+  const [editorTab, setEditorTab] = useState<'visual' | 'html' | 'text'>('visual');
   const [copySuccess, setCopySuccess] = useState(''); 
   
   // Form Fields
@@ -31,7 +33,6 @@ const BuilderPage: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize User
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -50,8 +51,15 @@ const BuilderPage: React.FC = () => {
     { id: 'facebook', label: 'Facebook', color: 'bg-blue-800' },
   ];
 
-  // 🛡️ Helper to check if platform supports HTML formatting
+  // 🛡️ Helper to check if platform supports HTML
   const isHtmlPlatform = activePlatform === 'ebay' || activePlatform === 'shopify';
+
+  // 🧹 Helper to strip HTML for Plain Text View
+  const stripHtml = (html: string) => {
+    const tmp = document.createElement("DIV");
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || "";
+  };
 
   const runAIAnalysis = async (files: File[], platform: string, proMode: boolean, cond: string) => {
     if (files.length === 0) return;
@@ -65,7 +73,7 @@ const BuilderPage: React.FC = () => {
       setDescription(result.description || '');
       setPrice(result.estimated_price || '');
       setTags(result.tags || []);
-      setEditorTab('visual');
+      setEditorTab('visual'); // Default to visual
     } catch (error) {
       console.error("AI Error:", error);
       alert("AI could not analyze images. Try again!");
@@ -137,7 +145,12 @@ const BuilderPage: React.FC = () => {
   };
 
   const copyToClipboard = (text: string, type: 'title' | 'desc') => {
-    navigator.clipboard.writeText(text);
+    // If we are in "Plain Text" mode, we want to copy the stripped text
+    const textToCopy = (type === 'desc' && editorTab === 'text' && isHtmlPlatform) 
+      ? stripHtml(text) 
+      : text;
+
+    navigator.clipboard.writeText(textToCopy);
     setCopySuccess(type);
     setTimeout(() => setCopySuccess(''), 2000);
   };
@@ -163,7 +176,6 @@ const BuilderPage: React.FC = () => {
   };
 
   return (
-    // FIX: Main Background with '!' to force override
     <div className="min-h-screen !bg-slate-50 dark:!bg-slate-900 transition-colors duration-300 pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative">
       
       {/* SUCCESS POPUP */}
@@ -293,17 +305,18 @@ const BuilderPage: React.FC = () => {
 
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description / Notes</label>
+                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description</label>
                  
-                 {/* 🛠️ UPDATED: SHOW TABS FOR BOTH EBAY & SHOPIFY */}
+                 {/* 🛠️ UPDATED: 3-TAB SYSTEM FOR HTML PLATFORMS */}
                  {isHtmlPlatform ? (
                     <div className="flex gap-2">
                        <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
-                          <button onClick={() => setEditorTab('visual')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${editorTab === 'visual' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Visual Preview</button>
-                          <button onClick={() => setEditorTab('html')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${editorTab === 'html' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>HTML Source</button>
+                          <button onClick={() => setEditorTab('visual')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'visual' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Visual</button>
+                          <button onClick={() => setEditorTab('html')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'html' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>HTML</button>
+                          <button onClick={() => setEditorTab('text')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'text' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Text</button>
                        </div>
                        <button onClick={() => copyToClipboard(description, 'desc')} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all shadow-md shadow-blue-500/20">
-                          {copySuccess === 'desc' ? <span>✓ Copied</span> : <><span>📋</span> Copy Code</>}
+                          {copySuccess === 'desc' ? <span>✓ Copied</span> : <><span>📋</span> Copy</>}
                        </button>
                     </div>
                  ) : (
@@ -313,21 +326,25 @@ const BuilderPage: React.FC = () => {
                  )}
               </div>
 
-              {/* 🛠️ UPDATED: SHOW HTML EDITOR FOR BOTH EBAY & SHOPIFY */}
-              {isHtmlPlatform ? (
-                <div className="relative">
-                   {editorTab === 'visual' ? (
-                      <div 
-                         className="w-full !bg-white dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert dark:invert dark:hue-rotate-180" 
-                         dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic">Select condition to generate listing...</p>' }}
-                      ></div>
-                   ) : (
-                      <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-[#1E293B] text-green-400 font-mono text-sm border border-slate-700 rounded-xl px-4 py-4 focus:outline-none focus:border-blue-500 h-[500px] resize-none" placeholder="<html>...</html>"></textarea>
-                   )}
-                </div>
-              ) : (
-                <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-[500px] resize-none" placeholder="AI will write this for you..."></textarea>
-              )}
+              {/* 🛠️ EDITOR VIEW LOGIC */}
+              <div className="relative">
+                 {isHtmlPlatform && editorTab === 'visual' ? (
+                    <div 
+                       className="w-full !bg-white dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert dark:invert dark:hue-rotate-180" 
+                       dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic">Select condition to generate listing...</p>' }}
+                    ></div>
+                 ) : isHtmlPlatform && editorTab === 'text' ? (
+                    <textarea 
+                      readOnly 
+                      value={stripHtml(description)} 
+                      className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 focus:outline-none h-[500px] resize-none font-mono text-sm text-slate-600 dark:text-slate-400"
+                    ></textarea>
+                 ) : isHtmlPlatform && editorTab === 'html' ? (
+                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-[#1E293B] text-green-400 font-mono text-sm border border-slate-700 rounded-xl px-4 py-4 focus:outline-none focus:border-blue-500 h-[500px] resize-none" placeholder="<html>...</html>"></textarea>
+                 ) : (
+                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-[500px] resize-none" placeholder="AI will write this for you..."></textarea>
+                 )}
+              </div>
             </div>
 
             <button onClick={handleGenerateAndSave} disabled={loading || analyzing} className="w-full bg-[#2563EB] hover:bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
