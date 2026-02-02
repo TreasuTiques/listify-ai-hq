@@ -207,11 +207,9 @@ const BuilderPage: React.FC = () => {
 
       <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-            <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
-            Listing Command Center
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Upload up to 8 photos for maximum accuracy.</p>
+          {/* 🆕 NEW LOGO IMPLEMENTATION */}
+          <img src="/sellistio-logo-new.png" alt="Sellistio AI Command Center" className="h-16 md:h-20 w-auto object-contain" />
+          <p className="text-slate-500 dark:text-slate-400 mt-2 ml-2 font-medium">Upload up to 8 photos for maximum accuracy.</p>
         </div>
         
         <div className="flex items-center gap-4">
