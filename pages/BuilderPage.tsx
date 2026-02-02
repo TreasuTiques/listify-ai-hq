@@ -50,6 +50,9 @@ const BuilderPage: React.FC = () => {
     { id: 'facebook', label: 'Facebook', color: 'bg-blue-800' },
   ];
 
+  // 🛡️ Helper to check if platform supports HTML formatting
+  const isHtmlPlatform = activePlatform === 'ebay' || activePlatform === 'shopify';
+
   const runAIAnalysis = async (files: File[], platform: string, proMode: boolean, cond: string) => {
     if (files.length === 0) return;
     if (!cond) return; 
@@ -291,7 +294,9 @@ const BuilderPage: React.FC = () => {
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description / Notes</label>
-                 {activePlatform === 'ebay' ? (
+                 
+                 {/* 🛠️ UPDATED: SHOW TABS FOR BOTH EBAY & SHOPIFY */}
+                 {isHtmlPlatform ? (
                     <div className="flex gap-2">
                        <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
                           <button onClick={() => setEditorTab('visual')} className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase ${editorTab === 'visual' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Visual Preview</button>
@@ -308,7 +313,8 @@ const BuilderPage: React.FC = () => {
                  )}
               </div>
 
-              {activePlatform === 'ebay' ? (
+              {/* 🛠️ UPDATED: SHOW HTML EDITOR FOR BOTH EBAY & SHOPIFY */}
+              {isHtmlPlatform ? (
                 <div className="relative">
                    {editorTab === 'visual' ? (
                       <div 
