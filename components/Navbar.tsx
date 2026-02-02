@@ -20,13 +20,19 @@ const Navbar: React.FC<NavbarProps> = ({ session, onNavigate, isDarkMode, toggle
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           
-          {/* 🆕 LOGO - Replaced Text/Icon with Premium Image */}
+          {/* 🆕 LOGO FIX: Rounded App Icon Style */}
           <div className="flex items-center cursor-pointer group" onClick={() => onNavigate('/')}>
-            <img 
-              src="/sellistio-logo-new.PNG" 
-              alt="Sellistio" 
-              className="h-12 w-auto object-contain transition-transform group-hover:scale-105" 
-            />
+            <div className="relative rounded-xl overflow-hidden shadow-md group-hover:shadow-lg transition-all transform group-hover:scale-105">
+               <img 
+                 src="/sellistio-logo-new.PNG" 
+                 alt="Sellistio" 
+                 className="h-12 w-12 object-cover" 
+               />
+            </div>
+            {/* Optional: Add Text next to it if you want, remove if not needed */}
+            <span className="ml-3 text-xl font-black text-slate-900 dark:text-white tracking-tight hidden sm:block">
+              SELLISTIO
+            </span>
           </div>
 
           {/* DESKTOP LINKS */}
