@@ -57,19 +57,24 @@ const BuilderPage: React.FC = () => {
   // 🧹 SMART TEXT FORMATTER (Premium "Document" Look)
   const formatPlainText = (html: string) => {
     if (!html) return "";
+    
+    // 1. Convert HTML Structure to Clean Text Structure
     let text = html
-      .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<\/p>/gi, '\n')
-      .replace(/<\/div>/gi, '\n')
-      .replace(/<li[^>]*>/gi, '• ')
-      .replace(/<\/li>/gi, '\n')
-      .replace(/<\/ul>/gi, '\n')
-      .replace(/<h[1-6][^>]*>/gi, '\n\n')
-      .replace(/<\/h[1-6]>/gi, ':\n');
+      .replace(/<br\s*\/?>/gi, '\n')         // Breaks to single newline
+      .replace(/<\/p>/gi, '\n')            // End paragraph = single newline
+      .replace(/<\/div>/gi, '\n')          // End div = single newline
+      .replace(/<li[^>]*>/gi, '• ')        // List items start with bullet
+      .replace(/<\/li>/gi, '\n')           // End list item = newline
+      .replace(/<\/ul>/gi, '\n')           // End list = extra newline for spacing
+      .replace(/<h[1-6][^>]*>/gi, '\n\n')  // Headers get double spacing above
+      .replace(/<\/h[1-6]>/gi, ':\n');     // Header endings get a colon and newline
 
+    // 2. Strip remaining tags (like <strong>, <ul> opening tags)
     const tmp = document.createElement("DIV");
     tmp.innerHTML = text;
     const cleanText = tmp.textContent || tmp.innerText || "";
+    
+    // 3. Clean up excessive whitespace (max 2 newlines) and trim
     return cleanText.replace(/\n\s*\n\s*\n/g, '\n\n').trim();
   };
 
@@ -157,6 +162,7 @@ const BuilderPage: React.FC = () => {
   };
 
   const copyToClipboard = (text: string, type: 'title' | 'desc') => {
+    // Copy the formatted plain text if we are in text mode, otherwise raw
     const textToCopy = (type === 'desc' && editorTab === 'text' && isHtmlPlatform) 
       ? formatPlainText(text) 
       : text;
@@ -188,6 +194,7 @@ const BuilderPage: React.FC = () => {
 
   return (
     <div className="min-h-screen !bg-slate-50 dark:!bg-slate-900 transition-colors duration-300 pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative">
+      
       {/* SUCCESS POPUP */}
       {showSuccess && (
         <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -200,9 +207,11 @@ const BuilderPage: React.FC = () => {
 
       <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          {/* ✅ FIXED: Uses .PNG (Capitalized) */}
-          <img src="/sellistio-logo-new.PNG" alt="Sellistio AI Command Center" className="h-16 md:h-20 w-auto object-contain" />
-          <p className="text-slate-500 dark:text-slate-400 mt-2 ml-2 font-medium">Upload up to 8 photos for maximum accuracy.</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+            <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
+            Listing Command Center
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Upload up to 8 photos for maximum accuracy.</p>
         </div>
         
         <div className="flex items-center gap-4">
@@ -342,7 +351,7 @@ const BuilderPage: React.FC = () => {
                        dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic">Select condition to generate listing...</p>' }}
                     ></div>
                  ) : isHtmlPlatform && editorTab === 'text' ? (
-                    // 💎 PREMIUM TEXT VIEW
+                    // 💎 PREMIUM TEXT VIEW: Sans-serif, larger font, relaxed spacing
                     <textarea 
                       readOnly 
                       value={formatPlainText(description)} 
