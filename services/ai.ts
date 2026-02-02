@@ -51,7 +51,7 @@ const DEEP_VISION_PROTOCOL = `
 `;
 
 /**
- * 🚫 NO MARKDOWN PROTOCOL
+ * 🚫 NO MARKDOWN PROTOCOL (For Text-Only Platforms)
  */
 const NO_MARKDOWN_PROTOCOL = `
   **FORMATTING RULES - STRICT:**
@@ -69,7 +69,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
   const baseHelper = `Analyze these images and return valid JSON.`;
   const conditionContext = userCondition ? `IMPORTANT: User says condition is "${userCondition}". Ensure description reflects this honesty.` : '';
 
-  // 🔵 EBAY HTML TEMPLATE (Updated: Cleaner, No "Authenticated" Badge)
+  // 🔵 EBAY HTML TEMPLATE (Clean & Professional)
   const EBAY_HTML_TEMPLATE = `
     <div style="font-family: sans-serif; max-width: 900px; margin: 0 auto; color: #1a1a1a; line-height: 1.6;">
       <div style="text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px;">
@@ -87,7 +87,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
       </div>
 
       <div style="margin-bottom: 30px;">
-        <h3 style="font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px; margin-bottom: 10px;">Expert Analysis</h3>
+        <h3 style="font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px; margin-bottom: 10px;">Detailed Analysis</h3>
         <p>{{DETAILED_ANALYSIS}}</p>
         <br>
         <p><strong>Defects/Notes:</strong> {{DEFECT_REPORT}}</p>
@@ -99,7 +99,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     </div>
   `;
 
-  // 🟢 SHOPIFY HTML TEMPLATE
+  // 🟢 SHOPIFY HTML TEMPLATE (Renamed Expert -> Detailed)
   const SHOPIFY_HTML_TEMPLATE = `
     <div class="product-description" style="font-family: inherit;">
       <p class="intro">{{SEMANTIC_INTRO}}</p>
@@ -111,7 +111,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
         <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
       </ul>
 
-      <h2>Expert Analysis</h2>
+      <h2>Detailed Analysis</h2>
       <p>{{DETAILED_ANALYSIS}}</p>
 
       <h2>Frequently Asked Questions</h2>
@@ -177,10 +177,11 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
         ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
         **ROLE:** Shopify SEO Architect.
         **GOAL:** Semantic Richness for Google SGE.
+        **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
         **RULES:**
         1. Use the provided HTML Template.
         2. Replace {{SEMANTIC_INTRO}} with a context-rich intro.
-        3. Replace {{SIZE_ANSWER}} and {{DEFECT_REPORT}} with data.
+        3. Replace {{DETAILED_ANALYSIS}} with expert insights.
         **HTML TEMPLATE:**
         ${SHOPIFY_HTML_TEMPLATE}
         **JSON OUTPUT:** { "title": "...", "description": "FULL_HTML_CODE...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
@@ -191,13 +192,10 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
       return `
         ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
         **ROLE:** eBay Cassini Algorithm Specialist.
+        **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
         **RULES:**
-        1. **Title:** STRICT 80 chars. Brand + Gender + Item + Material + Size.
-        2. **Description:** Use the provided HTML Template.
-           - Replace {{TITLE}} with optimized title.
-           - Replace {{SEMANTIC_INTRO}} with a professional summary (no fluff).
-           - Replace {{DETAILED_ANALYSIS}} with expert insights on quality/style.
-           - Replace {{DEFECT_REPORT}} with honest defect scan.
+        1. Title: STRICT 80 chars. Brand + Gender + Item + Material + Size.
+        2. Description: Use the provided HTML Template.
         **HTML TEMPLATE:**
         ${EBAY_HTML_TEMPLATE}
         **JSON OUTPUT:** { "title": "...", "description": "FULL_HTML_CODE...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
