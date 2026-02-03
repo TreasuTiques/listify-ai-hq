@@ -149,6 +149,11 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
        - **Features**: Bullet points with emojis.
        - **Why You'll Love It**: Emotional appeal.
        - **CTA Panel**: Fun closing tagline (1-3-1 format).
+
+    5. **FORMATTING RULES (STRICT):**
+       - **NO MARKDOWN**: Do NOT use asterisks (**) for bold text. Use <strong> tags ONLY.
+       - **NO MARKDOWN HEADERS**: Do NOT use # for headers. Use HTML tags (<h3>, <h4>).
+       - Output must be pure, valid HTML strings inside the JSON.
     
     **OUTPUT JSON:**
     {
