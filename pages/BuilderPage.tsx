@@ -190,9 +190,7 @@ const BuilderPage: React.FC = () => {
   // 🛠️ UPGRADED COPY FUNCTION
   const handleCopy = (content: string, type: 'title' | 'html' | 'text') => {
     if (!content) return;
-    
     const textToCopy = type === 'text' ? formatPlainText(content) : content;
-    
     navigator.clipboard.writeText(textToCopy);
     setCopySuccess(type);
     setTimeout(() => setCopySuccess(''), 2000);
@@ -273,7 +271,7 @@ const BuilderPage: React.FC = () => {
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* ================= LEFT COLUMN: MEDIA & DATA ================= */}
+        {/* ================= LEFT COLUMN ================= */}
         <div className="lg:col-span-5 space-y-6">
           <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6">
             <div className="flex justify-between items-center mb-4">
@@ -308,7 +306,7 @@ const BuilderPage: React.FC = () => {
             </div>
           </div>
 
-          {/* ITEM SPECIFICS & INSIGHTS */}
+          {/* SPECIFICS */}
           <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6 space-y-6">
              <div>
                <div className="flex items-center justify-between mb-2">
@@ -354,7 +352,7 @@ const BuilderPage: React.FC = () => {
           </div>
         </div>
 
-        {/* ================= RIGHT COLUMN: GENERATOR & PREVIEW ================= */}
+        {/* ================= RIGHT COLUMN ================= */}
         <div className="lg:col-span-7 space-y-6">
           <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-8 sticky top-24">
             
@@ -369,7 +367,7 @@ const BuilderPage: React.FC = () => {
                </div>
             </div>
 
-            {/* TITLE (Full Width) + PREMIUM COPY BUTTON */}
+            {/* TITLE & BOLD COPY BUTTON */}
             <div className="mb-4">
                <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Title</label>
                <div className="relative group">
@@ -381,24 +379,22 @@ const BuilderPage: React.FC = () => {
                    placeholder="AI Generated Title..." 
                  />
                  
-                 {/* 🆕 PREMIUM COPY BUTTON (Inside Input) */}
-                 <div className="absolute right-2 top-1/2 -translate-y-1/2 border-l border-slate-200 dark:border-slate-700 pl-2">
-                   <button 
-                     onClick={() => handleCopy(title, 'title')} 
-                     className="p-2 bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 text-slate-400 hover:text-blue-600 rounded-lg transition-all shadow-sm flex items-center justify-center w-8 h-8"
-                     title="Copy Title to Clipboard"
-                   >
-                     {copySuccess === 'title' ? (
-                       <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/></svg>
-                     ) : (
-                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                     )}
-                   </button>
-                 </div>
+                 {/* 💎 PREMIUM CYAN COPY BUTTON */}
+                 <button 
+                   onClick={() => handleCopy(title, 'title')} 
+                   className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg shadow-lg flex items-center justify-center transition-all transform active:scale-90 ${copySuccess === 'title' ? 'bg-green-500 text-white shadow-green-500/30' : 'bg-cyan-500 hover:bg-cyan-400 text-white shadow-cyan-500/30'}`}
+                   title="Copy Title"
+                 >
+                   {copySuccess === 'title' ? (
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>
+                   ) : (
+                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                   )}
+                 </button>
                </div>
             </div>
 
-            {/* CONDITION & PRICE ROW */}
+            {/* CONDITION & PRICE */}
             <div className="grid grid-cols-12 gap-4 mb-6">
                <div className="col-span-8">
                   <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Condition {showConditionError && <span className="text-red-500">*</span>}</label>
