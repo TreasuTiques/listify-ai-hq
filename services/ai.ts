@@ -6,8 +6,8 @@ if (!apiKey) console.error("Missing Gemini API Key! Check .env or Vercel setting
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// 🛑 MODEL LOCKED
-const MODEL_NAME = "gemini-1.5-flash";
+// 🛑 MODEL LOCKED - UPDATED TO 2.0 BASED ON YOUR SCREENSHOT
+const MODEL_NAME = "gemini-2.0-flash";
 
 // Helper: Convert File to Base64
 const fileToGenerativePart = async (file: File) => {
@@ -206,8 +206,7 @@ export async function generateListingFromImages(
 }
 
 /**
- * 🩺 BRAIN 2: THE DOCTOR (RESTORED!)
- * This was missing, causing the build error.
+ * 🩺 BRAIN 2: THE DOCTOR (SEO OPTIMIZER)
  */
 export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
   try {
