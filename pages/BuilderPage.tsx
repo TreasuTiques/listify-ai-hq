@@ -48,12 +48,19 @@ const BuilderPage: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // 🔐 ROBUST AUTH LISTENER
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-    getUser();
+    // 1. Check active session immediately
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // 2. Listen for any auth changes (sign in, token refresh, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const platforms = [
@@ -66,7 +73,6 @@ const BuilderPage: React.FC = () => {
     { id: 'facebook', label: 'Facebook', color: 'bg-blue-800' },
   ];
 
-  // 🛡️ Helper to check if platform supports HTML
   const isHtmlPlatform = activePlatform === 'ebay' || activePlatform === 'shopify';
 
   // 🧹 SMART TEXT FORMATTER
@@ -95,31 +101,38 @@ const BuilderPage: React.FC = () => {
     setAnalyzing(true);
     
     try {
-      // 📦 PACKAGING THE CONTEXT
       const richContext = `
         CONDITION: ${condition}.
         USER_INSIGHTS: ${sellerInsights}.
-        // Note: We send current values incase user pre-filled them, 
-        // but mostly we want AI to fill the empty ones.
+        SPECS_PROVIDED: 
+        - Brand: ${brand}
+        - Category: ${category}
+        - Size: ${size}
+        - Color: ${color}
+        - Material: ${material}
+        - Year/Era: ${year}
+        - Origin: ${madeIn}
+        - Department: ${department}
+        - Model: ${model}
+        - Theme: ${theme}
+        - Features: ${features}
       `;
 
       const result = await generateListingFromImages(selectedFiles, activePlatform, isProMode, richContext);
       
       // ✅ AUTO-POPULATE LOGIC
-      // If the AI returned 'item_specifics', we map them to our state fields.
-      // We check if the field is currently empty so we don't overwrite user manual edits.
       if (result.item_specifics) {
-        if (!brand) setBrand(result.item_specifics.brand || '');
-        if (!category) setCategory(result.item_specifics.category || '');
-        if (!size) setSize(result.item_specifics.size || '');
-        if (!color) setColor(result.item_specifics.color || '');
-        if (!material) setMaterial(result.item_specifics.material || '');
-        if (!year) setYear(result.item_specifics.year || '');
-        if (!madeIn) setMadeIn(result.item_specifics.made_in || '');
-        if (!department) setDepartment(result.item_specifics.department || '');
-        if (!model) setModel(result.item_specifics.model || '');
-        if (!theme) setTheme(result.item_specifics.theme || '');
-        if (!features) setFeatures(result.item_specifics.features || '');
+        if (!brand && result.item_specifics.brand) setBrand(result.item_specifics.brand);
+        if (!category && result.item_specifics.category) setCategory(result.item_specifics.category);
+        if (!size && result.item_specifics.size) setSize(result.item_specifics.size);
+        if (!color && result.item_specifics.color) setColor(result.item_specifics.color);
+        if (!material && result.item_specifics.material) setMaterial(result.item_specifics.material);
+        if (!year && result.item_specifics.year) setYear(result.item_specifics.year);
+        if (!madeIn && result.item_specifics.made_in) setMadeIn(result.item_specifics.made_in);
+        if (!department && result.item_specifics.department) setDepartment(result.item_specifics.department);
+        if (!model && result.item_specifics.model) setModel(result.item_specifics.model);
+        if (!theme && result.item_specifics.theme) setTheme(result.item_specifics.theme);
+        if (!features && result.item_specifics.features) setFeatures(result.item_specifics.features);
       }
 
       setTitle(result.title || '');
@@ -168,8 +181,12 @@ const BuilderPage: React.FC = () => {
     setImagePreviews(updatedPreviews);
   };
 
+  // 🔒 SECURE TOGGLE CHECK
   const handleProModeToggle = async () => {
-    if (!user) {
+    // 1. Double check session freshly from Supabase to avoid stale state bugs
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session?.user) {
       alert("🔒 PRO FEATURE: Sign up for a free account to unlock AI Storytelling Mode!");
       return;
     }
@@ -188,7 +205,10 @@ const BuilderPage: React.FC = () => {
   const onDragOver = (e: React.DragEvent) => e.preventDefault();
   
   const handleSaveToInventory = async () => {
-    if (!user) { alert("Please log in to save listings!"); return; }
+    // Check state user or fetch fresh
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) { alert("Please log in to save listings!"); return; }
+    
     if (!title) { alert("Please generate a listing first."); return; }
 
     setLoading(true);
