@@ -21,16 +21,16 @@ const BuilderPage: React.FC = () => {
   
   // 🔍 THE PERFECT 10 ITEM SPECIFICS
   const [brand, setBrand] = useState('');
-  const [category, setCategory] = useState(''); // New
-  const [size, setSize] = useState(''); // New
-  const [color, setColor] = useState(''); // New
-  const [material, setMaterial] = useState(''); // New
-  const [year, setYear] = useState(''); // New
-  const [madeIn, setMadeIn] = useState(''); // New
-  const [department, setDepartment] = useState(''); // New
-  const [model, setModel] = useState(''); // New
-  const [theme, setTheme] = useState(''); // New
-  const [features, setFeatures] = useState(''); // New
+  const [category, setCategory] = useState('');
+  const [size, setSize] = useState('');
+  const [color, setColor] = useState('');
+  const [material, setMaterial] = useState('');
+  const [year, setYear] = useState('');
+  const [madeIn, setMadeIn] = useState('');
+  const [department, setDepartment] = useState('');
+  const [model, setModel] = useState('');
+  const [theme, setTheme] = useState('');
+  const [features, setFeatures] = useState('');
 
   // 🧠 SELLER INSIGHTS (The INAD Shield)
   const [sellerInsights, setSellerInsights] = useState('');
@@ -96,8 +96,6 @@ const BuilderPage: React.FC = () => {
     
     try {
       // 📦 PACKAGING THE CONTEXT
-      // We bundle all the user inputs into a single "Context String" to send to the AI
-      // This allows the AI to use your specific inputs without changing the API signature yet.
       const richContext = `
         CONDITION: ${condition}.
         USER_INSIGHTS: ${sellerInsights}.
@@ -117,8 +115,8 @@ const BuilderPage: React.FC = () => {
 
       const result = await generateListingFromImages(selectedFiles, activePlatform, isProMode, richContext);
       
+      // Auto-Populate Logic (If AI returns these fields in the future, wire them here)
       setTitle(result.title || '');
-      // Only overwrite brand if AI found something better and user left it blank
       if (!brand && result.brand) setBrand(result.brand); 
       
       setDescription(result.description || '');
@@ -154,7 +152,6 @@ const BuilderPage: React.FC = () => {
       });
     }));
     setImagePreviews(newPreviews);
-    // 🛑 STOPPED AUTO-ANALYSIS here to save credits
   };
 
   const removeImage = (index: number) => {
@@ -189,7 +186,11 @@ const BuilderPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const listingData = { title, brand, description, condition, estimated_price: price, tags: tags, platform: activePlatform };
+      const listingData = { 
+        title, brand, description, condition, estimated_price: price, tags: tags, platform: activePlatform,
+        // Save the specific fields too if your backend supports it
+        item_specifics: { size, color, material, year, madeIn, department, model, theme, features }
+      };
       await saveListingToInventory(listingData, selectedFiles[0]);
       setShowSuccess(true);
       setTimeout(() => { window.location.hash = '/inventory'; }, 1500);
@@ -200,6 +201,22 @@ const BuilderPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // 🎨 REUSABLE COMPONENT: Premium Input Field
+  const PremiumInput = ({ label, value, onChange, placeholder, width = "full" }: any) => (
+    <div className={`${width === "half" ? "col-span-1" : "col-span-2"}`}>
+      <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1">
+        {label}
+      </label>
+      <input 
+        type="text" 
+        value={value} 
+        onChange={onChange} 
+        className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 text-sm shadow-sm" 
+        placeholder={placeholder} 
+      />
+    </div>
+  );
 
   return (
     <div className="min-h-screen !bg-slate-50 dark:!bg-slate-900 transition-colors duration-300 pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative">
@@ -214,6 +231,7 @@ const BuilderPage: React.FC = () => {
         </div>
       )}
 
+      {/* HEADER SECTION */}
       <div className="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
@@ -234,8 +252,11 @@ const BuilderPage: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* LEFT COLUMN: PHOTOS & INPUTS */}
+        
+        {/* ================= LEFT COLUMN: MEDIA & DATA ================= */}
         <div className="lg:col-span-5 space-y-6">
+          
+          {/* 1. MEDIA UPLOADER */}
           <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Source Media</h3>
@@ -243,7 +264,7 @@ const BuilderPage: React.FC = () => {
             </div>
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*" multiple />
 
-            <div onClick={() => fileInputRef.current?.click()} onDragOver={onDragOver} onDrop={handleFileUpload} className={`border-2 border-dashed rounded-2xl h-[320px] flex flex-col transition-all cursor-pointer relative overflow-hidden ${analyzing ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-700 !bg-slate-50/50 dark:!bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-blue-400'}`}>
+            <div onClick={() => fileInputRef.current?.click()} onDragOver={onDragOver} onDrop={handleFileUpload} className={`border-2 border-dashed rounded-2xl h-[300px] flex flex-col transition-all cursor-pointer relative overflow-hidden ${analyzing ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-700 !bg-slate-50/50 dark:!bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-blue-400'}`}>
               {imagePreviews.length > 0 ? (
                 <div className="h-full flex flex-col">
                   <div className="h-2/3 w-full relative">
@@ -269,49 +290,71 @@ const BuilderPage: React.FC = () => {
             </div>
           </div>
 
-          {/* 📝 ITEM SPECIFICS GRID */}
-          <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Key Specifics (Optional)</h3>
-                <span className="text-[10px] text-slate-400">Helps AI & eBay SEO</span>
-             </div>
+          {/* 2. ITEM SPECIFICS & INSIGHTS (UNIFIED PREMIUM CARD) */}
+          <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6 space-y-6">
              
-             <div className="grid grid-cols-2 gap-4">
-                <input type="text" placeholder="Brand / Maker" value={brand} onChange={e => setBrand(e.target.value)} className="input-field" />
-                <input type="text" placeholder="Category" value={category} onChange={e => setCategory(e.target.value)} className="input-field" />
-                
-                <input type="text" placeholder="Size / Dims" value={size} onChange={e => setSize(e.target.value)} className="input-field" />
-                <input type="text" placeholder="Color" value={color} onChange={e => setColor(e.target.value)} className="input-field" />
-                
-                <input type="text" placeholder="Material" value={material} onChange={e => setMaterial(e.target.value)} className="input-field" />
-                <input type="text" placeholder="Year / Era" value={year} onChange={e => setYear(e.target.value)} className="input-field" />
-                
-                <input type="text" placeholder="Made In (Country)" value={madeIn} onChange={e => setMadeIn(e.target.value)} className="input-field" />
-                <input type="text" placeholder="Dept (Men/Wms/Kids)" value={department} onChange={e => setDepartment(e.target.value)} className="input-field" />
-                
-                <input type="text" placeholder="Model / Style" value={model} onChange={e => setModel(e.target.value)} className="input-field" />
-                <input type="text" placeholder="Theme (Star Wars, etc)" value={theme} onChange={e => setTheme(e.target.value)} className="input-field" />
+             {/* SECTION: SELLER INSIGHTS */}
+             <div>
+               <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                    <span className="text-lg">💡</span> Seller Insights (Hidden Details)
+                  </h3>
+               </div>
+               <textarea 
+                 value={sellerInsights}
+                 onChange={e => setSellerInsights(e.target.value)}
+                 placeholder="Examples: 'Smells slightly like vanilla', 'Zipper sticks a bit', 'Found at estate sale'. The AI will weave this into the description naturally."
+                 className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 min-h-[80px] resize-none font-medium text-slate-900 dark:text-white"
+               ></textarea>
              </div>
-             <input type="text" placeholder="Features (Pockets, Waterproof, etc)" value={features} onChange={e => setFeatures(e.target.value)} className="input-field mt-4 w-full" />
-          </div>
 
-          {/* 🧠 SELLER INSIGHTS */}
-          <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-             <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Seller Insights (Hidden Details)</h3>
+             <div className="border-t border-slate-100 dark:border-slate-700 my-4"></div>
+
+             {/* SECTION: ITEM SPECIFICS GRID */}
+             <div>
+                <div className="flex items-center justify-between mb-4">
+                   <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                     <span className="text-lg">🏷️</span> Key Specifics (Optional)
+                   </h3>
+                   <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">Helps Auto-Fill</span>
+                </div>
+                
+                {/* THE PREMIUM GRID - Matches Title/Price Inputs Perfectly */}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                   <PremiumInput label="Brand / Maker" value={brand} onChange={(e: any) => setBrand(e.target.value)} placeholder="Nike, Sony..." width="half" />
+                   <PremiumInput label="Category" value={category} onChange={(e: any) => setCategory(e.target.value)} placeholder="Shoes, Electronics..." width="half" />
+                   
+                   <PremiumInput label="Size / Dims" value={size} onChange={(e: any) => setSize(e.target.value)} placeholder="Large, 12x10..." width="half" />
+                   <PremiumInput label="Color" value={color} onChange={(e: any) => setColor(e.target.value)} placeholder="Red, Black..." width="half" />
+                   
+                   <PremiumInput label="Material" value={material} onChange={(e: any) => setMaterial(e.target.value)} placeholder="Cotton, Metal..." width="half" />
+                   <PremiumInput label="Year / Era" value={year} onChange={(e: any) => setYear(e.target.value)} placeholder="1990s, 2023..." width="half" />
+                   
+                   <PremiumInput label="Made In" value={madeIn} onChange={(e: any) => setMadeIn(e.target.value)} placeholder="USA, China..." width="half" />
+                   <PremiumInput label="Department" value={department} onChange={(e: any) => setDepartment(e.target.value)} placeholder="Men, Women..." width="half" />
+                   
+                   <PremiumInput label="Model / Style" value={model} onChange={(e: any) => setModel(e.target.value)} placeholder="Air Max, 501..." width="half" />
+                   <PremiumInput label="Theme" value={theme} onChange={(e: any) => setTheme(e.target.value)} placeholder="Vintage, Sports..." width="half" />
+                   
+                   {/* Full Width Feature */}
+                   <div className="col-span-2">
+                      <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Key Features</label>
+                      <input 
+                        type="text" 
+                        value={features} 
+                        onChange={e => setFeatures(e.target.value)} 
+                        className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 text-sm shadow-sm" 
+                        placeholder="Waterproof, Pockets, Signed, Limited Edition..." 
+                      />
+                   </div>
+                </div>
              </div>
-             <textarea 
-               value={sellerInsights}
-               onChange={e => setSellerInsights(e.target.value)}
-               placeholder="Example: 'Small scratch on back', 'Smells slightly like vanilla', 'Zipper sticks a bit'. The AI will weave this into the description naturally."
-               className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 min-h-[80px] resize-none"
-             ></textarea>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: GENERATOR & PREVIEW */}
+        {/* ================= RIGHT COLUMN: GENERATOR & PREVIEW ================= */}
         <div className="lg:col-span-7 space-y-6">
-          <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-8">
+          <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-8 sticky top-24">
             
             {/* PLATFORM SELECTOR */}
             <div className="mb-6">
@@ -324,50 +367,54 @@ const BuilderPage: React.FC = () => {
                </div>
             </div>
 
-            {/* GENERATE BUTTON (Replaces Auto-Run) */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-               {/* Condition Selector */}
-               <div className="relative">
-                  <select value={condition} onChange={e => {setCondition(e.target.value); setShowConditionError(false)}} className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-xl px-4 py-3.5 font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-4 transition-all appearance-none cursor-pointer ${showConditionError ? 'border-red-300 ring-red-500/10' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/10'}`}>
-                    <option value="" disabled>Select Condition (Required)</option>
-                    <option>New with Tags</option>
-                    <option>New without Tags</option>
-                    <option>Pre-owned (Excellent)</option>
-                    <option>Pre-owned (Good)</option>
-                    <option>For Parts / Not Working</option>
-                  </select>
-               </div>
-
-               {/* MAGIC BUTTON */}
-               <button 
-                 onClick={handleGenerateListing} 
-                 disabled={analyzing}
-                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm uppercase tracking-wider rounded-xl shadow-lg shadow-blue-500/30 transition-all transform active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
-               >
-                 {analyzing ? (
-                   <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Writing...</>
-                 ) : (
-                   <>✨ Generate Premium Listing</>
-                 )}
-               </button>
+            {/* TITLE (Full Width) */}
+            <div className="mb-4">
+               <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Title</label>
+               <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 font-bold text-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 shadow-sm" placeholder="AI Generated Title..." />
             </div>
 
-            {/* TITLE & PRICE */}
-            <div className="flex gap-4 mb-6">
-               <div className="flex-1">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 block">Title</label>
-                  <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400" placeholder="Generated Title..." />
+            {/* CONDITION & PRICE ROW (Compact) */}
+            <div className="grid grid-cols-12 gap-4 mb-6">
+               {/* Condition Selector (Larger) */}
+               <div className="col-span-8">
+                  <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Condition {showConditionError && <span className="text-red-500">*</span>}</label>
+                  <div className="relative">
+                    <select value={condition} onChange={e => {setCondition(e.target.value); setShowConditionError(false)}} className={`w-full !bg-slate-50 dark:!bg-slate-900 border rounded-xl px-4 py-3.5 font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-4 transition-all appearance-none cursor-pointer shadow-sm ${showConditionError ? 'border-red-300 ring-red-500/10' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/10'}`}>
+                      <option value="" disabled>Select Condition...</option>
+                      <option>New with Tags</option>
+                      <option>New without Tags</option>
+                      <option>Pre-owned (Excellent)</option>
+                      <option>Pre-owned (Good)</option>
+                      <option>For Parts / Not Working</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg></div>
+                  </div>
                </div>
-               <div className="w-32">
-                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 block">Price</label>
-                  <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400 rounded-xl px-4 py-3 font-bold focus:outline-none focus:border-emerald-500 transition-all placeholder:text-emerald-300" placeholder="$0.00" />
+
+               {/* Price Input (Smaller) */}
+               <div className="col-span-4">
+                  <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Price ($)</label>
+                  <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 rounded-xl px-4 py-3.5 font-bold focus:outline-none focus:border-emerald-500 transition-all placeholder:text-emerald-300 shadow-sm text-center" placeholder="0.00" />
                </div>
             </div>
+
+            {/* MAGIC BUTTON */}
+            <button 
+               onClick={handleGenerateListing} 
+               disabled={analyzing}
+               className="w-full mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-base uppercase tracking-wider rounded-xl shadow-xl shadow-blue-500/20 py-4 transition-all transform active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed border border-white/10"
+            >
+               {analyzing ? (
+                 <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> AI is Writing...</>
+               ) : (
+                 <>✨ Generate Premium Listing</>
+               )}
+            </button>
 
             {/* DESCRIPTION EDITOR */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description</label>
+                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description Preview</label>
                  
                  {isHtmlPlatform ? (
                     <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
@@ -385,13 +432,13 @@ const BuilderPage: React.FC = () => {
               <div className="relative">
                  {isHtmlPlatform && editorTab === 'visual' ? (
                     <div 
-                       className="w-full !bg-white dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert dark:invert dark:hue-rotate-180" 
-                       dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic text-center mt-20">1. Upload Photos<br>2. Fill Specs<br>3. Select Condition<br>4. Click Generate!</p>' }}
+                       className="w-full !bg-white dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert dark:invert dark:hue-rotate-180 shadow-inner" 
+                       dangerouslySetInnerHTML={{ __html: description || '<div class="flex flex-col items-center justify-center h-full text-slate-400 space-y-4"><span class="text-4xl">✨</span><p>Ready to create magic.<br>Upload photos & click Generate.</p></div>' }}
                     ></div>
                  ) : isHtmlPlatform && editorTab === 'text' ? (
-                    <textarea readOnly value={formatPlainText(description)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-6 py-6 focus:outline-none h-[500px] resize-none text-left font-sans text-[15px] leading-relaxed text-slate-800 dark:text-slate-200"></textarea>
+                    <textarea readOnly value={formatPlainText(description)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-6 py-6 focus:outline-none h-[500px] resize-none text-left font-sans text-[15px] leading-relaxed text-slate-800 dark:text-slate-200 shadow-inner"></textarea>
                  ) : (
-                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-[500px] resize-none" placeholder="AI will write this for you..."></textarea>
+                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-[500px] resize-none shadow-inner" placeholder="AI will write this for you..."></textarea>
                  )}
               </div>
             </div>
@@ -402,13 +449,6 @@ const BuilderPage: React.FC = () => {
           </div>
         </div>
       </div>
-      
-      {/* GLOBAL STYLES FOR INPUTS */}
-      <style>{`
-        .input-field {
-          @apply w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400;
-        }
-      `}</style>
     </div>
   );
 };
