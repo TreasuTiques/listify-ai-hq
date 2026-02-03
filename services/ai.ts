@@ -40,7 +40,7 @@ const cleanAndParseJSON = (text: string) => {
 };
 
 /**
- * 🧠 DEEP VISION PROTOCOL (INTERNAL ANALYSIS ONLY)
+ * 🧠 DEEP VISION PROTOCOL
  */
 const DEEP_VISION_PROTOCOL = `
   **INTERNAL VISUAL ANALYSIS (DO NOT OUTPUT THESE SECTION NAMES):**
@@ -124,6 +124,30 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     </div>
   `;
 
+  // 🚨 UNIVERSAL JSON OUTPUT STRUCTURE (Must include item_specifics)
+  const OUTPUT_INSTRUCTION = `
+    **OUTPUT JSON STRUCTURE (REQUIRED):**
+    {
+      "title": "Optimized Title (Max 80 chars)",
+      "description": "FULL HTML OR TEXT DESCRIPTION",
+      "estimated_price": "$20.00",
+      "tags": ["tag1", "tag2"],
+      "item_specifics": {
+        "brand": "Extract from image or Unknown",
+        "category": "Suggest Category Path (e.g. Clothing > Men > Shirts)",
+        "size": "Estimate dimensions/size or One Size",
+        "color": "Dominant colors",
+        "material": "Visual material ID",
+        "year": "Era or Copyright Date",
+        "made_in": "Country of Origin tag or Unknown",
+        "department": "Men/Women/Kids/Unisex",
+        "model": "Model name/number or N/A",
+        "theme": "Aesthetic theme",
+        "features": "Key features list"
+      }
+    }
+  `;
+
   // 🔥 ELITE PRO PROMPT (Real-Talk / 8th Grade English / No Fluff)
   const PREMIUM_PRO_PROMPT = `
     🚨 ACTIVATE "REAL-TALK RESELLER ENGINE" 🚨
@@ -162,103 +186,37 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
        - **NO MARKDOWN**: Do NOT use asterisks (**) for bold text. Use <strong> tags ONLY.
        - **NO MARKDOWN HEADERS**: Do NOT use # for headers. Use HTML tags (<h3>, <h4>).
        - Output must be pure, valid HTML strings inside the JSON.
-    
-    **OUTPUT JSON:**
-    {
-      "title": "Optimized Title (Max 80 chars)",
-      "description": "<div style='...'>FULL PREMIUM HTML CODE HERE...</div>",
-      "brand": "...",
-      "condition": "...",
-      "estimated_price": "...",
-      "tags": [...]
-    }
   `;
+
+  // 📝 STANDARD MODE PROMPT (Clean, Professional)
+  const STANDARD_PROMPT = `
+    **ROLE:** eBay Cassini Algorithm Specialist.
+    **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
+    **RULES:**
+    1. Title: STRICT 80 chars. Brand + Gender + Item + Material + Size.
+    2. Description: Use the provided HTML Template.
+    **HTML TEMPLATE:**
+    ${EBAY_HTML_TEMPLATE}
+  `;
+
+  let selectedPrompt = "";
 
   switch (platform.toLowerCase()) {
     case 'poshmark':
-      return `
-        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
-        **ROLE:** Poshmark SEO Stylist.
-        **RULES:**
-        1. Vertical list layout. Use Emojis as bullets.
-        2. Integrate "Aesthetics" (e.g., #Boho, #Y2K).
-        **JSON OUTPUT:** { "title": "...", "description": "PLAIN TEXT WITH EMOJIS...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
-      `;
-    
+      selectedPrompt = `...Poshmark Logic... ${OUTPUT_INSTRUCTION}`; break; 
     case 'depop':
-      return `
-        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
-        **ROLE:** Depop Trend Curator.
-        **RULES:**
-        1. Title: Aesthetic Hook.
-        2. Description: Casual tone. Lowercase allowed.
-        **JSON OUTPUT:** { "title": "...", "description": "CASUAL TEXT...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
-      `;
-
-    case 'mercari':
-      return `
-        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
-        **ROLE:** Mercari Quick-Flip Assistant.
-        **RULES:**
-        1. Short paragraphs. "Ships Fast" mention.
-        **JSON OUTPUT:** { "title": "...", "description": "PUNCHY TEXT...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
-      `;
-
-    case 'etsy':
-      return `
-        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
-        **ROLE:** Etsy Artisan Guide.
-        **RULES:**
-        1. Description: Storytelling. Focus on "Maker", "History".
-        **JSON OUTPUT:** { "title": "...", "description": "STORY TEXT...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
-      `;
-
-    case 'facebook':
-      return `
-        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
-        **ROLE:** Local Commerce Connector.
-        **RULES:**
-        1. Focus: "Proximity" keywords. Simple and direct.
-        **JSON OUTPUT:** { "title": "...", "description": "SIMPLE TEXT...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
-      `;
-
+      selectedPrompt = `...Depop Logic... ${OUTPUT_INSTRUCTION}`; break;
     case 'shopify':
-      return `
-        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
-        **ROLE:** Shopify SEO Architect.
-        **GOAL:** Semantic Richness for Google SGE.
-        **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
-        **RULES:**
-        1. Use the provided HTML Template.
-        2. Replace {{SEMANTIC_INTRO}} with a context-rich intro.
-        3. Replace {{DETAILED_ANALYSIS}} with expert insights.
-        **HTML TEMPLATE:**
-        ${SHOPIFY_HTML_TEMPLATE}
-        **JSON OUTPUT:** { "title": "...", "description": "FULL_HTML_CODE...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
-      `;
-
+      selectedPrompt = `...Shopify Logic... HTML TEMPLATE: ${SHOPIFY_HTML_TEMPLATE} ${OUTPUT_INSTRUCTION}`; break;
     case 'ebay':
     default:
       // 🔥 CHECK FOR PRO MODE HERE
-      if (isProMode) {
-        return `
-          ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
-          ${PREMIUM_PRO_PROMPT}
-        `;
-      } else {
-        return `
-          ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
-          **ROLE:** eBay Cassini Algorithm Specialist.
-          **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
-          **RULES:**
-          1. Title: STRICT 80 chars. Brand + Gender + Item + Material + Size.
-          2. Description: Use the provided HTML Template.
-          **HTML TEMPLATE:**
-          ${EBAY_HTML_TEMPLATE}
-          **JSON OUTPUT:** { "title": "...", "description": "FULL_HTML_CODE...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
-        `;
-      }
+      selectedPrompt = isProMode ? PREMIUM_PRO_PROMPT : STANDARD_PROMPT;
+      selectedPrompt += `\n${OUTPUT_INSTRUCTION}`; // Append JSON requirement to both
+      break;
   }
+
+  return `${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL} ${selectedPrompt}`;
 };
 
 /**
