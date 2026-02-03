@@ -99,24 +99,31 @@ const BuilderPage: React.FC = () => {
       const richContext = `
         CONDITION: ${condition}.
         USER_INSIGHTS: ${sellerInsights}.
-        SPECS_PROVIDED: 
-        - Brand: ${brand}
-        - Category: ${category}
-        - Size: ${size}
-        - Color: ${color}
-        - Material: ${material}
-        - Year/Era: ${year}
-        - Origin: ${madeIn}
-        - Department: ${department}
-        - Model: ${model}
-        - Theme: ${theme}
-        - Features: ${features}
+        // Note: We send current values incase user pre-filled them, 
+        // but mostly we want AI to fill the empty ones.
       `;
 
       const result = await generateListingFromImages(selectedFiles, activePlatform, isProMode, richContext);
       
-      // Auto-Populate Logic (If AI returns these fields in the future, wire them here)
+      // ✅ AUTO-POPULATE LOGIC
+      // If the AI returned 'item_specifics', we map them to our state fields.
+      // We check if the field is currently empty so we don't overwrite user manual edits.
+      if (result.item_specifics) {
+        if (!brand) setBrand(result.item_specifics.brand || '');
+        if (!category) setCategory(result.item_specifics.category || '');
+        if (!size) setSize(result.item_specifics.size || '');
+        if (!color) setColor(result.item_specifics.color || '');
+        if (!material) setMaterial(result.item_specifics.material || '');
+        if (!year) setYear(result.item_specifics.year || '');
+        if (!madeIn) setMadeIn(result.item_specifics.made_in || '');
+        if (!department) setDepartment(result.item_specifics.department || '');
+        if (!model) setModel(result.item_specifics.model || '');
+        if (!theme) setTheme(result.item_specifics.theme || '');
+        if (!features) setFeatures(result.item_specifics.features || '');
+      }
+
       setTitle(result.title || '');
+      // Fallback for brand if it came in top-level
       if (!brand && result.brand) setBrand(result.brand); 
       
       setDescription(result.description || '');
@@ -188,7 +195,6 @@ const BuilderPage: React.FC = () => {
     try {
       const listingData = { 
         title, brand, description, condition, estimated_price: price, tags: tags, platform: activePlatform,
-        // Save the specific fields too if your backend supports it
         item_specifics: { size, color, material, year, madeIn, department, model, theme, features }
       };
       await saveListingToInventory(listingData, selectedFiles[0]);
@@ -316,7 +322,7 @@ const BuilderPage: React.FC = () => {
                    <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                      <span className="text-lg">🏷️</span> Key Specifics (Optional)
                    </h3>
-                   <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">Helps Auto-Fill</span>
+                   <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">Auto-Fills on Generate</span>
                 </div>
                 
                 {/* THE PREMIUM GRID - Matches Title/Price Inputs Perfectly */}
