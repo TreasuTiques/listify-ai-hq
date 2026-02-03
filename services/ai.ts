@@ -6,7 +6,7 @@ if (!apiKey) console.error("Missing Gemini API Key! Check .env or Vercel setting
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// 🛑 MODEL LOCKED (Reverted to the one that works for you!)
+// 🛑 MODEL LOCKED
 const MODEL_NAME = "gemini-flash-latest";
 
 // Helper: Convert File to Base64
@@ -124,12 +124,16 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     </div>
   `;
 
-  // 🔥 JUAN ACUÑA'S PREMIUM PROMPT (Injected ONLY when Pro Mode is ON)
+  // 🔥 ELITE PRO PROMPT (White-Labeled & Markdown-Free)
   const PREMIUM_PRO_PROMPT = `
-    🚨 ACTIVATE "JUAN ACUÑA PREMIUM LISTING GENERATOR" 🚨
+    🚨 ACTIVATE "ELITE STORYTELLING ENGINE" 🚨
     
     You are a high-end copywriting engine transforming RAW DATA into high-quality, themed, Cassini-optimized listings.
     
+    **CRITICAL WHITE-LABEL RULE:** - NEVER use specific names (e.g. "Juan Acuña", "Sellistio", or any developer name). 
+    - The listing must look like it comes from the USER'S store. 
+    - Use generic authority phrases like "Premium Verified", "The Archive Collection", or "Expertly Curated".
+
     1. **THEME DETECTION (CRITICAL):**
        - Auto-detect ERA/STYLE (e.g., 80s Neon, 90s Grunge, Minimalist, Y2K).
        - Style the HTML colors/fonts inline to match this theme.
@@ -141,7 +145,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     3. **TONE & MICRO-LORE:**
        - Add 1-2 lines of "Micro-Lore" (nostalgic/storytelling).
        - Tone: Warm, expert, slightly humorous.
-       - Add "Collector Confidence" line.
+       - Add "Collector Confidence" line (e.g. "Verified Authentic Condition").
 
     4. **HTML STRUCTURE (Single Block):**
        - **Main Title Panel**: Centered, themed.
