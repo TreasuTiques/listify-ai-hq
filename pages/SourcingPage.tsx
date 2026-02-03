@@ -11,7 +11,6 @@ const SourcingPage: React.FC = () => {
   // 📸 IMAGE STATE
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [showRefine, setShowRefine] = useState(false);
   const [condition, setCondition] = useState('Used');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,10 +32,11 @@ const SourcingPage: React.FC = () => {
     if (file) {
       setError(null);
       setSelectedFile(file);
+      
+      // Create immediate preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
-        setShowRefine(true); 
       };
       reader.readAsDataURL(file);
     }
@@ -45,8 +45,9 @@ const SourcingPage: React.FC = () => {
   const handleRemoveImage = () => {
     setImagePreview(null);
     setSelectedFile(null);
-    setShowRefine(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const safeParse = (val: any) => {
@@ -58,8 +59,9 @@ const SourcingPage: React.FC = () => {
 
   // 🤖 AI SCOUT HANDLER
   const handleScout = async () => {
-    if (!query && !selectedFile) {
-      setError("Please enter keywords or upload an image.");
+    // Validation: Must have either text OR an image
+    if (!query.trim() && !selectedFile) {
+      setError("Please enter item keywords or upload a photo to start.");
       return;
     }
     
@@ -69,9 +71,15 @@ const SourcingPage: React.FC = () => {
     
     try {
       const fullQuery = condition === 'New' ? `${query} new with tags` : query;
+      
+      // AI Call
       const data = await scoutProduct(fullQuery, selectedFile || undefined);
+      
+      if (!data) throw new Error("No data received from AI.");
+      
       setScoutResult(data);
 
+      // Auto-populate Calculator
       const min = safeParse(data.minPrice);
       const max = safeParse(data.maxPrice);
       
@@ -83,8 +91,8 @@ const SourcingPage: React.FC = () => {
       }
 
     } catch (err: any) {
-      console.error(err);
-      setError(`Scanner Error: ${err.message || "Please try again."}`);
+      console.error("Scout Error:", err);
+      setError(`Analysis Failed: ${err.message || "Please try again."}`);
     } finally {
       setLoading(false);
     }
@@ -124,13 +132,13 @@ const SourcingPage: React.FC = () => {
     }
   }, [costPrice, sellPrice, shipping, platform]);
 
-  const PlatformBtn = ({ p, label, color }: any) => (
+  const PlatformBtn = ({ p, label }: any) => (
     <button 
       onClick={() => setPlatform(p)} 
-      className={`flex-1 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
+      className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
         platform === p 
-          ? `bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-600` 
-          : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+          ? `bg-white text-slate-900 shadow-md transform scale-105` 
+          : 'text-slate-400 hover:text-white hover:bg-white/10'
       }`}
     >
       {label}
@@ -160,18 +168,19 @@ const SourcingPage: React.FC = () => {
                  value={query}
                  onChange={(e) => {setQuery(e.target.value); setError(null);}}
                  onKeyDown={(e) => e.key === 'Enter' && handleScout()}
-                 placeholder={showRefine ? "Add specific details (e.g. 'Missing tag, great condition')" : "Search item (e.g. 'Vintage Nike Windbreaker')"}
+                 placeholder={imagePreview ? "Added photo. Add details? (Optional)" : "Search item (e.g. 'Vintage Nike Windbreaker')"}
                  className="w-full !bg-slate-50 dark:!bg-slate-900 rounded-xl pl-4 pr-14 py-3.5 font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                />
                
+               {/* 📸 NEON TOGGLE CAMERA BUTTON */}
                <button 
                  onClick={() => fileInputRef.current?.click()}
                  className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all duration-300 shadow-sm ${
-                   selectedFile 
+                   imagePreview
                      ? 'bg-emerald-500 text-white shadow-emerald-500/30 scale-105' 
                      : 'bg-white dark:bg-slate-700 text-slate-400 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-600 hover:text-slate-600 dark:hover:text-slate-200'
                  }`}
-                 title={selectedFile ? "Change Photo" : "Upload Photo"}
+                 title={imagePreview ? "Change Photo" : "Upload Photo"}
                >
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                </button>
@@ -191,7 +200,16 @@ const SourcingPage: React.FC = () => {
             </button>
           </div>
 
-          {showRefine && !error && (
+          {/* ERROR MESSAGE */}
+          {error && (
+            <div className="mt-2 mx-2 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-xl flex items-center gap-2 animate-in slide-in-from-top-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              {error}
+            </div>
+          )}
+
+          {/* IMAGE PREVIEW BAR */}
+          {(imagePreview || query) && !error && (
             <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700 animate-in slide-in-from-top-2 duration-300 flex items-center justify-between px-2 pb-1">
                <div className="flex gap-2">
                   {['New', 'Used', 'Damaged'].map((c) => (
@@ -204,8 +222,12 @@ const SourcingPage: React.FC = () => {
                     </button>
                   ))}
                </div>
+               
                {imagePreview && (
-                 <button onClick={handleRemoveImage} className="text-[10px] text-red-500 hover:underline font-bold uppercase">Remove Photo</button>
+                 <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Image Attached</span>
+                    <button onClick={handleRemoveImage} className="text-[10px] text-red-500 hover:underline font-bold uppercase">Remove</button>
+                 </div>
                )}
             </div>
           )}
@@ -220,7 +242,7 @@ const SourcingPage: React.FC = () => {
                 
                 {/* 💎 THE AI VERDICT CARD */}
                 <div className="!bg-white dark:!bg-slate-800 rounded-[32px] p-8 shadow-xl border border-slate-100 dark:border-slate-700 relative overflow-hidden flex flex-col justify-between">
-                   <div className={`absolute top-0 left-0 w-2 h-full ${scoutResult.verdict.includes('PASS') ? 'bg-red-500' : 'bg-emerald-500'}`}></div>
+                   <div className={`absolute top-0 left-0 w-2 h-full ${scoutResult.verdict?.includes('PASS') ? 'bg-red-500' : 'bg-emerald-500'}`}></div>
                    
                    {imagePreview && (
                      <div className="absolute top-6 right-6 w-16 h-16 rounded-lg border-2 border-white dark:border-slate-600 shadow-md overflow-hidden">
@@ -230,8 +252,8 @@ const SourcingPage: React.FC = () => {
 
                    <div>
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">AI Market Verdict</div>
-                      <div className={`text-4xl sm:text-5xl font-black tracking-tight leading-tight mb-2 ${scoutResult.verdict.includes('PASS') ? 'text-red-500' : 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600'}`}>
-                        {scoutResult.verdict}
+                      <div className={`text-4xl sm:text-5xl font-black tracking-tight leading-tight mb-2 ${scoutResult.verdict?.includes('PASS') ? 'text-red-500' : 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600'}`}>
+                        {scoutResult.verdict || "ANALYZED"}
                       </div>
                       <div className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span>${scoutResult.minPrice} - ${scoutResult.maxPrice}</span>
@@ -310,10 +332,10 @@ const SourcingPage: React.FC = () => {
                    </div>
                    <div className="mt-2">
                       <div className="flex items-end gap-1">
-                         <span className="text-3xl font-black text-slate-900 dark:text-white">{scoutResult.metrics?.sell_through}%</span>
+                         <span className="text-3xl font-black text-slate-900 dark:text-white">{scoutResult.metrics?.sell_through || 50}%</span>
                       </div>
                       <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full mt-3 overflow-hidden">
-                         <div className={`h-full rounded-full ${scoutResult.metrics?.sell_through > 50 ? 'bg-green-500' : 'bg-orange-500'}`} style={{ width: `${scoutResult.metrics?.sell_through}%` }}></div>
+                         <div className={`h-full rounded-full ${scoutResult.metrics?.sell_through > 50 ? 'bg-green-500' : 'bg-orange-500'}`} style={{ width: `${scoutResult.metrics?.sell_through || 50}%` }}></div>
                       </div>
                    </div>
                 </div>
@@ -322,7 +344,7 @@ const SourcingPage: React.FC = () => {
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg Time to Sell</div>
                    <div className="mt-2">
-                      <div className="text-3xl font-black text-slate-900 dark:text-white">{scoutResult.metrics?.days_to_sell} <span className="text-sm font-bold text-slate-400">Days</span></div>
+                      <div className="text-3xl font-black text-slate-900 dark:text-white">{scoutResult.metrics?.days_to_sell || 30} <span className="text-sm font-bold text-slate-400">Days</span></div>
                       <p className="text-[10px] text-slate-400 mt-1">Based on category velocity</p>
                    </div>
                 </div>
