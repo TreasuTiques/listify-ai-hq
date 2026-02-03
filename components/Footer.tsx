@@ -33,7 +33,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             {/* 🆕 UPGRADED CREDIBILITY MESSAGE */}
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 max-w-xs leading-relaxed">
               Empowering top-tier resellers with enterprise-grade AI. <br/>
-              <span className="font-medium text-slate-700 dark:text-slate-300">Stop listing. Start scaling.</span>
+              <span className="font-medium text-slate-700 dark:text-slate-300">Stop typing. Start scaling.</span>
             </p>
             
             {/* Social Icons (Placeholder SVG) */}
