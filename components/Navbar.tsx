@@ -20,14 +20,15 @@ const Navbar: React.FC<NavbarProps> = ({ session, onNavigate, isDarkMode, toggle
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           
-          {/* 🆕 LOGO SECTION: Fixed Filename Case (.PNG) */}
+          {/* 🆕 LOGO FIX: Force Fill Container */}
           <div className="flex items-center cursor-pointer group" onClick={() => onNavigate('/')}>
-            {/* Icon Container - Clean & Simple */}
-            <div className="relative w-10 h-10 md:w-12 md:h-12 transition-transform group-hover:scale-105">
+            {/* Container is fixed size */}
+            <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-all flex items-center justify-center bg-transparent">
+               {/* Image is FORCED to be larger to cut off padding */}
                <img 
                  src="/sellistio-logo-new.PNG" 
                  alt="Sellistio" 
-                 className="w-full h-full object-contain drop-shadow-sm" 
+                 className="absolute w-[140%] h-[140%] max-w-none object-contain" 
                />
             </div>
             
