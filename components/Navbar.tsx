@@ -20,15 +20,17 @@ const Navbar: React.FC<NavbarProps> = ({ session, onNavigate, isDarkMode, toggle
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           
-          {/* 🆕 LOGO FIX: Force Fill Container */}
+          {/* 🆕 LOGO FIX: Super Zoom to Hide Empty Space */}
           <div className="flex items-center cursor-pointer group" onClick={() => onNavigate('/')}>
             {/* Container is fixed size */}
-            <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-sm group-hover:shadow-md transition-all flex items-center justify-center bg-transparent">
-               {/* Image is FORCED to be larger to cut off padding */}
+            <div className="relative w-10 h-10 md:w-12 md:h-12 flex items-center justify-center">
+               {/* scale-[2.0] = Zoom in 200% to cut off the empty edges 
+                  object-contain = Keep aspect ratio perfect
+               */}
                <img 
-                 src="/sellistio-logo-new.PNG" 
+                 src="/sellistio-logo-new.png" 
                  alt="Sellistio" 
-                 className="absolute w-[140%] h-[140%] max-w-none object-contain" 
+                 className="w-full h-full object-contain scale-[2.0] transition-transform group-hover:scale-[2.1]" 
                />
             </div>
             
