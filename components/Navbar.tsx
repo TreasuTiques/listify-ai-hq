@@ -20,13 +20,10 @@ const Navbar: React.FC<NavbarProps> = ({ session, onNavigate, isDarkMode, toggle
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           
-          {/* 🆕 LOGO FIX: Super Zoom to Hide Empty Space */}
-          <div className="flex items-center cursor-pointer group" onClick={() => onNavigate('/')}>
-            {/* Container is fixed size */}
+          {/* 🆕 LOGO SECTION: Premium Icon + Luxury Text */}
+          <div className="flex items-center cursor-pointer group gap-4" onClick={() => onNavigate('/')}>
+            {/* Icon Container - Fixed Size & Zoomed */}
             <div className="relative w-10 h-10 md:w-12 md:h-12 flex items-center justify-center">
-               {/* scale-[2.0] = Zoom in 200% to cut off the empty edges 
-                  object-contain = Keep aspect ratio perfect
-               */}
                <img 
                  src="/sellistio-logo-new.png" 
                  alt="Sellistio" 
@@ -34,8 +31,10 @@ const Navbar: React.FC<NavbarProps> = ({ session, onNavigate, isDarkMode, toggle
                />
             </div>
             
-            {/* Brand Name Text */}
-            <span className="ml-3 text-xl font-black text-slate-900 dark:text-white tracking-tight hidden sm:block">
+            {/* ✨ PREMIUM TEXT UPGRADE */}
+            {/* tracking-widest = Luxury spacing */}
+            {/* bg-gradient = Metallic Silver/White look */}
+            <span className="text-xl md:text-2xl font-extrabold tracking-widest hidden sm:block bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-500 dark:from-white dark:to-slate-400 drop-shadow-sm">
               SELLISTIO
             </span>
           </div>
