@@ -124,13 +124,6 @@ const SourcingPage: React.FC = () => {
     }
   }, [costPrice, sellPrice, shipping, platform]);
 
-  const getFlipStatus = (roiVal: number) => {
-    if (roiVal < 20) return { color: 'bg-red-500', text: 'text-red-500', label: '⛔ Bad Flip', border: 'border-red-500' };
-    if (roiVal < 75) return { color: 'bg-orange-500', text: 'text-orange-500', label: '⚠️ Decent Flip', border: 'border-orange-500' };
-    return { color: 'bg-emerald-500', text: 'text-emerald-500', label: '🚀 Great Flip', border: 'border-emerald-500' };
-  };
-
-  // Platform Button Helper
   const PlatformBtn = ({ p, label, color }: any) => (
     <button 
       onClick={() => setPlatform(p)} 
@@ -171,7 +164,6 @@ const SourcingPage: React.FC = () => {
                  className="w-full !bg-slate-50 dark:!bg-slate-900 rounded-xl pl-4 pr-14 py-3.5 font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                />
                
-               {/* 📸 NEON TOGGLE CAMERA BUTTON */}
                <button 
                  onClick={() => fileInputRef.current?.click()}
                  className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all duration-300 shadow-sm ${
@@ -230,7 +222,6 @@ const SourcingPage: React.FC = () => {
                 <div className="!bg-white dark:!bg-slate-800 rounded-[32px] p-8 shadow-xl border border-slate-100 dark:border-slate-700 relative overflow-hidden flex flex-col justify-between">
                    <div className={`absolute top-0 left-0 w-2 h-full ${scoutResult.verdict.includes('PASS') ? 'bg-red-500' : 'bg-emerald-500'}`}></div>
                    
-                   {/* Persistent Image Thumbnail in Result */}
                    {imagePreview && (
                      <div className="absolute top-6 right-6 w-16 h-16 rounded-lg border-2 border-white dark:border-slate-600 shadow-md overflow-hidden">
                        <img src={imagePreview} className="w-full h-full object-cover" />
@@ -259,7 +250,6 @@ const SourcingPage: React.FC = () => {
                 <div className="!bg-[#0F172A] dark:!bg-slate-800 rounded-[32px] p-8 shadow-2xl border border-slate-800 dark:border-slate-700 text-white relative">
                    <div className="flex justify-between items-center mb-6">
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Profit Engine</div>
-                      {/* Fixed Platform Selector - No More Dots */}
                       <div className="flex bg-slate-800 dark:bg-slate-900 p-1 rounded-lg gap-1">
                          <PlatformBtn p="ebay" label="EB" />
                          <PlatformBtn p="posh" label="PM" />
