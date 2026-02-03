@@ -6,8 +6,8 @@ if (!apiKey) console.error("Missing Gemini API Key! Check .env or Vercel setting
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// 🛑 MODEL LOCKED
-const MODEL_NAME = "gemini-1.5-flash"; // Updated to current standard, or keep "gemini-flash-latest" if preferred
+// 🛑 MODEL LOCKED (Reverted to the one that works for you!)
+const MODEL_NAME = "gemini-flash-latest";
 
 // Helper: Convert File to Base64
 const fileToGenerativePart = async (file: File) => {
@@ -124,7 +124,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     </div>
   `;
 
-  // 🔥 JUAN ACUÑA'S PREMIUM PROMPT (Injected for Pro Mode)
+  // 🔥 JUAN ACUÑA'S PREMIUM PROMPT (Injected ONLY when Pro Mode is ON)
   const PREMIUM_PRO_PROMPT = `
     🚨 ACTIVATE "JUAN ACUÑA PREMIUM LISTING GENERATOR" 🚨
     
@@ -136,7 +136,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     
     2. **SKU PILL BADGE:**
        - Generate a unique SKU (e.g., VINT-123).
-       - Place it ABSOLUTE TOP-RIGHT in a WHITE PILL BADGE (border-radius: 999px, white bg, thin border).
+       - Place it ABSOLUTE TOP-RIGHT in a WHITE PILL BADGE (border-radius: 999px, white bg, thin border, bold text).
     
     3. **TONE & MICRO-LORE:**
        - Add 1-2 lines of "Micro-Lore" (nostalgic/storytelling).
