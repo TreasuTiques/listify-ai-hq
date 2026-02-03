@@ -124,7 +124,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     </div>
   `;
 
-  // 🔥 ELITE PRO PROMPT (Fixed Badge Positioning)
+  // 🔥 ELITE PRO PROMPT (White-Labeled, No Overlap, NO CURSIVE)
   const PREMIUM_PRO_PROMPT = `
     🚨 ACTIVATE "ELITE STORYTELLING ENGINE" 🚨
     
@@ -158,6 +158,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
        - **CTA Panel**: Fun closing tagline (1-3-1 format).
 
     5. **FORMATTING RULES (STRICT):**
+       - **NO CURSIVE FONTS**: NEVER use cursive, script, or handwriting fonts (like 'Brush Script', 'Pacifico', etc.). Use clean Sans-Serif (Arial, Helvetica, Verdana) or Serif (Georgia, Times) fonts ONLY for maximum readability.
        - **NO MARKDOWN**: Do NOT use asterisks (**) for bold text. Use <strong> tags ONLY.
        - **NO MARKDOWN HEADERS**: Do NOT use # for headers. Use HTML tags (<h3>, <h4>).
        - Output must be pure, valid HTML strings inside the JSON.
