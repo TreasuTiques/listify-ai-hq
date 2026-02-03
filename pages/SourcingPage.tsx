@@ -169,12 +169,18 @@ const SourcingPage: React.FC = () => {
                  onChange={(e) => {setQuery(e.target.value); setError(null);}}
                  onKeyDown={(e) => e.key === 'Enter' && handleScout()}
                  placeholder={showRefine ? "Add keywords (e.g. 'Vintage Nike')" : "Search item (e.g. Nike Air Max)"}
-                 className="w-full !bg-slate-50 dark:!bg-slate-900 rounded-xl pl-4 pr-12 py-3.5 font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                 className="w-full !bg-slate-50 dark:!bg-slate-900 rounded-xl pl-4 pr-14 py-3.5 font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                />
+               
+               {/* 📸 CAMERA BUTTON - PREMIUM TOGGLE DESIGN */}
                <button 
                  onClick={() => fileInputRef.current?.click()}
-                 className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-emerald-600 hover:text-emerald-700 bg-emerald-50/50 rounded-lg transition-colors"
-                 title="Upload Photo"
+                 className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all duration-300 shadow-sm ${
+                   selectedFile 
+                     ? 'bg-emerald-500 text-white shadow-emerald-500/30 scale-105' // Active: Neon Green & White
+                     : 'bg-white dark:bg-slate-700 text-slate-400 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-600 hover:text-slate-600 dark:hover:text-slate-200' // Inactive: Clean Surface
+                 }`}
+                 title={selectedFile ? "Change Photo" : "Upload Photo"}
                >
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                </button>
@@ -207,7 +213,7 @@ const SourcingPage: React.FC = () => {
                  {imagePreview && (
                    <div className="w-16 h-16 rounded-lg bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 overflow-hidden flex-shrink-0 relative group">
                       <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                      <button onClick={handleRemoveImage} className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center font-bold text-xs transition-opacity">Remove</button>
+                      <button onClick={handleRemoveImage} className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center font-bold text-xs transition-opacity">✕</button>
                    </div>
                  )}
                  <div className="flex-grow">
