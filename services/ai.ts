@@ -6,8 +6,10 @@ if (!apiKey) console.error("Missing Gemini API Key! Check .env or Vercel setting
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-const MODEL_NAME = "gemini-flash-latest";
+// 🛑 MODEL LOCKED
+const MODEL_NAME = "gemini-1.5-flash";
 
+// Helper: Convert File to Base64
 const fileToGenerativePart = async (file: File) => {
   const base64EncodedDataPromise = new Promise<string>((resolve) => {
     const reader = new FileReader();
@@ -19,6 +21,9 @@ const fileToGenerativePart = async (file: File) => {
   };
 };
 
+/**
+ * 🧼 THE CLEANER
+ */
 const cleanAndParseJSON = (text: string) => {
   try {
     let clean = text.replace(/```json|```/g, '');
@@ -34,41 +39,222 @@ const cleanAndParseJSON = (text: string) => {
   }
 };
 
-// ... (Keep existing generateListing and optimizeListing functions) ...
+/**
+ * 🧠 DEEP VISION PROTOCOL
+ */
+const DEEP_VISION_PROTOCOL = `
+  **INTERNAL VISUAL ANALYSIS (DO NOT OUTPUT THESE SECTION NAMES):**
+  1. Inspect for pilling, scratches, stains, or fading.
+  2. Identify fabric weight/material feel.
+  3. Classify the exact style (e.g., "Y2K", "Gorpcore").
+  4. Read labels/tags.
+`;
 
 /**
- * 🔭 BRAIN 3: THE SCOUT (PREMIUM MARKET ANALYST)
+ * 🎨 MARKETPLACE PROMPT ENGINEER
+ */
+const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: string) => {
+  const baseHelper = `Analyze these images and return valid JSON.`;
+  const contextBlock = userContext ? `IMPORTANT USER CONTEXT & SPECS:\n${userContext}\nEnsure description reflects these details.` : '';
+
+  // 🔵 EBAY HTML TEMPLATE
+  const EBAY_HTML_TEMPLATE = `
+    <div style="font-family: sans-serif; max-width: 900px; margin: 0 auto; color: #1a1a1a; line-height: 1.6;">
+      <div style="text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px;">
+        <h1 style="font-size: 24px; margin: 10px 0;">{{TITLE}}</h1>
+        <p style="color: #555; font-size: 16px;">{{SEMANTIC_INTRO}}</p>
+      </div>
+      
+      <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e5e7eb;">
+        <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666; letter-spacing: 1px;">Item Specifics</h3>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          <li style="margin-bottom: 8px;"><strong>Brand:</strong> {{BRAND}}</li>
+          <li style="margin-bottom: 8px;"><strong>Material:</strong> {{MATERIAL}}</li>
+          <li style="margin-bottom: 8px;"><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <h3 style="font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px; margin-bottom: 10px;">Detailed Analysis</h3>
+        <p>{{DETAILED_ANALYSIS}}</p>
+        <br>
+        <p><strong>Defects/Notes:</strong> {{DEFECT_REPORT}}</p>
+      </div>
+
+      <div style="text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #f0f0f0; padding-top: 20px;">
+        <p>⚡ Fast Shipping • 📦 Professional Packaging</p>
+      </div>
+    </div>
+  `;
+
+  // 🟢 SHOPIFY HTML TEMPLATE
+  const SHOPIFY_HTML_TEMPLATE = `
+    <div class="product-description" style="font-family: inherit;">
+      <p class="intro">{{SEMANTIC_INTRO}}</p>
+      
+      <h2>Product Specifications</h2>
+      <ul>
+        <li><strong>Material:</strong> {{MATERIAL}}</li>
+        <li><strong>Color:</strong> {{COLOR}}</li>
+        <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
+      </ul>
+
+      <h2>Detailed Analysis</h2>
+      <p>{{DETAILED_ANALYSIS}}</p>
+
+      <h2>Frequently Asked Questions</h2>
+      <dl>
+        <dt><strong>Is this item true to size?</strong></dt>
+        <dd>{{SIZE_ANSWER}}</dd>
+        <dt><strong>Any notable flaws?</strong></dt>
+        <dd>{{DEFECT_REPORT}}</dd>
+      </dl>
+    </div>
+  `;
+
+  // 🚨 UNIVERSAL JSON OUTPUT STRUCTURE
+  const OUTPUT_INSTRUCTION = `
+    **OUTPUT JSON STRUCTURE (REQUIRED):**
+    {
+      "title": "Optimized Title (Max 80 chars)",
+      "description": "FULL HTML OR TEXT DESCRIPTION",
+      "estimated_price": "$20.00",
+      "tags": ["tag1", "tag2"],
+      "item_specifics": {
+        "brand": "Extract from image or Unknown",
+        "category": "Suggest Category Path",
+        "size": "Estimate dimensions",
+        "color": "Dominant colors",
+        "material": "Visual material ID",
+        "year": "Era or Copyright Date",
+        "made_in": "Country of Origin tag",
+        "department": "Men/Women/Kids/Unisex",
+        "model": "Model name/number",
+        "theme": "Aesthetic theme",
+        "features": "Key features list"
+      }
+    }
+  `;
+
+  // 🔥 ELITE PRO PROMPT
+  const PREMIUM_PRO_PROMPT = `
+    🚨 ACTIVATE "REAL-TALK RESELLER ENGINE" 🚨
+    
+    You are an expert flipper writing a high-converting eBay listing. 
+    
+    **CRITICAL VOCABULARY RULE:** - Write at an **8th GRADE READING LEVEL**. Simple, direct, natural English.
+    - **BANNED WORDS:** Whimsical, Curated, Bespoke, Exquisite, Tapestry, Symphony, Heritage, Provenance.
+    - **APPROVED TONE:** "Just found this," "Super clean," "Hard to find," "Great shape," "Cool details."
+    
+    **CRITICAL WHITE-LABEL RULE:** - NEVER use specific names (e.g. "Juan Acuña", "Sellistio").
+    - Use generic headers like "Vintage Vault Find", "The Collection", or just the Item Name.
+
+    1. **THEME DETECTION:** Auto-detect ERA/STYLE.
+    2. **SKU PILL BADGE:** Place unique SKU in a dedicated <div> ABOVE main title (Right Aligned).
+    3. **MICRO-LORE:** Add 1 line of relatable nostalgia.
+    4. **FORMATTING:** NO Cursive. NO Markdown asterisks (**). Use HTML <strong> tags.
+  `;
+
+  // 📝 STANDARD PROMPT
+  const STANDARD_PROMPT = `
+    **ROLE:** eBay Cassini Algorithm Specialist.
+    **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
+    **RULES:**
+    1. Title: STRICT 80 chars.
+    2. Description: Use the provided HTML Template.
+    **HTML TEMPLATE:**
+    ${EBAY_HTML_TEMPLATE}
+  `;
+
+  let selectedPrompt = "";
+
+  switch (platform.toLowerCase()) {
+    case 'poshmark': selectedPrompt = `...Poshmark Logic... ${OUTPUT_INSTRUCTION}`; break; 
+    case 'depop': selectedPrompt = `...Depop Logic... ${OUTPUT_INSTRUCTION}`; break;
+    case 'shopify': selectedPrompt = `...Shopify Logic... HTML TEMPLATE: ${SHOPIFY_HTML_TEMPLATE} ${OUTPUT_INSTRUCTION}`; break;
+    case 'ebay':
+    default:
+      selectedPrompt = isProMode ? PREMIUM_PRO_PROMPT : STANDARD_PROMPT;
+      selectedPrompt += `\n${OUTPUT_INSTRUCTION}`;
+      break;
+  }
+
+  return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${selectedPrompt}`;
+};
+
+/**
+ * 📸 BRAIN 1: THE BUILDER (MULTI-IMAGE)
+ */
+export async function generateListingFromImages(
+  imageFiles: File[], 
+  platform: string = 'ebay', 
+  isProMode: boolean = false, 
+  userContext: string = ''
+) {
+  try {
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+    const imageParts = await Promise.all(imageFiles.map(file => fileToGenerativePart(file)));
+    const prompt = getPlatformPrompt(platform, isProMode, userContext);
+
+    const result = await model.generateContent([prompt, ...imageParts]);
+    return cleanAndParseJSON(result.response.text());
+
+  } catch (error) {
+    console.error("AI Generation Error:", error);
+    throw error;
+  }
+}
+
+/**
+ * 🩺 BRAIN 2: THE DOCTOR (RESTORED!)
+ * This was missing, causing the build error.
+ */
+export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
+  try {
+    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+    const prompt = `
+      Act as an expert reseller on ${platform}. 
+      Analyze this listing: Title: "${currentTitle}", Desc: "${currentDescription}". 
+      Improve SEO & Conversion.
+      RETURN ONLY RAW JSON.
+      JSON: { "optimizedTitle": "...", "optimizedDescription": "..." } 
+    `;
+    const result = await model.generateContent(prompt);
+    return cleanAndParseJSON(result.response.text());
+  } catch (error) { console.error("Optimization Error:", error); throw error; }
+}
+
+/**
+ * 🔭 BRAIN 3: THE SCOUT (MARKET ANALYST)
  */
 export async function scoutProduct(productName: string, imageFile?: File) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     let requestParts: any[] = [];
     
-    // 🚨 PREMIUM "HYPE" PROMPT
+    // 🚨 PREMIUM MARKET ANALYSIS PROMPT
     const instruction = `
-      Act as a World-Class Vintage Reseller & Market Analyst.
-      Analyze this item: "${productName}".
+      Act as a Senior Market Analyst for eBay Resellers. 
+      Identify this item: "${productName}". 
       
-      **GOAL:** excite the user about the profit potential (or warn them effectively).
+      Perform a deep simulated market analysis based on current trends for this item category.
       
-      **RETURN RAW JSON ONLY:**
+      **RETURN ONLY RAW JSON** with this exact structure:
       {
-        "item_name": "Specific Item Name",
+        "item_name": "Short precise item name",
         "minPrice": 10,
         "maxPrice": 20,
         "demand": "High" | "Medium" | "Low",
         "verdict": "2-3 WORD HYPE PHRASE (e.g. '💎 HIDDEN GEM', '🚀 FAST FLIP', '💰 CASH COW', '🛑 HARD PASS')",
-        "reason": "Expert analysis on WHY this is a buy/pass. Mention trends.",
+        "reason": "1 short punchy sentence on why.",
         "metrics": {
           "sell_through": 75, 
           "days_to_sell": 14,
-          "volatility": "Stable" | "Volatile",
-          "competition": "Low" | "Medium" | "High"
+          "volatility": "Low" | "Medium" | "High",
+          "competition": "Low" | "Medium" | "High" | "Saturated"
         },
         "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
       }
-      
-      *Logic for Sell-Through:* Based on historical popularity of this category/brand.
     `;
 
     if (imageFile) {
@@ -82,15 +268,4 @@ export async function scoutProduct(productName: string, imageFile?: File) {
     return cleanAndParseJSON(result.response.text());
     
   } catch (error) { console.error("Scout Error:", error); throw error; }
-}
-
-// ... (Ensure generateListingFromImages is preserved below) ...
-// (Placeholder to keep file valid)
-const getPlatformPrompt = (p: string, pro: boolean, c: string) => `Analyze ${c}`;
-export async function generateListingFromImages(files: File[], platform: string, proMode: boolean, context: string) {
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
-    const imageParts = await Promise.all(files.map(fileToGenerativePart));
-    const prompt = `Analyze this item for ${platform}. Context: ${context}. Return JSON.`;
-    const result = await model.generateContent([prompt, ...imageParts]);
-    return cleanAndParseJSON(result.response.text());
 }
