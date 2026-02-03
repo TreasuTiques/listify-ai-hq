@@ -6,7 +6,7 @@ if (!apiKey) console.error("Missing Gemini API Key! Check .env or Vercel setting
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// 🛑 MODEL LOCKED (Reverted to the one that works for you!)
+// 🛑 MODEL LOCKED
 const MODEL_NAME = "gemini-flash-latest";
 
 // Helper: Convert File to Base64
@@ -40,18 +40,18 @@ const cleanAndParseJSON = (text: string) => {
 };
 
 /**
- * 🧠 DEEP VISION PROTOCOL
+ * 🧠 DEEP VISION PROTOCOL (INTERNAL ANALYSIS ONLY)
  */
 const DEEP_VISION_PROTOCOL = `
-  **CRITICAL IMAGE ANALYSIS PROTOCOL:**
-  1. **Micro-Defect Scan:** Inspect for pilling, scratches >1mm, stains, or fading. Mark distinct flaws.
-  2. **Material DNA:** Identify fabric weight (e.g., "Heavyweight French Terry" vs "Cotton").
-  3. **Aesthetic Match:** Classify the exact style (e.g., "Y2K", "Gorpcore", "Quiet Luxury").
-  4. **Brand Verification:** Read labels/tags even if blurry.
+  **INTERNAL VISUAL ANALYSIS (DO NOT OUTPUT THESE SECTION NAMES):**
+  1. Inspect for pilling, scratches, stains, or fading.
+  2. Identify fabric weight/material feel.
+  3. Classify the exact style (e.g., "Y2K", "Gorpcore").
+  4. Read labels/tags.
 `;
 
 /**
- * 🚫 NO MARKDOWN PROTOCOL (For Text-Only Platforms)
+ * 🚫 NO MARKDOWN PROTOCOL
  */
 const NO_MARKDOWN_PROTOCOL = `
   **FORMATTING RULES - STRICT:**
@@ -124,17 +124,21 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     </div>
   `;
 
-  // 🔥 ELITE PRO PROMPT (White-Labeled, No Overlap, NO CURSIVE)
+  // 🔥 ELITE PRO PROMPT (Casual Cool Reseller Vibe)
   const PREMIUM_PRO_PROMPT = `
-    🚨 ACTIVATE "ELITE STORYTELLING ENGINE" 🚨
+    🚨 ACTIVATE "CASUAL COOL RESELLER ENGINE" 🚨
     
-    You are a high-end copywriting engine transforming RAW DATA into high-quality, themed, Cassini-optimized listings.
+    You are an expert flipper/reseller writing a high-converting eBay listing. 
+    You found a gem at an estate sale/storage unit and you are excited to share it.
     
-    **CRITICAL WHITE-LABEL RULE:** - NEVER use specific names (e.g. "Juan Acuña", "Sellistio", or any developer name). 
-    - The listing must look like it comes from the USER'S store. 
-    - Use generic authority phrases like "Premium Verified", "The Archive Collection", or "Expertly Curated".
+    **CRITICAL VOICE RULE:** - **TONE:** Casual, knowledgeable, enthusiastic, "Thrift Store Gold" vibe.
+    - **AVOID:** "Museum quality," "Provenance," "Curated," "Exquisite," "Micro-Defect Scan," "AI Analysis."
+    - **USE:** "Great vintage condition," "Hard to find," "Awesome piece," "Shows some love," "Ready for your collection," "Solid find."
+    
+    **CRITICAL WHITE-LABEL RULE:** - NEVER use specific names (e.g. "Juan Acuña", "Sellistio").
+    - Use generic headers like "Vintage Vault Find", "The Collection", or just the Item Name.
 
-    1. **THEME DETECTION (CRITICAL):**
+    1. **THEME DETECTION:**
        - Auto-detect ERA/STYLE (e.g., 80s Neon, 90s Grunge, Minimalist, Y2K).
        - Style the HTML colors/fonts inline to match this theme.
     
@@ -142,23 +146,20 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
        - Generate a unique SKU (e.g., VINT-123).
        - **PLACEMENT:** Place it in a dedicated <div> ABOVE the main title. Align it to the RIGHT.
        - **STYLING:** border-radius: 999px; background: #fff; padding: 4px 10px; font-size: 10px; border: 1px solid #ccc; display: inline-block; margin-bottom: 10px;
-       - **CRITICAL:** Do NOT use 'position: absolute'. It must flow naturally above the text so it never covers the title.
     
-    3. **TONE & MICRO-LORE:**
-       - Add 1-2 lines of "Micro-Lore" (nostalgic/storytelling).
-       - Tone: Warm, expert, slightly humorous.
-       - Add "Collector Confidence" line (e.g. "Verified Authentic Condition").
+    3. **MICRO-LORE:**
+       - Add 1-2 lines of relatable nostalgia. (e.g., "Reminds you of Saturday morning cartoons," "The kind of quality they don't make anymore.")
 
     4. **HTML STRUCTURE (Single Block):**
        - **SKU Row:** Right-aligned container with the badge.
        - **Main Title Panel:** Centered, themed.
-       - **Description**: Detailed, storytelling.
+       - **Description**: Detailed but conversational. Write like you are talking to another collector.
        - **Features**: Bullet points with emojis.
-       - **Why You'll Love It**: Emotional appeal.
+       - **Why You'll Love It**: The "Cool Factor."
        - **CTA Panel**: Fun closing tagline (1-3-1 format).
 
     5. **FORMATTING RULES (STRICT):**
-       - **NO CURSIVE FONTS**: NEVER use cursive, script, or handwriting fonts (like 'Brush Script', 'Pacifico', etc.). Use clean Sans-Serif (Arial, Helvetica, Verdana) or Serif (Georgia, Times) fonts ONLY for maximum readability.
+       - **NO CURSIVE FONTS**: Use clean Sans-Serif or Serif fonts ONLY.
        - **NO MARKDOWN**: Do NOT use asterisks (**) for bold text. Use <strong> tags ONLY.
        - **NO MARKDOWN HEADERS**: Do NOT use # for headers. Use HTML tags (<h3>, <h4>).
        - Output must be pure, valid HTML strings inside the JSON.
