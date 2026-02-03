@@ -7,7 +7,7 @@ if (!apiKey) console.error("Missing Gemini API Key! Check .env or Vercel setting
 const genAI = new GoogleGenerativeAI(apiKey);
 
 // 🛑 MODEL LOCKED
-const MODEL_NAME = "gemini-flash-latest";
+const MODEL_NAME = "gemini-1.5-flash"; // Updated to current standard, or keep "gemini-flash-latest" if preferred
 
 // Helper: Convert File to Base64
 const fileToGenerativePart = async (file: File) => {
@@ -69,7 +69,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
   const baseHelper = `Analyze these images and return valid JSON.`;
   const conditionContext = userCondition ? `IMPORTANT: User says condition is "${userCondition}". Ensure description reflects this honesty.` : '';
 
-  // 🔵 EBAY HTML TEMPLATE (Clean & Professional)
+  // 🔵 EBAY HTML TEMPLATE (Standard)
   const EBAY_HTML_TEMPLATE = `
     <div style="font-family: sans-serif; max-width: 900px; margin: 0 auto; color: #1a1a1a; line-height: 1.6;">
       <div style="text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px;">
@@ -99,7 +99,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     </div>
   `;
 
-  // 🟢 SHOPIFY HTML TEMPLATE (Renamed Expert -> Detailed)
+  // 🟢 SHOPIFY HTML TEMPLATE
   const SHOPIFY_HTML_TEMPLATE = `
     <div class="product-description" style="font-family: inherit;">
       <p class="intro">{{SEMANTIC_INTRO}}</p>
@@ -122,6 +122,43 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
         <dd>{{DEFECT_REPORT}}</dd>
       </dl>
     </div>
+  `;
+
+  // 🔥 JUAN ACUÑA'S PREMIUM PROMPT (Injected for Pro Mode)
+  const PREMIUM_PRO_PROMPT = `
+    🚨 ACTIVATE "JUAN ACUÑA PREMIUM LISTING GENERATOR" 🚨
+    
+    You are a high-end copywriting engine transforming RAW DATA into high-quality, themed, Cassini-optimized listings.
+    
+    1. **THEME DETECTION (CRITICAL):**
+       - Auto-detect ERA/STYLE (e.g., 80s Neon, 90s Grunge, Minimalist, Y2K).
+       - Style the HTML colors/fonts inline to match this theme.
+    
+    2. **SKU PILL BADGE:**
+       - Generate a unique SKU (e.g., VINT-123).
+       - Place it ABSOLUTE TOP-RIGHT in a WHITE PILL BADGE (border-radius: 999px, white bg, thin border).
+    
+    3. **TONE & MICRO-LORE:**
+       - Add 1-2 lines of "Micro-Lore" (nostalgic/storytelling).
+       - Tone: Warm, expert, slightly humorous.
+       - Add "Collector Confidence" line.
+
+    4. **HTML STRUCTURE (Single Block):**
+       - **Main Title Panel**: Centered, themed.
+       - **Description**: Detailed, storytelling.
+       - **Features**: Bullet points with emojis.
+       - **Why You'll Love It**: Emotional appeal.
+       - **CTA Panel**: Fun closing tagline (1-3-1 format).
+    
+    **OUTPUT JSON:**
+    {
+      "title": "Optimized Title (Max 80 chars)",
+      "description": "<div style='...'>FULL PREMIUM HTML CODE HERE...</div>",
+      "brand": "...",
+      "condition": "...",
+      "estimated_price": "...",
+      "tags": [...]
+    }
   `;
 
   switch (platform.toLowerCase()) {
@@ -189,17 +226,25 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
 
     case 'ebay':
     default:
-      return `
-        ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
-        **ROLE:** eBay Cassini Algorithm Specialist.
-        **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
-        **RULES:**
-        1. Title: STRICT 80 chars. Brand + Gender + Item + Material + Size.
-        2. Description: Use the provided HTML Template.
-        **HTML TEMPLATE:**
-        ${EBAY_HTML_TEMPLATE}
-        **JSON OUTPUT:** { "title": "...", "description": "FULL_HTML_CODE...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
-      `;
+      // 🔥 CHECK FOR PRO MODE HERE
+      if (isProMode) {
+        return `
+          ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
+          ${PREMIUM_PRO_PROMPT}
+        `;
+      } else {
+        return `
+          ${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL}
+          **ROLE:** eBay Cassini Algorithm Specialist.
+          **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
+          **RULES:**
+          1. Title: STRICT 80 chars. Brand + Gender + Item + Material + Size.
+          2. Description: Use the provided HTML Template.
+          **HTML TEMPLATE:**
+          ${EBAY_HTML_TEMPLATE}
+          **JSON OUTPUT:** { "title": "...", "description": "FULL_HTML_CODE...", "brand": "...", "condition": "...", "estimated_price": "...", "tags": [...] }
+        `;
+      }
   }
 };
 
