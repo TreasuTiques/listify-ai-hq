@@ -51,11 +51,10 @@ const SourcingPage: React.FC = () => {
     }
   };
 
-  // 🛡️ HELPER: SAFE NUMBER PARSER (Prevents Math Crashes)
   const safeParse = (val: any) => {
     if (!val) return 0;
-    const str = String(val); // Force string
-    const num = parseFloat(str.replace(/[^0-9.]/g, '')); // Remove $ and ,
+    const str = String(val);
+    const num = parseFloat(str.replace(/[^0-9.]/g, ''));
     return isNaN(num) ? 0 : num;
   };
 
@@ -72,12 +71,9 @@ const SourcingPage: React.FC = () => {
     
     try {
       const fullQuery = condition === 'New' ? `${query} new with tags` : query;
-      
-      // Call the Fixed Brain
       const data = await scoutProduct(fullQuery, selectedFile || undefined);
       setScoutResult(data);
 
-      // Safe Math for Calculator Auto-Fill
       const min = safeParse(data.minPrice);
       const max = safeParse(data.maxPrice);
       
@@ -128,7 +124,6 @@ const SourcingPage: React.FC = () => {
     }
   }, [costPrice, sellPrice, shipping, platform]);
 
-  // 🎨 FLIP STATUS LOGIC
   const getFlipStatus = (roiVal: number) => {
     if (roiVal < 20) return { color: 'bg-red-500', text: 'bg-red-600', label: '⛔ Bad Flip', glow: 'shadow-red-500/50' };
     if (roiVal < 75) return { color: 'bg-orange-500', text: 'bg-orange-500', label: '⚠️ Decent Flip', glow: 'shadow-orange-500/50' };
@@ -137,7 +132,7 @@ const SourcingPage: React.FC = () => {
 
   const getButtonClass = (p: string, activeColor: string) => {
     const isActive = platform === p;
-    return `flex items-center justify-center py-3 rounded-xl text-xs font-bold transition-all duration-300 border ${
+    return `flex items-center justify-center py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-300 border ${
       isActive 
         ? `bg-white dark:bg-slate-700 ${activeColor} dark:text-white border-slate-200 dark:border-slate-600 shadow-md transform scale-105` 
         : 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border-transparent hover:bg-white dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300 hover:shadow-sm'
@@ -146,21 +141,20 @@ const SourcingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen !bg-slate-50 dark:!bg-slate-900 pb-24 pt-24 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-300">
-      <div className="max-w-md mx-auto relative">
+      <div className="max-w-4xl mx-auto relative">
         
         {/* HEADER */}
-        <div className="text-center mb-4 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0F172A] dark:bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider mb-3 shadow-lg shadow-blue-900/20">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
-            AI Market Scanner
+            Market Command Center
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Sourcing Assistant</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">Scan items & check profitability instantly.</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Profit Scout</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">Real-time valuation & market intelligence.</p>
         </div>
 
         {/* 🔭 SEARCH WIZARD */}
-        <div className="!bg-white dark:!bg-slate-800 rounded-[24px] shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 p-2 mb-6 transition-all duration-300">
-          
+        <div className="max-w-xl mx-auto !bg-white dark:!bg-slate-800 rounded-[24px] shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 p-2 mb-8 transition-all duration-300 relative z-20">
           <div className="flex gap-2">
             <div className="relative flex-grow">
                <input 
@@ -172,13 +166,13 @@ const SourcingPage: React.FC = () => {
                  className="w-full !bg-slate-50 dark:!bg-slate-900 rounded-xl pl-4 pr-14 py-3.5 font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                />
                
-               {/* 📸 CAMERA BUTTON - PREMIUM TOGGLE DESIGN */}
+               {/* 📸 NEON TOGGLE CAMERA BUTTON */}
                <button 
                  onClick={() => fileInputRef.current?.click()}
                  className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all duration-300 shadow-sm ${
                    selectedFile 
-                     ? 'bg-emerald-500 text-white shadow-emerald-500/30 scale-105' // Active: Neon Green & White
-                     : 'bg-white dark:bg-slate-700 text-slate-400 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-600 hover:text-slate-600 dark:hover:text-slate-200' // Inactive: Clean Surface
+                     ? 'bg-emerald-500 text-white shadow-emerald-500/30 scale-105' 
+                     : 'bg-white dark:bg-slate-700 text-slate-400 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-600 hover:text-slate-600 dark:hover:text-slate-200'
                  }`}
                  title={selectedFile ? "Change Photo" : "Upload Photo"}
                >
@@ -190,7 +184,7 @@ const SourcingPage: React.FC = () => {
             <button 
               onClick={handleScout}
               disabled={loading}
-              className="bg-[#0F172A] dark:bg-blue-600 text-white px-5 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-blue-700 disabled:opacity-80 transition-all flex items-center justify-center min-w-[60px] shadow-lg shadow-slate-900/20"
+              className="bg-[#0F172A] dark:bg-blue-600 text-white px-6 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-blue-700 disabled:opacity-80 transition-all flex items-center justify-center min-w-[60px] shadow-lg shadow-slate-900/20"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -200,168 +194,154 @@ const SourcingPage: React.FC = () => {
             </button>
           </div>
 
-          {error && (
-            <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-medium rounded-xl flex items-center gap-2 animate-in slide-in-from-top-1">
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              {error}
-            </div>
-          )}
-
           {showRefine && !error && (
-            <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 animate-in slide-in-from-top-2 duration-300">
-              <div className="flex gap-3">
-                 {imagePreview && (
-                   <div className="w-16 h-16 rounded-lg bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 overflow-hidden flex-shrink-0 relative group">
-                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                      <button onClick={handleRemoveImage} className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center font-bold text-xs transition-opacity">✕</button>
-                   </div>
-                 )}
-                 <div className="flex-grow">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Condition</label>
-                    <div className="flex gap-2">
-                       {['New', 'Used', 'Damaged'].map((c) => (
-                         <button 
-                           key={c}
-                           onClick={() => setCondition(c)}
-                           className={`flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all ${condition === c ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300' : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 hover:border-blue-200'}`}
-                         >
-                           {c}
-                         </button>
-                       ))}
-                    </div>
-                 </div>
-              </div>
+            <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700 animate-in slide-in-from-top-2 duration-300 flex items-center justify-between px-2 pb-1">
+               <div className="flex gap-2">
+                  {['New', 'Used', 'Damaged'].map((c) => (
+                    <button 
+                      key={c}
+                      onClick={() => setCondition(c)}
+                      className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md border transition-all ${condition === c ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300' : 'bg-slate-50 dark:bg-slate-900 border-transparent text-slate-400 dark:text-slate-500 hover:bg-slate-100'}`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+               </div>
+               {imagePreview && (
+                 <button onClick={handleRemoveImage} className="text-[10px] text-red-500 hover:underline font-bold uppercase">Remove Photo</button>
+               )}
             </div>
           )}
         </div>
 
-        {/* 📉 AI RESULT CARD */}
+        {/* ==================== MARKET DASHBOARD ==================== */}
         {scoutResult && !loading && !error && (
-          <div className="!bg-white dark:!bg-slate-800 rounded-[24px] p-6 shadow-xl border border-slate-100 dark:border-slate-700 text-center relative overflow-hidden mb-6 animate-in slide-in-from-top-4 duration-500">
-             <div className={`absolute top-0 left-0 w-full h-1.5 ${scoutResult.verdict === 'BUY' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+          <div className="animate-in slide-in-from-bottom-8 duration-700 space-y-6">
              
-             <div className="flex justify-between items-start mb-4">
-                <div className="text-left">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Verdict</div>
-                  <div className={`text-3xl font-black tracking-tight ${scoutResult.verdict === 'BUY' ? 'text-green-500' : 'text-red-500'}`}>
-                    {scoutResult.verdict}
-                  </div>
+             {/* 1. TOP ROW: VERDICT & PRICE */}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* VERDICT CARD */}
+                <div className="!bg-white dark:!bg-slate-800 rounded-[24px] p-6 shadow-xl border border-slate-100 dark:border-slate-700 relative overflow-hidden">
+                   <div className={`absolute top-0 left-0 w-1.5 h-full ${scoutResult.verdict === 'BUY' ? 'bg-green-500' : scoutResult.verdict === 'CAUTION' ? 'bg-orange-500' : 'bg-red-500'}`}></div>
+                   <div className="flex justify-between items-start">
+                      <div>
+                         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">AI Verdict</div>
+                         <div className={`text-4xl font-black tracking-tight ${scoutResult.verdict === 'BUY' ? 'text-green-500' : scoutResult.verdict === 'CAUTION' ? 'text-orange-500' : 'text-red-500'}`}>
+                           {scoutResult.verdict}
+                         </div>
+                      </div>
+                      <div className="text-right">
+                         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Market Value</div>
+                         <div className="text-2xl font-black text-slate-900 dark:text-white">${scoutResult.minPrice} - ${scoutResult.maxPrice}</div>
+                      </div>
+                   </div>
+                   <p className="mt-4 text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
+                     {scoutResult.reason}
+                   </p>
                 </div>
-                <div className="text-right">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Est. Value</div>
-                  <div className="text-xl font-black text-slate-900 dark:text-white">${scoutResult.minPrice}-${scoutResult.maxPrice}</div>
+
+                {/* CALCULATOR CARD (Simplified) */}
+                <div className="!bg-white dark:!bg-slate-800 rounded-[24px] p-6 shadow-xl border border-slate-100 dark:border-slate-700">
+                   <div className="flex justify-between items-center mb-4">
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Quick Calc</div>
+                      <div className="flex gap-1">
+                         {['ebay', 'posh', 'mercari'].map(p => (
+                            <button key={p} onClick={() => setPlatform(p as any)} className={`w-2 h-2 rounded-full transition-all ${platform === p ? 'bg-blue-500 scale-125' : 'bg-slate-200 dark:bg-slate-700'}`}></button>
+                         ))}
+                      </div>
+                   </div>
+                   <div className="flex gap-3">
+                      <div className="flex-1">
+                         <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Cost</label>
+                         <input type="number" value={costPrice} onChange={e => setCostPrice(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-900 rounded-lg px-3 py-2 text-sm font-bold border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-blue-500" placeholder="$0" />
+                      </div>
+                      <div className="flex-1">
+                         <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Profit</label>
+                         <div className={`w-full rounded-lg px-3 py-2 text-sm font-bold border flex items-center justify-center ${profit && profit > 0 ? 'bg-green-50 text-green-600 border-green-200' : 'bg-slate-50 text-slate-400 border-slate-200'}`}>
+                            {profit ? `$${profit.toFixed(2)}` : '--'}
+                         </div>
+                      </div>
+                   </div>
                 </div>
              </div>
-             
-             <p className="text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-700 leading-relaxed">
-               "{scoutResult.reason}"
-             </p>
-          </div>
-        )}
 
-        {/* 3. CALCULATOR INPUTS */}
-        <div className="!bg-white dark:!bg-slate-800 rounded-[32px] border border-slate-100 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none p-6 mb-6">
-          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Select Platform</label>
-          <div className="grid grid-cols-3 gap-2 mb-8 p-1.5 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-700">
-            <button onClick={() => setPlatform('ebay')} className={getButtonClass('ebay', 'text-blue-600')}>eBay</button>
-            <button onClick={() => setPlatform('posh')} className={getButtonClass('posh', 'text-red-600')}>Posh</button>
-            <button onClick={() => setPlatform('mercari')} className={getButtonClass('mercari', 'text-purple-600')}>Mercari</button>
-            <button onClick={() => setPlatform('shopify')} className={getButtonClass('shopify', 'text-green-600')}>Shopify</button>
-            <button onClick={() => setPlatform('etsy')} className={getButtonClass('etsy', 'text-orange-600')}>Etsy</button>
-            <button onClick={() => setPlatform('depop')} className={getButtonClass('depop', 'text-slate-800 dark:text-slate-200')}>Depop</button>
-          </div>
+             {/* 2. MIDDLE ROW: BENTO METRICS GRID */}
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                
+                {/* METRIC 1: SELL-THROUGH */}
+                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sell-Through</div>
+                   <div className="mt-2">
+                      <div className="flex items-end gap-1">
+                         <span className="text-2xl font-black text-slate-900 dark:text-white">{scoutResult.metrics?.sell_through}%</span>
+                         <span className="text-[10px] font-bold text-green-500 mb-1">STR</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full mt-2 overflow-hidden">
+                         <div className="h-full bg-gradient-to-r from-blue-400 to-green-500" style={{ width: `${scoutResult.metrics?.sell_through}%` }}></div>
+                      </div>
+                   </div>
+                </div>
 
-          <div className="space-y-5">
-            <div className="group">
-              <label className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                Item Cost
-                {costPrice && <span className="text-emerald-600 text-[10px] bg-emerald-50 dark:bg-emerald-900/30 px-1.5 rounded">Investment</span>}
-              </label>
-              <div className="relative">
-                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">$</span>
-                <input 
-                  type="number" 
-                  inputMode="decimal"
-                  value={costPrice}
-                  onChange={(e) => setCostPrice(e.target.value)}
-                  // FIX: Added '!' to input background
-                  className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl pl-10 pr-4 py-4 text-xl font-bold text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all shadow-inner"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
+                {/* METRIC 2: DAYS TO SELL */}
+                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg Time</div>
+                   <div className="mt-2">
+                      <div className="text-2xl font-black text-slate-900 dark:text-white">{scoutResult.metrics?.days_to_sell} <span className="text-sm font-medium text-slate-400">Days</span></div>
+                      <p className="text-[10px] text-slate-400 mt-1">To sell similar items</p>
+                   </div>
+                </div>
 
-            <div className="group">
-              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Target Price</label>
-              <div className="relative">
-                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">$</span>
-                <input 
-                  type="number" 
-                  inputMode="decimal"
-                  value={sellPrice}
-                  onChange={(e) => setSellPrice(e.target.value)}
-                  className="w-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl pl-10 pr-4 py-4 text-xl font-bold text-emerald-900 dark:text-emerald-400 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-inner placeholder:text-emerald-300"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-            
-            <div className="group">
-               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Shipping</label>
-               <div className="relative">
-                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</span>
-                <input 
-                  type="number" 
-                  inputMode="decimal"
-                  value={shipping}
-                  onChange={(e) => setShipping(e.target.value)}
-                  className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl pl-10 pr-4 py-3 text-lg font-bold text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all shadow-inner"
-                  placeholder="0.00"
-                />
-               </div>
-            </div>
-          </div>
-        </div>
+                {/* METRIC 3: COMPETITION */}
+                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Competition</div>
+                   <div className="mt-2">
+                      <div className={`text-lg font-black uppercase ${scoutResult.metrics?.competition === 'Low' ? 'text-green-500' : 'text-orange-500'}`}>
+                         {scoutResult.metrics?.competition || 'Medium'}
+                      </div>
+                      <div className="flex gap-1 mt-2">
+                         {[1,2,3,4].map(i => (
+                            <div key={i} className={`h-1.5 flex-1 rounded-full ${
+                               (scoutResult.metrics?.competition === 'High' && i <= 3) ? 'bg-red-400' : 
+                               (scoutResult.metrics?.competition === 'Medium' && i <= 2) ? 'bg-orange-400' :
+                               (scoutResult.metrics?.competition === 'Low' && i <= 1) ? 'bg-green-400' : 'bg-slate-100 dark:bg-slate-700'
+                            }`}></div>
+                         ))}
+                      </div>
+                   </div>
+                </div>
 
-        {/* 4. RESULTS CARD */}
-        {profit !== null && !loading ? (
-          <div className={`relative overflow-hidden rounded-[32px] p-8 text-center shadow-2xl transition-all duration-500 transform animate-in slide-in-from-bottom-8 ${
-             roi && roi < 20 ? 'bg-red-600' : '!bg-[#0F172A] dark:!bg-slate-800'
-          }`}>
-             {/* Dynamic Glow Background */}
-             <div className={`absolute -top-20 -right-20 w-64 h-64 rounded-full blur-[80px] opacity-40 pointer-events-none ${
-                roi && roi < 20 ? 'bg-red-900' : roi && roi >= 75 ? 'bg-emerald-500' : 'bg-orange-500'
-             }`}></div>
+                {/* METRIC 4: VOLATILITY */}
+                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Price Stability</div>
+                   <div className="mt-2">
+                      <div className="text-lg font-black text-slate-900 dark:text-white">{scoutResult.metrics?.volatility || 'Stable'}</div>
+                      {/* Fake sparkline for visuals */}
+                      <svg className="w-full h-6 text-blue-500 mt-1" viewBox="0 0 100 20" preserveAspectRatio="none">
+                         <path d="M0,15 Q20,5 40,10 T80,5 T100,15" fill="none" stroke="currentColor" strokeWidth="2" />
+                      </svg>
+                   </div>
+                </div>
+             </div>
 
-            <div className="relative z-10">
-              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60 mb-1">Net Profit</div>
-              <div className="text-6xl font-black tracking-tighter text-white mb-2 drop-shadow-lg">
-                <span className="text-3xl align-top opacity-50 font-medium">$</span>
-                {profit.toFixed(2)}
-              </div>
-              
-              <div className="flex justify-center items-center gap-6 text-sm font-medium text-white/80 mb-6 bg-white/10 py-2 px-4 rounded-full inline-flex backdrop-blur-md border border-white/5">
-                <span className={roi && roi >= 75 ? "text-emerald-300 font-bold" : ""}>ROI: {roi?.toFixed(0)}%</span>
-                <span className="w-1 h-1 rounded-full bg-white/30"></span>
-                <span>Fees: ${fees.toFixed(2)}</span>
-              </div>
+             {/* 3. BOTTOM ROW: SEO KEYWORDS */}
+             <div className="bg-[#0F172A] dark:bg-blue-900/20 p-6 rounded-[24px] border border-slate-800 dark:border-blue-800/30 relative overflow-hidden">
+                <div className="relative z-10">
+                   <div className="flex items-center gap-2 mb-3">
+                      <span className="text-lg">💎</span>
+                      <h3 className="text-xs font-bold text-white uppercase tracking-widest">Winning SEO Keywords</h3>
+                   </div>
+                   <div className="flex flex-wrap gap-2">
+                      {scoutResult.keywords?.map((kw: string, i: number) => (
+                         <span key={i} className="bg-white/10 hover:bg-white/20 text-white text-xs font-medium px-3 py-1.5 rounded-lg border border-white/10 cursor-pointer transition-colors">
+                            {kw}
+                         </span>
+                      )) || <span className="text-slate-400 text-xs">No keywords found.</span>}
+                   </div>
+                </div>
+                {/* Background Decoration */}
+                <div className="absolute right-0 top-0 w-32 h-32 bg-blue-500/20 blur-[50px] rounded-full pointer-events-none"></div>
+             </div>
 
-              {/* Dynamic Badge Based on New Logic */}
-              {roi !== null && (
-                 <div className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg ${
-                    getFlipStatus(roi).color
-                 } ${getFlipStatus(roi).glow} text-white`}>
-                    {roi >= 75 && <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>}
-                    {getFlipStatus(roi).label}
-                 </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="text-center p-8 opacity-50 animate-pulse">
-            <p className="text-sm font-medium text-slate-400">
-              {loading ? "Scanning market..." : "Enter details above to calculate..."}
-            </p>
           </div>
         )}
 
