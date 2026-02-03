@@ -191,7 +191,6 @@ const BuilderPage: React.FC = () => {
   const handleCopy = (content: string, type: 'title' | 'html' | 'text') => {
     if (!content) return;
     
-    // If copying text, strip HTML first
     const textToCopy = type === 'text' ? formatPlainText(content) : content;
     
     navigator.clipboard.writeText(textToCopy);
@@ -277,7 +276,6 @@ const BuilderPage: React.FC = () => {
         {/* ================= LEFT COLUMN: MEDIA & DATA ================= */}
         <div className="lg:col-span-5 space-y-6">
           <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6">
-            {/* ... Media Uploader (unchanged) ... */}
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Source Media</h3>
               <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold px-2 py-1 rounded-md">Multi-Vision Ready</span>
@@ -371,23 +369,32 @@ const BuilderPage: React.FC = () => {
                </div>
             </div>
 
-            {/* TITLE (Full Width) + COPY BUTTON */}
+            {/* TITLE (Full Width) + PREMIUM COPY BUTTON */}
             <div className="mb-4">
                <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Title</label>
-               <div className="relative">
-                 <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 pr-14 font-bold text-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 shadow-sm" placeholder="AI Generated Title..." />
-                 {/* 🆕 TITLE COPY BUTTON */}
-                 <button 
-                   onClick={() => handleCopy(title, 'title')} 
-                   className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-blue-600 transition-colors"
-                   title="Copy Title"
-                 >
-                   {copySuccess === 'title' ? (
-                     <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
-                   ) : (
-                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                   )}
-                 </button>
+               <div className="relative group">
+                 <input 
+                   type="text" 
+                   value={title} 
+                   onChange={(e) => setTitle(e.target.value)} 
+                   className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 pr-20 font-bold text-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 shadow-sm" 
+                   placeholder="AI Generated Title..." 
+                 />
+                 
+                 {/* 🆕 PREMIUM COPY BUTTON (Inside Input) */}
+                 <div className="absolute right-2 top-1/2 -translate-y-1/2 border-l border-slate-200 dark:border-slate-700 pl-2">
+                   <button 
+                     onClick={() => handleCopy(title, 'title')} 
+                     className="p-2 bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-slate-700 text-slate-400 hover:text-blue-600 rounded-lg transition-all shadow-sm flex items-center justify-center w-8 h-8"
+                     title="Copy Title to Clipboard"
+                   >
+                     {copySuccess === 'title' ? (
+                       <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"/></svg>
+                     ) : (
+                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                     )}
+                   </button>
+                 </div>
                </div>
             </div>
 
