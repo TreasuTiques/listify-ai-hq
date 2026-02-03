@@ -50,12 +50,10 @@ const BuilderPage: React.FC = () => {
 
   // 🔐 ROBUST AUTH LISTENER
   useEffect(() => {
-    // 1. Check active session immediately
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
 
-    // 2. Listen for any auth changes (sign in, token refresh, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -136,7 +134,6 @@ const BuilderPage: React.FC = () => {
       }
 
       setTitle(result.title || '');
-      // Fallback for brand if it came in top-level
       if (!brand && result.brand) setBrand(result.brand); 
       
       setDescription(result.description || '');
@@ -181,11 +178,8 @@ const BuilderPage: React.FC = () => {
     setImagePreviews(updatedPreviews);
   };
 
-  // 🔒 SECURE TOGGLE CHECK
   const handleProModeToggle = async () => {
-    // 1. Double check session freshly from Supabase to avoid stale state bugs
     const { data: { session } } = await supabase.auth.getSession();
-    
     if (!session?.user) {
       alert("🔒 PRO FEATURE: Sign up for a free account to unlock AI Storytelling Mode!");
       return;
@@ -193,10 +187,13 @@ const BuilderPage: React.FC = () => {
     setIsProMode(!isProMode);
   };
 
-  const copyToClipboard = (text: string, type: 'title' | 'desc') => {
-    const textToCopy = (type === 'desc' && editorTab === 'text' && isHtmlPlatform) 
-      ? formatPlainText(text) 
-      : text;
+  // 🛠️ UPGRADED COPY FUNCTION
+  const handleCopy = (content: string, type: 'title' | 'html' | 'text') => {
+    if (!content) return;
+    
+    // If copying text, strip HTML first
+    const textToCopy = type === 'text' ? formatPlainText(content) : content;
+    
     navigator.clipboard.writeText(textToCopy);
     setCopySuccess(type);
     setTimeout(() => setCopySuccess(''), 2000);
@@ -205,10 +202,8 @@ const BuilderPage: React.FC = () => {
   const onDragOver = (e: React.DragEvent) => e.preventDefault();
   
   const handleSaveToInventory = async () => {
-    // Check state user or fetch fresh
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) { alert("Please log in to save listings!"); return; }
-    
     if (!title) { alert("Please generate a listing first."); return; }
 
     setLoading(true);
@@ -281,9 +276,8 @@ const BuilderPage: React.FC = () => {
         
         {/* ================= LEFT COLUMN: MEDIA & DATA ================= */}
         <div className="lg:col-span-5 space-y-6">
-          
-          {/* 1. MEDIA UPLOADER */}
           <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+            {/* ... Media Uploader (unchanged) ... */}
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Source Media</h3>
               <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold px-2 py-1 rounded-md">Multi-Vision Ready</span>
@@ -316,10 +310,8 @@ const BuilderPage: React.FC = () => {
             </div>
           </div>
 
-          {/* 2. ITEM SPECIFICS & INSIGHTS (UNIFIED PREMIUM CARD) */}
+          {/* ITEM SPECIFICS & INSIGHTS */}
           <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6 space-y-6">
-             
-             {/* SECTION: SELLER INSIGHTS */}
              <div>
                <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
@@ -336,7 +328,6 @@ const BuilderPage: React.FC = () => {
 
              <div className="border-t border-slate-100 dark:border-slate-700 my-4"></div>
 
-             {/* SECTION: ITEM SPECIFICS GRID */}
              <div>
                 <div className="flex items-center justify-between mb-4">
                    <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
@@ -345,33 +336,20 @@ const BuilderPage: React.FC = () => {
                    <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">Auto-Fills on Generate</span>
                 </div>
                 
-                {/* THE PREMIUM GRID - Matches Title/Price Inputs Perfectly */}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-4">
                    <PremiumInput label="Brand / Maker" value={brand} onChange={(e: any) => setBrand(e.target.value)} placeholder="Nike, Sony..." width="half" />
                    <PremiumInput label="Category" value={category} onChange={(e: any) => setCategory(e.target.value)} placeholder="Shoes, Electronics..." width="half" />
-                   
                    <PremiumInput label="Size / Dims" value={size} onChange={(e: any) => setSize(e.target.value)} placeholder="Large, 12x10..." width="half" />
                    <PremiumInput label="Color" value={color} onChange={(e: any) => setColor(e.target.value)} placeholder="Red, Black..." width="half" />
-                   
                    <PremiumInput label="Material" value={material} onChange={(e: any) => setMaterial(e.target.value)} placeholder="Cotton, Metal..." width="half" />
                    <PremiumInput label="Year / Era" value={year} onChange={(e: any) => setYear(e.target.value)} placeholder="1990s, 2023..." width="half" />
-                   
                    <PremiumInput label="Made In" value={madeIn} onChange={(e: any) => setMadeIn(e.target.value)} placeholder="USA, China..." width="half" />
                    <PremiumInput label="Department" value={department} onChange={(e: any) => setDepartment(e.target.value)} placeholder="Men, Women..." width="half" />
-                   
                    <PremiumInput label="Model / Style" value={model} onChange={(e: any) => setModel(e.target.value)} placeholder="Air Max, 501..." width="half" />
                    <PremiumInput label="Theme" value={theme} onChange={(e: any) => setTheme(e.target.value)} placeholder="Vintage, Sports..." width="half" />
-                   
-                   {/* Full Width Feature */}
                    <div className="col-span-2">
                       <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Key Features</label>
-                      <input 
-                        type="text" 
-                        value={features} 
-                        onChange={e => setFeatures(e.target.value)} 
-                        className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 text-sm shadow-sm" 
-                        placeholder="Waterproof, Pockets, Signed, Limited Edition..." 
-                      />
+                      <input type="text" value={features} onChange={e => setFeatures(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 text-sm shadow-sm" placeholder="Waterproof, Pockets, Signed, Limited Edition..." />
                    </div>
                 </div>
              </div>
@@ -393,15 +371,28 @@ const BuilderPage: React.FC = () => {
                </div>
             </div>
 
-            {/* TITLE (Full Width) */}
+            {/* TITLE (Full Width) + COPY BUTTON */}
             <div className="mb-4">
                <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Title</label>
-               <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 font-bold text-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 shadow-sm" placeholder="AI Generated Title..." />
+               <div className="relative">
+                 <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 pr-14 font-bold text-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 shadow-sm" placeholder="AI Generated Title..." />
+                 {/* 🆕 TITLE COPY BUTTON */}
+                 <button 
+                   onClick={() => handleCopy(title, 'title')} 
+                   className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-white dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-blue-600 transition-colors"
+                   title="Copy Title"
+                 >
+                   {copySuccess === 'title' ? (
+                     <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
+                   ) : (
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                   )}
+                 </button>
+               </div>
             </div>
 
-            {/* CONDITION & PRICE ROW (Compact) */}
+            {/* CONDITION & PRICE ROW */}
             <div className="grid grid-cols-12 gap-4 mb-6">
-               {/* Condition Selector (Larger) */}
                <div className="col-span-8">
                   <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Condition {showConditionError && <span className="text-red-500">*</span>}</label>
                   <div className="relative">
@@ -417,7 +408,6 @@ const BuilderPage: React.FC = () => {
                   </div>
                </div>
 
-               {/* Price Input (Smaller) */}
                <div className="col-span-4">
                   <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Price ($)</label>
                   <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 rounded-xl px-4 py-3.5 font-bold focus:outline-none focus:border-emerald-500 transition-all placeholder:text-emerald-300 shadow-sm text-center" placeholder="0.00" />
@@ -437,22 +427,39 @@ const BuilderPage: React.FC = () => {
                )}
             </button>
 
-            {/* DESCRIPTION EDITOR */}
+            {/* DESCRIPTION EDITOR & SPLIT COPY BUTTONS */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description Preview</label>
                  
-                 {isHtmlPlatform ? (
-                    <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
-                          <button onClick={() => setEditorTab('visual')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'visual' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Visual</button>
-                          <button onClick={() => setEditorTab('html')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'html' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>HTML</button>
-                          <button onClick={() => setEditorTab('text')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'text' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Text</button>
+                 <div className="flex items-center gap-3">
+                    {/* TABS */}
+                    {isHtmlPlatform && (
+                        <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                              <button onClick={() => setEditorTab('visual')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'visual' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Visual</button>
+                              <button onClick={() => setEditorTab('html')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'html' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>HTML</button>
+                              <button onClick={() => setEditorTab('text')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'text' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Text</button>
+                        </div>
+                    )}
+
+                    {/* 🆕 SPLIT COPY BUTTONS */}
+                    <div className="flex gap-2">
+                        {isHtmlPlatform && (
+                            <button 
+                                onClick={() => handleCopy(description, 'html')} 
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all shadow-md shadow-blue-500/20 active:scale-95"
+                            >
+                                {copySuccess === 'html' ? <span>✓ Copied</span> : <><span>&lt;/&gt;</span> Copy HTML</>}
+                            </button>
+                        )}
+                        <button 
+                            onClick={() => handleCopy(description, 'text')} 
+                            className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all active:scale-95"
+                        >
+                            {copySuccess === 'text' ? <span>✓ Copied</span> : <><span>📄</span> Copy Text</>}
+                        </button>
                     </div>
-                 ) : null}
-                 
-                 <button onClick={() => copyToClipboard(description, 'desc')} className="text-blue-600 dark:text-blue-400 text-xs font-bold hover:underline">
-                    {copySuccess === 'desc' ? 'Copied!' : 'Copy to Clipboard'}
-                 </button>
+                 </div>
               </div>
 
               <div className="relative">
