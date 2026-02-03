@@ -12,14 +12,29 @@ const BuilderPage: React.FC = () => {
   const [editorTab, setEditorTab] = useState<'visual' | 'html' | 'text'>('visual');
   const [copySuccess, setCopySuccess] = useState(''); 
   
-  // Form Fields
+  // 📝 CORE FIELDS
   const [title, setTitle] = useState('');
-  const [brand, setBrand] = useState('');
   const [condition, setCondition] = useState(''); 
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   
+  // 🔍 THE PERFECT 10 ITEM SPECIFICS
+  const [brand, setBrand] = useState('');
+  const [category, setCategory] = useState(''); // New
+  const [size, setSize] = useState(''); // New
+  const [color, setColor] = useState(''); // New
+  const [material, setMaterial] = useState(''); // New
+  const [year, setYear] = useState(''); // New
+  const [madeIn, setMadeIn] = useState(''); // New
+  const [department, setDepartment] = useState(''); // New
+  const [model, setModel] = useState(''); // New
+  const [theme, setTheme] = useState(''); // New
+  const [features, setFeatures] = useState(''); // New
+
+  // 🧠 SELLER INSIGHTS (The INAD Shield)
+  const [sellerInsights, setSellerInsights] = useState('');
+
   // 📸 Multi-Image Memory
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]); 
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -54,39 +69,58 @@ const BuilderPage: React.FC = () => {
   // 🛡️ Helper to check if platform supports HTML
   const isHtmlPlatform = activePlatform === 'ebay' || activePlatform === 'shopify';
 
-  // 🧹 SMART TEXT FORMATTER (Premium "Document" Look)
+  // 🧹 SMART TEXT FORMATTER
   const formatPlainText = (html: string) => {
     if (!html) return "";
-    
-    // 1. Convert HTML Structure to Clean Text Structure
     let text = html
-      .replace(/<br\s*\/?>/gi, '\n')         // Breaks to single newline
-      .replace(/<\/p>/gi, '\n')            // End paragraph = single newline
-      .replace(/<\/div>/gi, '\n')          // End div = single newline
-      .replace(/<li[^>]*>/gi, '• ')        // List items start with bullet
-      .replace(/<\/li>/gi, '\n')           // End list item = newline
-      .replace(/<\/ul>/gi, '\n')           // End list = extra newline for spacing
-      .replace(/<h[1-6][^>]*>/gi, '\n\n')  // Headers get double spacing above
-      .replace(/<\/h[1-6]>/gi, ':\n');     // Header endings get a colon and newline
-
-    // 2. Strip remaining tags (like <strong>, <ul> opening tags)
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<\/div>/gi, '\n')
+      .replace(/<li[^>]*>/gi, '• ')
+      .replace(/<\/li>/gi, '\n')
+      .replace(/<\/ul>/gi, '\n')
+      .replace(/<h[1-6][^>]*>/gi, '\n\n')
+      .replace(/<\/h[1-6]>/gi, ':\n');
     const tmp = document.createElement("DIV");
     tmp.innerHTML = text;
     const cleanText = tmp.textContent || tmp.innerText || "";
-    
-    // 3. Clean up excessive whitespace (max 2 newlines) and trim
     return cleanText.replace(/\n\s*\n\s*\n/g, '\n\n').trim();
   };
 
-  const runAIAnalysis = async (files: File[], platform: string, proMode: boolean, cond: string) => {
-    if (files.length === 0) return;
-    if (!cond) return; 
+  // 🚀 MAIN AI TRIGGER
+  const handleGenerateListing = async () => {
+    if (selectedFiles.length === 0) { alert("Please upload at least one photo."); return; }
+    if (!condition) { setShowConditionError(true); alert("Please select a condition first."); return; }
 
     setAnalyzing(true);
+    
     try {
-      const result = await generateListingFromImages(files, platform, proMode, cond);
+      // 📦 PACKAGING THE CONTEXT
+      // We bundle all the user inputs into a single "Context String" to send to the AI
+      // This allows the AI to use your specific inputs without changing the API signature yet.
+      const richContext = `
+        CONDITION: ${condition}.
+        USER_INSIGHTS: ${sellerInsights}.
+        SPECS_PROVIDED: 
+        - Brand: ${brand}
+        - Category: ${category}
+        - Size: ${size}
+        - Color: ${color}
+        - Material: ${material}
+        - Year/Era: ${year}
+        - Origin: ${madeIn}
+        - Department: ${department}
+        - Model: ${model}
+        - Theme: ${theme}
+        - Features: ${features}
+      `;
+
+      const result = await generateListingFromImages(selectedFiles, activePlatform, isProMode, richContext);
+      
       setTitle(result.title || '');
-      setBrand(result.brand || '');
+      // Only overwrite brand if AI found something better and user left it blank
+      if (!brand && result.brand) setBrand(result.brand); 
+      
       setDescription(result.description || '');
       setPrice(result.estimated_price || '');
       setTags(result.tags || []);
@@ -120,10 +154,7 @@ const BuilderPage: React.FC = () => {
       });
     }));
     setImagePreviews(newPreviews);
-
-    if (condition) {
-       await runAIAnalysis(updatedFiles, activePlatform, isProMode, condition);
-    }
+    // 🛑 STOPPED AUTO-ANALYSIS here to save credits
   };
 
   const removeImage = (index: number) => {
@@ -133,50 +164,28 @@ const BuilderPage: React.FC = () => {
     setImagePreviews(updatedPreviews);
   };
 
-  const handlePlatformChange = async (newPlatform: string) => {
-    setActivePlatform(newPlatform);
-    if (selectedFiles.length > 0 && condition) {
-      await runAIAnalysis(selectedFiles, newPlatform, isProMode, condition);
-    }
-  };
-
   const handleProModeToggle = async () => {
     if (!user) {
       alert("🔒 PRO FEATURE: Sign up for a free account to unlock AI Storytelling Mode!");
       return;
     }
-    const newMode = !isProMode;
-    setIsProMode(newMode);
-    if (selectedFiles.length > 0 && condition) {
-      await runAIAnalysis(selectedFiles, activePlatform, newMode, condition);
-    }
-  };
-
-  const handleConditionChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newCondition = e.target.value;
-    setCondition(newCondition);
-    setShowConditionError(false);
-    if (selectedFiles.length > 0) {
-      await runAIAnalysis(selectedFiles, activePlatform, isProMode, newCondition);
-    }
+    setIsProMode(!isProMode);
   };
 
   const copyToClipboard = (text: string, type: 'title' | 'desc') => {
-    // Copy the formatted plain text if we are in text mode, otherwise raw
     const textToCopy = (type === 'desc' && editorTab === 'text' && isHtmlPlatform) 
       ? formatPlainText(text) 
       : text;
-
     navigator.clipboard.writeText(textToCopy);
     setCopySuccess(type);
     setTimeout(() => setCopySuccess(''), 2000);
   };
+  
   const onDragOver = (e: React.DragEvent) => e.preventDefault();
   
-  const handleGenerateAndSave = async () => {
+  const handleSaveToInventory = async () => {
     if (!user) { alert("Please log in to save listings!"); return; }
-    if (!title) { alert("Please enter a title first."); return; }
-    if (!condition) { setShowConditionError(true); alert("⚠️ PLEASE SELECT A CONDITION."); return; }
+    if (!title) { alert("Please generate a listing first."); return; }
 
     setLoading(true);
     try {
@@ -211,7 +220,7 @@ const BuilderPage: React.FC = () => {
             <span className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></span>
             Listing Command Center
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Upload up to 8 photos for maximum accuracy.</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Upload photos, fill details, and let AI work its magic.</p>
         </div>
         
         <div className="flex items-center gap-4">
@@ -225,15 +234,16 @@ const BuilderPage: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* LEFT COLUMN: PHOTOS & INPUTS */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6 relative overflow-hidden group">
+          <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Source Media</h3>
               <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold px-2 py-1 rounded-md">Multi-Vision Ready</span>
             </div>
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept="image/*" multiple />
 
-            <div onClick={() => fileInputRef.current?.click()} onDragOver={onDragOver} onDrop={handleFileUpload} className={`border-2 border-dashed rounded-2xl h-[400px] flex flex-col transition-all cursor-pointer relative overflow-hidden ${analyzing ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-700 !bg-slate-50/50 dark:!bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-blue-400'}`}>
+            <div onClick={() => fileInputRef.current?.click()} onDragOver={onDragOver} onDrop={handleFileUpload} className={`border-2 border-dashed rounded-2xl h-[320px] flex flex-col transition-all cursor-pointer relative overflow-hidden ${analyzing ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-700 !bg-slate-50/50 dark:!bg-slate-900/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-blue-400'}`}>
               {imagePreviews.length > 0 ? (
                 <div className="h-full flex flex-col">
                   <div className="h-2/3 w-full relative">
@@ -256,121 +266,149 @@ const BuilderPage: React.FC = () => {
                   <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Drop up to 8 Photos</p><p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Front, Back, Tags, Flaws</p>
                 </div>
               )}
-              {analyzing && (
-                <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center z-20">
-                  <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="font-bold text-blue-700 dark:text-blue-400 animate-pulse">Analyzing {imagePreviews.length} Photos...</p>
-                  <p className="text-xs text-blue-500 dark:text-blue-300">Reading Condition: {condition}...</p>
-                </div>
-              )}
             </div>
+          </div>
+
+          {/* 📝 ITEM SPECIFICS GRID */}
+          <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+             <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Key Specifics (Optional)</h3>
+                <span className="text-[10px] text-slate-400">Helps AI & eBay SEO</span>
+             </div>
+             
+             <div className="grid grid-cols-2 gap-4">
+                <input type="text" placeholder="Brand / Maker" value={brand} onChange={e => setBrand(e.target.value)} className="input-field" />
+                <input type="text" placeholder="Category" value={category} onChange={e => setCategory(e.target.value)} className="input-field" />
+                
+                <input type="text" placeholder="Size / Dims" value={size} onChange={e => setSize(e.target.value)} className="input-field" />
+                <input type="text" placeholder="Color" value={color} onChange={e => setColor(e.target.value)} className="input-field" />
+                
+                <input type="text" placeholder="Material" value={material} onChange={e => setMaterial(e.target.value)} className="input-field" />
+                <input type="text" placeholder="Year / Era" value={year} onChange={e => setYear(e.target.value)} className="input-field" />
+                
+                <input type="text" placeholder="Made In (Country)" value={madeIn} onChange={e => setMadeIn(e.target.value)} className="input-field" />
+                <input type="text" placeholder="Dept (Men/Wms/Kids)" value={department} onChange={e => setDepartment(e.target.value)} className="input-field" />
+                
+                <input type="text" placeholder="Model / Style" value={model} onChange={e => setModel(e.target.value)} className="input-field" />
+                <input type="text" placeholder="Theme (Star Wars, etc)" value={theme} onChange={e => setTheme(e.target.value)} className="input-field" />
+             </div>
+             <input type="text" placeholder="Features (Pockets, Waterproof, etc)" value={features} onChange={e => setFeatures(e.target.value)} className="input-field mt-4 w-full" />
+          </div>
+
+          {/* 🧠 SELLER INSIGHTS */}
+          <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+             <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Seller Insights (Hidden Details)</h3>
+             </div>
+             <textarea 
+               value={sellerInsights}
+               onChange={e => setSellerInsights(e.target.value)}
+               placeholder="Example: 'Small scratch on back', 'Smells slightly like vanilla', 'Zipper sticks a bit'. The AI will weave this into the description naturally."
+               className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 min-h-[80px] resize-none"
+             ></textarea>
           </div>
         </div>
 
+        {/* RIGHT COLUMN: GENERATOR & PREVIEW */}
         <div className="lg:col-span-7 space-y-6">
           <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-8">
-            <div className="mb-8">
-               <label className="block text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Target Marketplace</label>
+            
+            {/* PLATFORM SELECTOR */}
+            <div className="mb-6">
                <div className="flex flex-wrap gap-2">
                  {platforms.map((platform) => (
-                   <button key={platform.id} onClick={() => handlePlatformChange(platform.id)} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all border ${activePlatform === platform.id ? 'bg-[#0F172A] dark:bg-blue-600 text-white border-[#0F172A] dark:border-blue-600 shadow-md transform scale-105' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-600'}`}>
+                   <button key={platform.id} onClick={() => setActivePlatform(platform.id)} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all border ${activePlatform === platform.id ? 'bg-[#0F172A] dark:bg-blue-600 text-white border-[#0F172A] dark:border-blue-600 shadow-md' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-slate-300'}`}>
                      <span className={`w-2 h-2 rounded-full ${activePlatform === platform.id ? 'bg-white' : platform.color}`}></span>{platform.label}
                    </button>
                  ))}
                </div>
             </div>
 
-            <div className="mb-6 relative">
-              <div className="flex justify-between mb-2">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Listing Title</label>
-                <span className={`text-xs font-bold ${title.length > (activePlatform === 'poshmark' ? 50 : 80) ? 'text-red-500' : 'text-slate-400'}`}>{title.length} / {activePlatform === 'poshmark' ? '50' : '80'}</span>
-              </div>
-              <div className="relative">
-                <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 pr-16 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400" placeholder="AI will generate this..." />
-                <button onClick={() => copyToClipboard(title, 'title')} className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-400 p-2 rounded-lg transition-colors border border-blue-100 dark:border-blue-800" title="Copy Title">
-                  {copySuccess === 'title' ? <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg> : <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>}
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6 mb-6">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Brand</label>
-                <input type="text" value={brand} onChange={(e) => setBrand(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400" placeholder="Nike, Sony..." />
-              </div>
-              
-              <div className="relative">
-                <label className={`block text-xs font-bold uppercase tracking-wider mb-2 ${showConditionError ? 'text-red-500 animate-pulse' : 'text-slate-500 dark:text-slate-400'}`}>Condition {showConditionError && "(Required!)"}</label>
-                <div className="relative">
-                  <select value={condition} onChange={handleConditionChange} className={`w-full bg-white dark:bg-slate-900 border rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-4 transition-all appearance-none cursor-pointer ${showConditionError ? 'border-red-300 ring-red-500/10' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/10'}`}>
-                    <option value="" disabled>Select Condition...</option>
+            {/* GENERATE BUTTON (Replaces Auto-Run) */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+               {/* Condition Selector */}
+               <div className="relative">
+                  <select value={condition} onChange={e => {setCondition(e.target.value); setShowConditionError(false)}} className={`w-full bg-slate-50 dark:bg-slate-900 border rounded-xl px-4 py-3.5 font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-4 transition-all appearance-none cursor-pointer ${showConditionError ? 'border-red-300 ring-red-500/10' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/10'}`}>
+                    <option value="" disabled>Select Condition (Required)</option>
                     <option>New with Tags</option>
                     <option>New without Tags</option>
                     <option>Pre-owned (Excellent)</option>
                     <option>Pre-owned (Good)</option>
                     <option>For Parts / Not Working</option>
                   </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg></div>
-                </div>
-              </div>
+               </div>
+
+               {/* MAGIC BUTTON */}
+               <button 
+                 onClick={handleGenerateListing} 
+                 disabled={analyzing}
+                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm uppercase tracking-wider rounded-xl shadow-lg shadow-blue-500/30 transition-all transform active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+               >
+                 {analyzing ? (
+                   <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Writing...</>
+                 ) : (
+                   <>✨ Generate Premium Listing</>
+                 )}
+               </button>
             </div>
 
-            <div className="mb-6">
-               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">AI Estimated Price</label>
-               <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400 rounded-xl px-4 py-3 font-bold focus:outline-none focus:border-emerald-500 transition-all placeholder:text-emerald-300" placeholder="$0.00" />
+            {/* TITLE & PRICE */}
+            <div className="flex gap-4 mb-6">
+               <div className="flex-1">
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 block">Title</label>
+                  <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400" placeholder="Generated Title..." />
+               </div>
+               <div className="w-32">
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1 block">Price</label>
+                  <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-400 rounded-xl px-4 py-3 font-bold focus:outline-none focus:border-emerald-500 transition-all placeholder:text-emerald-300" placeholder="$0.00" />
+               </div>
             </div>
 
+            {/* DESCRIPTION EDITOR */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description</label>
                  
-                 {/* 🛠️ 3-TAB SWITCHER */}
                  {isHtmlPlatform ? (
-                    <div className="flex gap-2">
-                       <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                    <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
                           <button onClick={() => setEditorTab('visual')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'visual' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Visual</button>
                           <button onClick={() => setEditorTab('html')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'html' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>HTML</button>
                           <button onClick={() => setEditorTab('text')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'text' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Text</button>
-                       </div>
-                       <button onClick={() => copyToClipboard(description, 'desc')} className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all shadow-md shadow-blue-500/20">
-                          {copySuccess === 'desc' ? <span>✓ Copied</span> : <><span>📋</span> Copy</>}
-                       </button>
                     </div>
-                 ) : (
-                    <button onClick={() => copyToClipboard(description, 'desc')} className="bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all border border-blue-100 dark:border-blue-800">
-                        {copySuccess === 'desc' ? <span>✓ Copied</span> : <><span>📋</span> Copy Text</>}
-                    </button>
-                 )}
+                 ) : null}
+                 
+                 <button onClick={() => copyToClipboard(description, 'desc')} className="text-blue-600 dark:text-blue-400 text-xs font-bold hover:underline">
+                    {copySuccess === 'desc' ? 'Copied!' : 'Copy to Clipboard'}
+                 </button>
               </div>
 
-              {/* 🛠️ EDITOR VIEWS */}
               <div className="relative">
                  {isHtmlPlatform && editorTab === 'visual' ? (
                     <div 
                        className="w-full !bg-white dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert dark:invert dark:hue-rotate-180" 
-                       dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic">Select condition to generate listing...</p>' }}
+                       dangerouslySetInnerHTML={{ __html: description || '<p class="text-slate-400 italic text-center mt-20">1. Upload Photos<br>2. Fill Specs<br>3. Select Condition<br>4. Click Generate!</p>' }}
                     ></div>
                  ) : isHtmlPlatform && editorTab === 'text' ? (
-                    // 💎 PREMIUM TEXT VIEW: Sans-serif, larger font, relaxed spacing
-                    <textarea 
-                      readOnly 
-                      value={formatPlainText(description)} 
-                      className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-6 py-6 focus:outline-none h-[500px] resize-none text-left font-sans text-[15px] leading-relaxed text-slate-800 dark:text-slate-200"
-                    ></textarea>
-                 ) : isHtmlPlatform && editorTab === 'html' ? (
-                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full bg-[#1E293B] text-green-400 font-mono text-sm border border-slate-700 rounded-xl px-4 py-4 focus:outline-none focus:border-blue-500 h-[500px] resize-none" placeholder="<html>...</html>"></textarea>
+                    <textarea readOnly value={formatPlainText(description)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-6 py-6 focus:outline-none h-[500px] resize-none text-left font-sans text-[15px] leading-relaxed text-slate-800 dark:text-slate-200"></textarea>
                  ) : (
                     <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-[500px] resize-none" placeholder="AI will write this for you..."></textarea>
                  )}
               </div>
             </div>
 
-            <button onClick={handleGenerateAndSave} disabled={loading || analyzing} className="w-full bg-[#2563EB] hover:bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
-              {loading ? "Uploading & Saving..." : analyzing ? `Optimizing with ${condition}...` : `Save ${platforms.find(p => p.id === activePlatform)?.label} Listing`}
+            <button onClick={handleSaveToInventory} disabled={loading} className="w-full bg-[#0F172A] hover:bg-slate-800 text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+              {loading ? "Saving..." : `Save to Inventory`}
             </button>
           </div>
         </div>
       </div>
+      
+      {/* GLOBAL STYLES FOR INPUTS */}
+      <style>{`
+        .input-field {
+          @apply w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400;
+        }
+      `}</style>
     </div>
   );
 };
