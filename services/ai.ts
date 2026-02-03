@@ -6,7 +6,7 @@ if (!apiKey) console.error("Missing Gemini API Key! Check .env or Vercel setting
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// 🛑 MODEL LOCKED
+// 🛑 MODEL LOCKED (Reverted to the one that works for you!)
 const MODEL_NAME = "gemini-flash-latest";
 
 // Helper: Convert File to Base64
@@ -124,7 +124,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     </div>
   `;
 
-  // 🔥 ELITE PRO PROMPT (White-Labeled & Markdown-Free)
+  // 🔥 ELITE PRO PROMPT (Fixed Badge Positioning)
   const PREMIUM_PRO_PROMPT = `
     🚨 ACTIVATE "ELITE STORYTELLING ENGINE" 🚨
     
@@ -138,9 +138,11 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
        - Auto-detect ERA/STYLE (e.g., 80s Neon, 90s Grunge, Minimalist, Y2K).
        - Style the HTML colors/fonts inline to match this theme.
     
-    2. **SKU PILL BADGE:**
+    2. **SKU PILL BADGE (NO OVERLAP RULE):**
        - Generate a unique SKU (e.g., VINT-123).
-       - Place it ABSOLUTE TOP-RIGHT in a WHITE PILL BADGE (border-radius: 999px, white bg, thin border, bold text).
+       - **PLACEMENT:** Place it in a dedicated <div> ABOVE the main title. Align it to the RIGHT.
+       - **STYLING:** border-radius: 999px; background: #fff; padding: 4px 10px; font-size: 10px; border: 1px solid #ccc; display: inline-block; margin-bottom: 10px;
+       - **CRITICAL:** Do NOT use 'position: absolute'. It must flow naturally above the text so it never covers the title.
     
     3. **TONE & MICRO-LORE:**
        - Add 1-2 lines of "Micro-Lore" (nostalgic/storytelling).
@@ -148,7 +150,8 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
        - Add "Collector Confidence" line (e.g. "Verified Authentic Condition").
 
     4. **HTML STRUCTURE (Single Block):**
-       - **Main Title Panel**: Centered, themed.
+       - **SKU Row:** Right-aligned container with the badge.
+       - **Main Title Panel:** Centered, themed.
        - **Description**: Detailed, storytelling.
        - **Features**: Bullet points with emojis.
        - **Why You'll Love It**: Emotional appeal.
