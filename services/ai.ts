@@ -40,7 +40,7 @@ const cleanAndParseJSON = (text: string) => {
 };
 
 /**
- * 🧠 DEEP VISION PROTOCOL
+ * 🧠 DEEP VISION PROTOCOL (INTERNAL ANALYSIS ONLY)
  */
 const DEEP_VISION_PROTOCOL = `
   **INTERNAL VISUAL ANALYSIS (DO NOT OUTPUT THESE SECTION NAMES):**
@@ -65,9 +65,10 @@ const NO_MARKDOWN_PROTOCOL = `
 /**
  * 🎨 MARKETPLACE PROMPT ENGINEER
  */
-const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: string) => {
+const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: string) => {
   const baseHelper = `Analyze these images and return valid JSON.`;
-  const conditionContext = userCondition ? `IMPORTANT: User says condition is "${userCondition}". Ensure description reflects this honesty.` : '';
+  // We now accept a rich context string (Condition + Insights + Specs)
+  const contextBlock = userContext ? `IMPORTANT USER CONTEXT & SPECS:\n${userContext}\nEnsure description reflects these details.` : '';
 
   // 🔵 EBAY HTML TEMPLATE (Standard)
   const EBAY_HTML_TEMPLATE = `
@@ -212,11 +213,11 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userCondition: 
     default:
       // 🔥 CHECK FOR PRO MODE HERE
       selectedPrompt = isProMode ? PREMIUM_PRO_PROMPT : STANDARD_PROMPT;
-      selectedPrompt += `\n${OUTPUT_INSTRUCTION}`; // Append JSON requirement to both
+      selectedPrompt += `\n${OUTPUT_INSTRUCTION}`;
       break;
   }
 
-  return `${baseHelper} ${conditionContext} ${DEEP_VISION_PROTOCOL} ${selectedPrompt}`;
+  return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${selectedPrompt}`;
 };
 
 /**
@@ -226,12 +227,12 @@ export async function generateListingFromImages(
   imageFiles: File[], 
   platform: string = 'ebay', 
   isProMode: boolean = false, 
-  userCondition: string = ''
+  userContext: string = ''
 ) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     const imageParts = await Promise.all(imageFiles.map(file => fileToGenerativePart(file)));
-    const prompt = getPlatformPrompt(platform, isProMode, userCondition);
+    const prompt = getPlatformPrompt(platform, isProMode, userContext);
 
     const result = await model.generateContent([prompt, ...imageParts]);
     return cleanAndParseJSON(result.response.text());
@@ -261,20 +262,42 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
 }
 
 /**
- * 🔭 BRAIN 3: THE SCOUT
+ * 🔭 BRAIN 3: THE SCOUT (MARKET ANALYST)
  */
 export async function scoutProduct(productName: string, imageFile?: File) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     let requestParts: any[] = [];
     
-    // STRICT JSON INSTRUCTION
+    // 🚨 PREMIUM MARKET ANALYSIS PROMPT
     const instruction = `
-      Act as an expert antique and resale appraiser. 
+      Act as a Senior Market Analyst for eBay Resellers. 
       Identify this item: "${productName}". 
-      Perform deep market analysis.
-      RETURN ONLY RAW JSON. No intro text.
-      Format: { "minPrice": 10, "maxPrice": 20, "demand": "High", "verdict": "BUY", "reason": "Short reason" }
+      
+      Perform a deep simulated market analysis based on current trends for this item category.
+      
+      **RETURN ONLY RAW JSON** with this exact structure:
+      {
+        "item_name": "Short precise item name",
+        "minPrice": 10,
+        "maxPrice": 20,
+        "demand": "High" | "Medium" | "Low",
+        "verdict": "BUY" | "PASS" | "CAUTION",
+        "reason": "1 short punchy sentence on why.",
+        "metrics": {
+          "sell_through": 75, 
+          "days_to_sell": 14,
+          "volatility": "Low" | "Medium" | "High",
+          "competition": "Low" | "Medium" | "High" | "Saturated"
+        },
+        "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
+      }
+      
+      *Note on metrics:*
+      - sell_through: Estimate percentage (0-100). High is better.
+      - days_to_sell: Estimated average days listed.
+      - volatility: How much price fluctuates.
+      - competition: How many others are listing this.
     `;
 
     if (imageFile) {
