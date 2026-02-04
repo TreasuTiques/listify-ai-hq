@@ -158,38 +158,6 @@ const SourcingPage: React.FC = () => {
   const hasData = !!scoutResult;
   const verdictStyle = hasData ? getVerdictFromScore(scoutResult.demand_score || 50) : { label: "READY TO SCAN", color: "text-slate-300 dark:text-slate-600", bar: "bg-slate-300 dark:bg-slate-700" };
 
-  // 🔵 RADIAL PROGRESS CHART (Sell Through)
-  const RadialChart = ({ value }: { value: number }) => {
-    const radius = 30;
-    const stroke = 6;
-    const normalizedRadius = radius - stroke * 2;
-    const circumference = normalizedRadius * 2 * Math.PI;
-    const strokeDashoffset = circumference - (value / 100) * circumference;
-
-    return (
-      <div className="relative flex items-center justify-center">
-        <svg height={radius * 2} width={radius * 2} className="transform -rotate-90">
-          <circle stroke="currentColor" fill="transparent" strokeWidth={stroke} r={normalizedRadius} cx={radius} cy={radius} className="text-slate-200 dark:text-slate-700" />
-          <circle stroke="currentColor" fill="transparent" strokeWidth={stroke} strokeDasharray={circumference + ' ' + circumference} style={{ strokeDashoffset }} r={normalizedRadius} cx={radius} cy={radius} className={`${value > 60 ? 'text-green-500' : value > 30 ? 'text-orange-500' : 'text-slate-400'} transition-all duration-1000`} />
-        </svg>
-        <span className="absolute text-[10px] font-bold text-slate-600 dark:text-white">{value}%</span>
-      </div>
-    );
-  };
-
-  // 📶 SIGNAL BARS (Competition)
-  const SignalBars = ({ level }: { level: string }) => {
-    const score = level === 'Low' ? 1 : level === 'Medium' ? 2 : level === 'High' ? 3 : 4; // High competition = more bars (Red)
-    return (
-      <div className="flex gap-1 items-end h-6">
-        {[1, 2, 3, 4].map(bar => (
-          <div key={bar} className={`w-1.5 rounded-sm transition-all ${bar <= score ? (score < 2 ? 'bg-green-500' : score < 3 ? 'bg-orange-500' : 'bg-red-500') : 'bg-slate-200 dark:bg-slate-700'}`} style={{ height: `${bar * 25}%` }}></div>
-        ))}
-      </div>
-    );
-  };
-
-  // 🍩 FINANCIAL DONUT CHART
   const DonutChart = ({ profitPct }: { profitPct: number }) => {
     const value = Math.max(0, Math.min(100, profitPct));
     const size = 140;
@@ -390,9 +358,9 @@ const SourcingPage: React.FC = () => {
                           <div className="relative"><span className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" value={sellPrice} onChange={e => setSellPrice(e.target.value)} className="w-full bg-transparent pl-4 text-2xl font-black text-slate-900 dark:text-white focus:outline-none placeholder:text-slate-300" placeholder="0.00" /></div>
                        </div>
                        <div className="grid grid-cols-2 gap-4">
-                          {/* ✅ ITEM COST - OPTIONAL LABEL & COLOR */}
+                          {/* ✅ ITEM COST - COLOR HIGHLIGHT + NO OPTIONAL TEXT */}
                           <div className={`p-3 rounded-xl border transition-all ${costPrice && costPrice !== '0' ? 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-700' : 'bg-amber-50/50 dark:bg-amber-900/10 border-amber-200/50 dark:border-amber-700/30'}`}>
-                             <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Item Cost <span className="text-amber-500 dark:text-amber-400 ml-1">(Optional)</span></label>
+                             <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Item Cost</label>
                              <div className="relative"><span className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" value={costPrice} onChange={e => setCostPrice(e.target.value)} className="w-full bg-transparent pl-3 text-lg font-bold text-slate-900 dark:text-white focus:outline-none placeholder:text-slate-300" placeholder="0" /></div>
                           </div>
                           <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Shipping</label><div className="relative"><span className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" value={shipping} onChange={e => setShipping(e.target.value)} className="w-full bg-transparent pl-3 text-lg font-bold text-slate-900 dark:text-white focus:outline-none placeholder:text-slate-300" placeholder="0" /></div></div>
@@ -416,7 +384,7 @@ const SourcingPage: React.FC = () => {
                 {/* 🔵 SELL-THROUGH (RADIAL) */}
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center text-center">
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Sell-Through</div>
-                    {hasData ? <RadialChart value={scoutResult.metrics?.sell_through || 0} /> : <div className="w-16 h-16 rounded-full border-4 border-slate-200 dark:border-slate-700"></div>}
+                    {hasData ? <div className="relative flex items-center justify-center"><svg height={60} width={60} className="transform -rotate-90"><circle stroke="currentColor" fill="transparent" strokeWidth={6} r={24} cx={30} cy={30} className="text-slate-200 dark:text-slate-700" /><circle stroke="currentColor" fill="transparent" strokeWidth={6} strokeDasharray={150.79} style={{ strokeDashoffset: 150.79 - (scoutResult.metrics?.sell_through / 100) * 150.79 }} r={24} cx={30} cy={30} className={`${scoutResult.metrics?.sell_through > 60 ? 'text-green-500' : 'text-orange-500'} transition-all duration-1000`} /></svg><span className="absolute text-[10px] font-bold text-slate-600 dark:text-white">{scoutResult.metrics?.sell_through}%</span></div> : <div className="w-16 h-16 rounded-full border-4 border-slate-200 dark:border-slate-700"></div>}
                 </div>
                 {/* 📅 AVG TIME */}
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
@@ -426,7 +394,7 @@ const SourcingPage: React.FC = () => {
                 {/* 📶 COMPETITION (SIGNAL BARS) */}
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Competition</div>
-                    {hasData ? <SignalBars level={scoutResult.metrics?.competition} /> : <div className="flex gap-1 items-end h-6"><div className="w-1.5 h-1/4 bg-slate-200 rounded-sm"></div><div className="w-1.5 h-2/4 bg-slate-200 rounded-sm"></div><div className="w-1.5 h-3/4 bg-slate-200 rounded-sm"></div><div className="w-1.5 h-full bg-slate-200 rounded-sm"></div></div>}
+                    {hasData ? <div className="flex gap-1 items-end h-6">{[1, 2, 3, 4].map(bar => (<div key={bar} className={`w-1.5 rounded-sm transition-all ${bar <= (scoutResult.metrics?.competition === 'Low' ? 1 : scoutResult.metrics?.competition === 'Medium' ? 2 : 3) ? 'bg-orange-500' : 'bg-slate-200 dark:bg-slate-700'}`} style={{ height: `${bar * 25}%` }}></div>))}</div> : <div className="flex gap-1 items-end h-6"><div className="w-1.5 h-1/4 bg-slate-200 rounded-sm"></div><div className="w-1.5 h-2/4 bg-slate-200 rounded-sm"></div><div className="w-1.5 h-3/4 bg-slate-200 rounded-sm"></div><div className="w-1.5 h-full bg-slate-200 rounded-sm"></div></div>}
                     <div className="text-xs font-bold text-slate-500 mt-1 uppercase">{hasData ? scoutResult.metrics?.competition : '---'}</div>
                 </div>
                 {/* 📈 PRICE STABILITY */}
