@@ -40,22 +40,33 @@ const cleanAndParseJSON = (text: string) => {
 };
 
 /**
- * 🧠 DEEP VISION PROTOCOL (Internal Eye)
+ * 🧠 DEEP VISION PROTOCOL (INTERNAL ANALYSIS ONLY)
  */
 const DEEP_VISION_PROTOCOL = `
   **INTERNAL VISUAL ANALYSIS (DO NOT OUTPUT THESE SECTION NAMES):**
   1. Inspect for pilling, scratches, stains, or fading.
   2. Identify fabric weight/material feel.
-  3. Classify the exact style (e.g., "Y2K", "Gorpcore", "Streetwear").
+  3. Classify the exact style (e.g., "Y2K", "Gorpcore").
   4. Read labels/tags for precise Brand/Size/Material.
 `;
 
 /**
- * 🎨 MARKETPLACE PROMPT ENGINEER (THE LISTING BUILDER)
+ * 🚫 NO MARKDOWN PROTOCOL
+ */
+const NO_MARKDOWN_PROTOCOL = `
+  **FORMATTING RULES - STRICT:**
+  - OUTPUT MUST BE PLAIN TEXT ONLY (Unless HTML is requested).
+  - DO NOT use markdown characters like asterisks (** or *).
+  - DO NOT use hash signs (#) for headers inside the text descriptions.
+  - To emphasize a header, use UPPERCASE (e.g. "CONDITION:" instead of "**Condition:**").
+  - Use standard hyphens (-) for bullet points.
+`;
+
+/**
+ * 🎨 MARKETPLACE PROMPT ENGINEER
  */
 const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: string) => {
   const baseHelper = `Analyze these images and return valid JSON.`;
-  
   // 📥 RICH CONTEXT INJECTION (Seller Insights + Specs)
   const contextBlock = userContext 
     ? `\n**IMPORTANT USER CONTEXT & SPECS:**\n${userContext}\n\n*INSTRUCTION:* You MUST incorporate the user's insights (flaws, history, smells) and specific details into the description naturally. If they provided a Brand or Size, USE IT.` 
@@ -92,83 +103,185 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     </div>
   `;
 
-  // 🚨 UNIVERSAL JSON OUTPUT STRUCTURE (RESTORED ITEM SPECIFICS)
-  const OUTPUT_INSTRUCTION = `
-    **OUTPUT JSON STRUCTURE (REQUIRED):**
-    {
-      "title": "Optimized Title (Max 80 chars, Keyword Heavy)",
-      "description": "FULL HTML OR TEXT DESCRIPTION (Based on Template)",
-      "estimated_price": "$20.00",
-      "tags": ["tag1", "tag2", "tag3"],
-      "brand": "Extracted Brand",
-      "item_specifics": {
-        "brand": "Brand Name",
-        "category": "Recommended Category Path",
-        "size": "Size on Tag or Measured",
-        "color": "Dominant Colors",
-        "material": "Fabric Content",
-        "year": "Era (e.g. 90s, Y2K) or Year",
-        "made_in": "Country of Origin",
-        "department": "Men/Women/Unisex",
-        "model": "Model Name/Number",
-        "theme": "Style Theme (e.g. Vintage, Sports)",
-        "features": "Key Features (e.g. Pockets, Waterproof)"
-      }
-    }
+  // 🟢 SHOPIFY HTML TEMPLATE
+  const SHOPIFY_HTML_TEMPLATE = `
+    <div class="product-description" style="font-family: inherit;">
+      <p class="intro">{{SEMANTIC_INTRO}}</p>
+      
+      <h2>Product Specifications</h2>
+      <ul>
+        <li><strong>Material:</strong> {{MATERIAL}}</li>
+        <li><strong>Color:</strong> {{COLOR}}</li>
+        <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
+      </ul>
+
+      <h2>Detailed Analysis</h2>
+      <p>{{DETAILED_ANALYSIS}}</p>
+
+      <h2>Frequently Asked Questions</h2>
+      <dl>
+        <dt><strong>Is this item true to size?</strong></dt>
+        <dd>{{SIZE_ANSWER}}</dd>
+        <dt><strong>Any notable flaws?</strong></dt>
+        <dd>{{DEFECT_REPORT}}</dd>
+      </dl>
+    </div>
   `;
 
-  // 🔥 ELITE PRO PROMPT (RESTORED - THE "REAL TALK" ENGINE)
+  // 🔥 ELITE PRO PROMPT (The "Real-Talk" Engine)
   const PREMIUM_PRO_PROMPT = `
     🚨 ACTIVATE "REAL-TALK RESELLER ENGINE" 🚨
     
-    You are an expert flipper writing a high-converting listing.
+    You are an expert flipper writing a high-converting eBay listing. 
     
     **CRITICAL VOCABULARY RULE:** - Write at an **8th GRADE READING LEVEL**. Simple, direct, natural English.
-    - **BANNED WORDS (DO NOT USE):** Whimsical, Curated, Bespoke, Exquisite, Tapestry, Symphony, Heritage, Provenance, Iconic, Meticulous, "Testament to".
+    - **BANNED WORDS (DO NOT USE):** Whimsical, Curated, Bespoke, Exquisite, Tapestry, Symphony, Heritage, Provenance, Iconic, Meticulous.
     - **APPROVED TONE:** "Just found this," "Super clean," "Hard to find," "Great shape," "Cool details," "Ready to ship."
     
     **CRITICAL WHITE-LABEL RULE:** - NEVER use specific names (e.g. "Juan Acuña", "Sellistio").
     - Use generic headers like "Vintage Vault Find", "The Collection", or just the Item Name.
 
-    1. **THEME DETECTION:** Auto-detect ERA/STYLE (e.g., 80s Neon, 90s Grunge, Minimalist, Y2K).
-    2. **SKU PILL BADGE:** Place a unique SKU in a dedicated <div> ABOVE main title (Right Aligned).
-    3. **MICRO-LORE:** Add 1 line of relatable nostalgia if vintage.
-    4. **FORMATTING:** NO Cursive. NO Markdown asterisks (**). Use HTML <strong> tags.
+    1. **THEME DETECTION:**
+       - Auto-detect ERA/STYLE (e.g., 80s Neon, 90s Grunge, Minimalist, Y2K).
+       - Style the HTML colors/fonts inline to match this theme.
+    
+    2. **SKU PILL BADGE (NO OVERLAP RULE):**
+       - Generate a unique SKU (e.g., VINT-123).
+       - **PLACEMENT:** Place it in a dedicated <div> ABOVE the main title. Align it to the RIGHT.
+       - **STYLING:** border-radius: 999px; background: #fff; padding: 4px 10px; font-size: 10px; border: 1px solid #ccc; display: inline-block; margin-bottom: 10px;
+    
+    3. **MICRO-LORE:**
+       - Add 1 line of relatable nostalgia. (e.g., "Takes you right back to the 90s," "This is the stuff we grew up with.")
+
+    4. **HTML STRUCTURE (Single Block):**
+       - **SKU Row:** Right-aligned container with the badge.
+       - **Main Title Panel:** Centered, themed.
+       - **Description**: Conversational and honest. Tell them exactly what they are buying.
+       - **Features**: Bullet points with emojis.
+       - **Why You'll Love It**: Simple reasons (e.g. "It looks cool," "Hard to find these days").
+       - **CTA Panel**: Fun closing tagline (1-3-1 format).
+
+    5. **FORMATTING RULES (STRICT):**
+       - **NO CURSIVE FONTS**: Use clean Sans-Serif or Serif fonts ONLY.
+       - **NO MARKDOWN**: Do NOT use asterisks (**) for bold text. Use <strong> tags ONLY.
+       - **NO MARKDOWN HEADERS**: Do NOT use # for headers. Use HTML tags (<h3>, <h4>).
+       - Output must be pure, valid HTML strings inside the JSON.
   `;
 
-  // 📝 STANDARD PROMPT
-  const STANDARD_PROMPT = `
-    **ROLE:** eBay Cassini Algorithm Specialist.
-    **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
-    **RULES:**
-    1. Title: STRICT 80 chars. Brand + Gender + Item + Material + Size.
-    2. Description: Use the provided HTML Template.
-    **HTML TEMPLATE:**
-    ${EBAY_HTML_TEMPLATE}
+  // 📋 UNIVERSAL OUTPUT STRUCTURE (Crucial for Auto-Populate)
+  const OUTPUT_JSON_STRUCTURE = `
+    **OUTPUT JSON STRUCTURE (REQUIRED):**
+    {
+      "title": "Optimized Title (Max 80 chars)",
+      "description": "FULL HTML OR TEXT DESCRIPTION",
+      "estimated_price": "$20.00",
+      "tags": ["tag1", "tag2"],
+      "item_specifics": {
+        "brand": "Extract from image or Unknown",
+        "category": "Suggest Category Path",
+        "size": "Estimate dimensions/tag",
+        "color": "Dominant colors",
+        "material": "Visual material ID",
+        "year": "Era or Copyright Date",
+        "made_in": "Country of Origin tag",
+        "department": "Men/Women/Kids/Unisex",
+        "model": "Model name/number",
+        "theme": "Aesthetic theme",
+        "features": "Key features list"
+      }
+    }
   `;
-
-  let selectedPrompt = "";
 
   switch (platform.toLowerCase()) {
     case 'poshmark':
-      selectedPrompt = `...Poshmark Logic (Emojis, Friendly)... ${OUTPUT_INSTRUCTION}`; break; 
+      return `
+        ${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
+        **ROLE:** Poshmark SEO Stylist.
+        **RULES:**
+        1. Vertical list layout. Use Emojis as bullets.
+        2. Integrate "Aesthetics" (e.g., #Boho, #Y2K).
+        ${OUTPUT_JSON_STRUCTURE}
+      `;
+    
     case 'depop':
-      selectedPrompt = `...Depop Logic (Hashtags, Gen Z Tone)... ${OUTPUT_INSTRUCTION}`; break;
+      return `
+        ${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
+        **ROLE:** Depop Trend Curator.
+        **RULES:**
+        1. Title: Aesthetic Hook.
+        2. Description: Casual tone. Lowercase allowed.
+        ${OUTPUT_JSON_STRUCTURE}
+      `;
+
+    case 'mercari':
+      return `
+        ${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
+        **ROLE:** Mercari Quick-Flip Assistant.
+        **RULES:**
+        1. Short paragraphs. "Ships Fast" mention.
+        ${OUTPUT_JSON_STRUCTURE}
+      `;
+
+    case 'etsy':
+      return `
+        ${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
+        **ROLE:** Etsy Artisan Guide.
+        **RULES:**
+        1. Description: Storytelling. Focus on "Maker", "History".
+        ${OUTPUT_JSON_STRUCTURE}
+      `;
+
+    case 'facebook':
+      return `
+        ${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
+        **ROLE:** Local Commerce Connector.
+        **RULES:**
+        1. Focus: "Proximity" keywords. Simple and direct.
+        ${OUTPUT_JSON_STRUCTURE}
+      `;
+
     case 'shopify':
-      selectedPrompt = `...Shopify Logic (Clean, SEO)... ${OUTPUT_INSTRUCTION}`; break;
+      return `
+        ${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL}
+        **ROLE:** Shopify SEO Architect.
+        **GOAL:** Semantic Richness for Google SGE.
+        **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
+        **RULES:**
+        1. Use the provided HTML Template.
+        2. Replace {{SEMANTIC_INTRO}} with a context-rich intro.
+        3. Replace {{DETAILED_ANALYSIS}} with expert insights.
+        **HTML TEMPLATE:**
+        ${SHOPIFY_HTML_TEMPLATE}
+        ${OUTPUT_JSON_STRUCTURE}
+      `;
+
     case 'ebay':
     default:
       // 🔥 CHECK FOR PRO MODE HERE
-      selectedPrompt = isProMode ? PREMIUM_PRO_PROMPT : STANDARD_PROMPT;
-      selectedPrompt += `\n${OUTPUT_INSTRUCTION}`;
-      break;
+      if (isProMode) {
+        return `
+          ${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL}
+          ${PREMIUM_PRO_PROMPT}
+          ${OUTPUT_JSON_STRUCTURE}
+        `;
+      } else {
+        return `
+          ${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL}
+          **ROLE:** eBay Cassini Algorithm Specialist.
+          **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
+          **RULES:**
+          1. Title: STRICT 80 chars. Brand + Gender + Item + Material + Size.
+          2. Description: Use the provided HTML Template.
+          **HTML TEMPLATE:**
+          ${EBAY_HTML_TEMPLATE}
+          ${OUTPUT_JSON_STRUCTURE}
+        `;
+      }
   }
-
-  return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${selectedPrompt}`;
 };
 
 /**
- * 📸 BRAIN 1: THE BUILDER (LISTING GENERATOR)
+ * 📸 BRAIN 1: THE BUILDER (MULTI-IMAGE)
  */
 export async function generateListingFromImages(
   imageFiles: File[], 
@@ -191,7 +304,7 @@ export async function generateListingFromImages(
 }
 
 /**
- * 🩺 BRAIN 2: THE DOCTOR (OPTIMIZER)
+ * 🩺 BRAIN 2: THE DOCTOR (SEO OPTIMIZER)
  */
 export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
   try {
