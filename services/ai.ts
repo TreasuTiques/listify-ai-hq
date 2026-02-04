@@ -6,7 +6,7 @@ if (!apiKey) console.error("Missing Gemini API Key! Check .env or Vercel setting
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// 🛑 MODEL LOCKED
+// 🛑 MODEL LOCKED - GEMINI 2.0 FLASH (Best for Speed & Logic)
 const MODEL_NAME = "gemini-2.0-flash";
 
 // Helper: Convert File to Base64
@@ -40,24 +40,28 @@ const cleanAndParseJSON = (text: string) => {
 };
 
 /**
- * 🧠 DEEP VISION PROTOCOL
+ * 🧠 DEEP VISION PROTOCOL (Internal Eye)
  */
 const DEEP_VISION_PROTOCOL = `
   **INTERNAL VISUAL ANALYSIS (DO NOT OUTPUT THESE SECTION NAMES):**
   1. Inspect for pilling, scratches, stains, or fading.
   2. Identify fabric weight/material feel.
-  3. Classify the exact style (e.g., "Y2K", "Gorpcore").
-  4. Read labels/tags.
+  3. Classify the exact style (e.g., "Y2K", "Gorpcore", "Streetwear").
+  4. Read labels/tags for precise Brand/Size/Material.
 `;
 
 /**
- * 🎨 MARKETPLACE PROMPT ENGINEER
+ * 🎨 MARKETPLACE PROMPT ENGINEER (THE LISTING BUILDER)
  */
 const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: string) => {
   const baseHelper = `Analyze these images and return valid JSON.`;
-  const contextBlock = userContext ? `IMPORTANT USER CONTEXT & SPECS:\n${userContext}\nEnsure description reflects these details.` : '';
+  
+  // 📥 RICH CONTEXT INJECTION (Seller Insights + Specs)
+  const contextBlock = userContext 
+    ? `\n**IMPORTANT USER CONTEXT & SPECS:**\n${userContext}\n\n*INSTRUCTION:* You MUST incorporate the user's insights (flaws, history, smells) and specific details into the description naturally. If they provided a Brand or Size, USE IT.` 
+    : '';
 
-  // 🔵 EBAY HTML TEMPLATE
+  // 🔵 EBAY HTML TEMPLATE (Standard)
   const EBAY_HTML_TEMPLATE = `
     <div style="font-family: sans-serif; max-width: 900px; margin: 0 auto; color: #1a1a1a; line-height: 1.6;">
       <div style="text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px;">
@@ -69,6 +73,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
         <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666; letter-spacing: 1px;">Item Specifics</h3>
         <ul style="list-style: none; padding: 0; margin: 0;">
           <li style="margin-bottom: 8px;"><strong>Brand:</strong> {{BRAND}}</li>
+          <li style="margin-bottom: 8px;"><strong>Size:</strong> {{SIZE}}</li>
           <li style="margin-bottom: 8px;"><strong>Material:</strong> {{MATERIAL}}</li>
           <li style="margin-bottom: 8px;"><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
         </ul>
@@ -87,71 +92,47 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     </div>
   `;
 
-  // 🟢 SHOPIFY HTML TEMPLATE
-  const SHOPIFY_HTML_TEMPLATE = `
-    <div class="product-description" style="font-family: inherit;">
-      <p class="intro">{{SEMANTIC_INTRO}}</p>
-      
-      <h2>Product Specifications</h2>
-      <ul>
-        <li><strong>Material:</strong> {{MATERIAL}}</li>
-        <li><strong>Color:</strong> {{COLOR}}</li>
-        <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
-      </ul>
-
-      <h2>Detailed Analysis</h2>
-      <p>{{DETAILED_ANALYSIS}}</p>
-
-      <h2>Frequently Asked Questions</h2>
-      <dl>
-        <dt><strong>Is this item true to size?</strong></dt>
-        <dd>{{SIZE_ANSWER}}</dd>
-        <dt><strong>Any notable flaws?</strong></dt>
-        <dd>{{DEFECT_REPORT}}</dd>
-      </dl>
-    </div>
-  `;
-
-  // 🚨 UNIVERSAL JSON OUTPUT STRUCTURE
+  // 🚨 UNIVERSAL JSON OUTPUT STRUCTURE (RESTORED ITEM SPECIFICS)
   const OUTPUT_INSTRUCTION = `
     **OUTPUT JSON STRUCTURE (REQUIRED):**
     {
-      "title": "Optimized Title (Max 80 chars)",
-      "description": "FULL HTML OR TEXT DESCRIPTION",
+      "title": "Optimized Title (Max 80 chars, Keyword Heavy)",
+      "description": "FULL HTML OR TEXT DESCRIPTION (Based on Template)",
       "estimated_price": "$20.00",
-      "tags": ["tag1", "tag2"],
+      "tags": ["tag1", "tag2", "tag3"],
+      "brand": "Extracted Brand",
       "item_specifics": {
-        "brand": "Extract from image or Unknown",
-        "category": "Suggest Category Path",
-        "size": "Estimate dimensions",
-        "color": "Dominant colors",
-        "material": "Visual material ID",
-        "year": "Era or Copyright Date",
-        "made_in": "Country of Origin tag",
-        "department": "Men/Women/Kids/Unisex",
-        "model": "Model name/number",
-        "theme": "Aesthetic theme",
-        "features": "Key features list"
+        "brand": "Brand Name",
+        "category": "Recommended Category Path",
+        "size": "Size on Tag or Measured",
+        "color": "Dominant Colors",
+        "material": "Fabric Content",
+        "year": "Era (e.g. 90s, Y2K) or Year",
+        "made_in": "Country of Origin",
+        "department": "Men/Women/Unisex",
+        "model": "Model Name/Number",
+        "theme": "Style Theme (e.g. Vintage, Sports)",
+        "features": "Key Features (e.g. Pockets, Waterproof)"
       }
     }
   `;
 
-  // 🔥 ELITE PRO PROMPT
+  // 🔥 ELITE PRO PROMPT (RESTORED - THE "REAL TALK" ENGINE)
   const PREMIUM_PRO_PROMPT = `
     🚨 ACTIVATE "REAL-TALK RESELLER ENGINE" 🚨
     
-    You are an expert flipper writing a high-converting eBay listing. 
+    You are an expert flipper writing a high-converting listing.
     
     **CRITICAL VOCABULARY RULE:** - Write at an **8th GRADE READING LEVEL**. Simple, direct, natural English.
-    - **BANNED WORDS:** Whimsical, Curated, Bespoke, Exquisite, Tapestry, Symphony, Heritage, Provenance.
-    - **APPROVED TONE:** "Just found this," "Super clean," "Hard to find," "Great shape," "Cool details."
+    - **BANNED WORDS (DO NOT USE):** Whimsical, Curated, Bespoke, Exquisite, Tapestry, Symphony, Heritage, Provenance, Iconic, Meticulous, "Testament to".
+    - **APPROVED TONE:** "Just found this," "Super clean," "Hard to find," "Great shape," "Cool details," "Ready to ship."
     
     **CRITICAL WHITE-LABEL RULE:** - NEVER use specific names (e.g. "Juan Acuña", "Sellistio").
     - Use generic headers like "Vintage Vault Find", "The Collection", or just the Item Name.
 
-    1. **THEME DETECTION:** Auto-detect ERA/STYLE.
-    2. **SKU PILL BADGE:** Place unique SKU in a dedicated <div> ABOVE main title (Right Aligned).
-    3. **MICRO-LORE:** Add 1 line of relatable nostalgia.
+    1. **THEME DETECTION:** Auto-detect ERA/STYLE (e.g., 80s Neon, 90s Grunge, Minimalist, Y2K).
+    2. **SKU PILL BADGE:** Place a unique SKU in a dedicated <div> ABOVE main title (Right Aligned).
+    3. **MICRO-LORE:** Add 1 line of relatable nostalgia if vintage.
     4. **FORMATTING:** NO Cursive. NO Markdown asterisks (**). Use HTML <strong> tags.
   `;
 
@@ -160,7 +141,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     **ROLE:** eBay Cassini Algorithm Specialist.
     **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
     **RULES:**
-    1. Title: STRICT 80 chars.
+    1. Title: STRICT 80 chars. Brand + Gender + Item + Material + Size.
     2. Description: Use the provided HTML Template.
     **HTML TEMPLATE:**
     ${EBAY_HTML_TEMPLATE}
@@ -169,11 +150,15 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
   let selectedPrompt = "";
 
   switch (platform.toLowerCase()) {
-    case 'poshmark': selectedPrompt = `...Poshmark Logic... ${OUTPUT_INSTRUCTION}`; break; 
-    case 'depop': selectedPrompt = `...Depop Logic... ${OUTPUT_INSTRUCTION}`; break;
-    case 'shopify': selectedPrompt = `...Shopify Logic... HTML TEMPLATE: ${SHOPIFY_HTML_TEMPLATE} ${OUTPUT_INSTRUCTION}`; break;
+    case 'poshmark':
+      selectedPrompt = `...Poshmark Logic (Emojis, Friendly)... ${OUTPUT_INSTRUCTION}`; break; 
+    case 'depop':
+      selectedPrompt = `...Depop Logic (Hashtags, Gen Z Tone)... ${OUTPUT_INSTRUCTION}`; break;
+    case 'shopify':
+      selectedPrompt = `...Shopify Logic (Clean, SEO)... ${OUTPUT_INSTRUCTION}`; break;
     case 'ebay':
     default:
+      // 🔥 CHECK FOR PRO MODE HERE
       selectedPrompt = isProMode ? PREMIUM_PRO_PROMPT : STANDARD_PROMPT;
       selectedPrompt += `\n${OUTPUT_INSTRUCTION}`;
       break;
@@ -183,7 +168,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
 };
 
 /**
- * 📸 BRAIN 1: THE BUILDER (MULTI-IMAGE)
+ * 📸 BRAIN 1: THE BUILDER (LISTING GENERATOR)
  */
 export async function generateListingFromImages(
   imageFiles: File[], 
@@ -206,7 +191,7 @@ export async function generateListingFromImages(
 }
 
 /**
- * 🩺 BRAIN 2: THE DOCTOR (SEO OPTIMIZER)
+ * 🩺 BRAIN 2: THE DOCTOR (OPTIMIZER)
  */
 export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
   try {
@@ -224,14 +209,14 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
 }
 
 /**
- * 🔭 BRAIN 3: THE SCOUT (MARKET ANALYST V2)
+ * 🔭 BRAIN 3: THE SCOUT (MARKET ANALYST - STRATEGY EDITION)
  */
 export async function scoutProduct(productName: string, imageFile?: File) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     let requestParts: any[] = [];
     
-    // 🚨 PREMIUM "MARKET STRATEGIST" PROMPT
+    // 🚨 PREMIUM "PRO STRATEGY" PROMPT
     const instruction = `
       Act as a Senior Market Analyst and Expert Flipper. 
       Identify this item: "${productName}". 
@@ -257,7 +242,7 @@ export async function scoutProduct(productName: string, imageFile?: File) {
           "saturation": "Low" | "Medium" | "High",
           "liquidity": "High" | "Medium" | "Low"
         },
-        "strategy_tip": "A specific, detailed tactical plan for THIS item. STRICTLY cover: 1. The best Listing Format (Auction vs BIN) based on rarity. 2. Specific features/flaws to highlight in photos. 3. Pricing psychology (e.g. 'List high at $X, accept offers')."
+        "strategy_tip": "A specific, detailed tactical plan for THIS item. STRICTLY cover: 1. The best Listing Format (Auction vs BIN). 2. Specific features/flaws to highlight in photos. 3. Pricing psychology (e.g. 'List high at $X, accept offers')."
       }
       
       *Definitions:*
