@@ -6,7 +6,7 @@ if (!apiKey) console.error("Missing Gemini API Key! Check .env or Vercel setting
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
-// 🛑 MODEL LOCKED - UPDATED TO 2.0 BASED ON YOUR SCREENSHOT
+// 🛑 MODEL LOCKED - Uses Gemini 2.0 Flash as requested
 const MODEL_NAME = "gemini-2.0-flash";
 
 // Helper: Convert File to Base64
@@ -231,21 +231,23 @@ export async function scoutProduct(productName: string, imageFile?: File) {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     let requestParts: any[] = [];
     
-    // 🚨 PREMIUM MARKET ANALYSIS PROMPT
+    // 🚨 CONSISTENT ANALYST PROMPT
+    // Returns a numerical score (demand_score) for consistent frontend labels
     const instruction = `
       Act as a Senior Market Analyst for eBay Resellers. 
       Identify this item: "${productName}". 
       
       Perform a deep simulated market analysis based on current trends for this item category.
       
+      **CRITICAL:** Be consistent. Base your scoring on historical desirability and liquidity of this item category.
+      
       **RETURN ONLY RAW JSON** with this exact structure:
       {
         "item_name": "Short precise item name",
         "minPrice": 10,
         "maxPrice": 20,
-        "demand": "High" | "Medium" | "Low",
-        "verdict": "2-3 WORD HYPE PHRASE (e.g. '💎 HIDDEN GEM', '🚀 FAST FLIP', '💰 CASH COW', '🛑 HARD PASS')",
-        "reason": "1 short punchy sentence on why.",
+        "demand_score": 75,
+        "reason": "1 short professional sentence on why (e.g. 'Consistent collector demand for 80s nostalgia').",
         "metrics": {
           "sell_through": 75, 
           "days_to_sell": 14,
@@ -254,6 +256,10 @@ export async function scoutProduct(productName: string, imageFile?: File) {
         },
         "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
       }
+      
+      *Definitions:*
+      - demand_score: 0-100. (100 = Instant Sale, 0 = Never Sells).
+      - sell_through: Estimated Sell-Through Rate %.
     `;
 
     if (imageFile) {
