@@ -158,6 +158,38 @@ const SourcingPage: React.FC = () => {
   const hasData = !!scoutResult;
   const verdictStyle = hasData ? getVerdictFromScore(scoutResult.demand_score || 50) : { label: "READY TO SCAN", color: "text-slate-300 dark:text-slate-600", bar: "bg-slate-300 dark:bg-slate-700" };
 
+  // 🔵 RADIAL PROGRESS CHART (Sell Through)
+  const RadialChart = ({ value }: { value: number }) => {
+    const radius = 30;
+    const stroke = 6;
+    const normalizedRadius = radius - stroke * 2;
+    const circumference = normalizedRadius * 2 * Math.PI;
+    const strokeDashoffset = circumference - (value / 100) * circumference;
+
+    return (
+      <div className="relative flex items-center justify-center">
+        <svg height={radius * 2} width={radius * 2} className="transform -rotate-90">
+          <circle stroke="currentColor" fill="transparent" strokeWidth={stroke} r={normalizedRadius} cx={radius} cy={radius} className="text-slate-200 dark:text-slate-700" />
+          <circle stroke="currentColor" fill="transparent" strokeWidth={stroke} strokeDasharray={circumference + ' ' + circumference} style={{ strokeDashoffset }} r={normalizedRadius} cx={radius} cy={radius} className={`${value > 60 ? 'text-green-500' : value > 30 ? 'text-orange-500' : 'text-slate-400'} transition-all duration-1000`} />
+        </svg>
+        <span className="absolute text-[10px] font-bold text-slate-600 dark:text-white">{value}%</span>
+      </div>
+    );
+  };
+
+  // 📶 SIGNAL BARS (Competition)
+  const SignalBars = ({ level }: { level: string }) => {
+    const score = level === 'Low' ? 1 : level === 'Medium' ? 2 : level === 'High' ? 3 : 4; // High competition = more bars (Red)
+    return (
+      <div className="flex gap-1 items-end h-6">
+        {[1, 2, 3, 4].map(bar => (
+          <div key={bar} className={`w-1.5 rounded-sm transition-all ${bar <= score ? (score < 2 ? 'bg-green-500' : score < 3 ? 'bg-orange-500' : 'bg-red-500') : 'bg-slate-200 dark:bg-slate-700'}`} style={{ height: `${bar * 25}%` }}></div>
+        ))}
+      </div>
+    );
+  };
+
+  // 🍩 FINANCIAL DONUT CHART
   const DonutChart = ({ profitPct }: { profitPct: number }) => {
     const value = Math.max(0, Math.min(100, profitPct));
     const size = 140;
@@ -258,7 +290,6 @@ const SourcingPage: React.FC = () => {
                
                {imagePreview && (
                  <div className="flex items-center gap-3">
-                    {/* ✅ IMMEDIATE IMAGE PREVIEW */}
                     <img src={imagePreview} alt="Upload preview" className="w-8 h-8 rounded-md object-cover border border-slate-200 dark:border-slate-700" />
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Image Attached</span>
                     <button onClick={handleRemoveImage} className="text-[10px] text-red-500 hover:underline font-bold uppercase">Remove</button>
@@ -271,7 +302,6 @@ const SourcingPage: React.FC = () => {
         {/* ==================== ALWAYS-VISIBLE DASHBOARD ==================== */}
         <div className={`space-y-6 transition-all duration-500 ${loading ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
             
-            {/* 1. TOP ROW: VERDICT & CALCULATOR */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             {/* 💎 AI VERDICT CARD (Left - 5 Cols) */}
@@ -284,7 +314,6 @@ const SourcingPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* ✅ BIGGER CONFIDENCE BADGE */}
                 {hasData && scoutResult.vitals?.confidence && (
                    <div className="absolute top-6 left-8 bg-slate-900 text-white text-sm font-black px-3 py-1.5 rounded-md shadow-lg flex items-center gap-1.5">
                       <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -299,7 +328,6 @@ const SourcingPage: React.FC = () => {
                     </div>
                     <div className={`text-3xl font-bold flex items-center gap-3 transition-all ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'}`}>
                     <span>{hasData ? `$${scoutResult.minPrice} - $${scoutResult.maxPrice}` : "$0.00"}</span>
-                    {/* TREND INDICATOR */}
                     {hasData && scoutResult.vitals?.trend && (
                         <span className={`text-sm px-2.5 py-1 rounded-md font-bold uppercase ${scoutResult.vitals.trend === 'Rising' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}`}>
                            {scoutResult.vitals.trend === 'Rising' ? '↗ Rising' : '→ Stable'}
@@ -308,7 +336,7 @@ const SourcingPage: React.FC = () => {
                     </div>
                 </div>
                 
-                {/* ✅ STACKED & BIGGER MARKET SIGNALS */}
+                {/* 🎨 NEW STACKED MARKET SIGNALS */}
                 <div className="mt-8 flex flex-col gap-3">
                    {hasData ? (
                       <>
@@ -339,8 +367,6 @@ const SourcingPage: React.FC = () => {
 
             {/* 🧮 FINANCIAL COMMAND CENTER (Right - 7 Cols) */}
             <div className="lg:col-span-7 !bg-white dark:!bg-slate-800 rounded-[32px] p-8 shadow-xl border border-slate-100 dark:border-slate-700 relative flex flex-col justify-between min-h-[320px]">
-                
-                {/* Header & Tabs */}
                 <div className="flex flex-col gap-6">
                     <div className="flex justify-between items-center">
                         <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
@@ -348,7 +374,6 @@ const SourcingPage: React.FC = () => {
                         Financial Command
                         </h3>
                     </div>
-                    {/* FULL WIDTH PLATFORM SELECTOR */}
                     <div className="flex flex-wrap gap-2">
                         <PlatformBtn p="ebay" label="eBay" />
                         <PlatformBtn p="posh" label="Poshmark" />
@@ -358,142 +383,81 @@ const SourcingPage: React.FC = () => {
                         <PlatformBtn p="shopify" label="Shopify" />
                     </div>
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
-                    
-                    {/* INPUTS COLUMN */}
                     <div className="space-y-5">
                        <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700">
-                          <div className="flex justify-between mb-2">
-                             <label className="text-[10px] font-bold text-slate-400 uppercase">Target Price</label>
-                             <span className="text-[10px] text-slate-400">Revenue</span>
-                          </div>
-                          <div className="relative">
-                             <span className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-                             <input type="number" value={sellPrice} onChange={e => setSellPrice(e.target.value)} className="w-full bg-transparent pl-4 text-2xl font-black text-slate-900 dark:text-white focus:outline-none placeholder:text-slate-300" placeholder="0.00" />
-                          </div>
+                          <div className="flex justify-between mb-2"><label className="text-[10px] font-bold text-slate-400 uppercase">Target Price</label><span className="text-[10px] text-slate-400">Revenue</span></div>
+                          <div className="relative"><span className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" value={sellPrice} onChange={e => setSellPrice(e.target.value)} className="w-full bg-transparent pl-4 text-2xl font-black text-slate-900 dark:text-white focus:outline-none placeholder:text-slate-300" placeholder="0.00" /></div>
                        </div>
-
                        <div className="grid grid-cols-2 gap-4">
-                          {/* ✅ ITEM COST - STAND OUT & OPTIONAL LABEL */}
+                          {/* ✅ ITEM COST - OPTIONAL LABEL & COLOR */}
                           <div className={`p-3 rounded-xl border transition-all ${costPrice && costPrice !== '0' ? 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-700' : 'bg-amber-50/50 dark:bg-amber-900/10 border-amber-200/50 dark:border-amber-700/30'}`}>
-                             <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">
-                                Item Cost <span className="text-amber-500 dark:text-amber-400 ml-1">(Optional)</span>
-                             </label>
-                             <div className="relative">
-                               <span className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-                               <input type="number" value={costPrice} onChange={e => setCostPrice(e.target.value)} className="w-full bg-transparent pl-3 text-lg font-bold text-slate-900 dark:text-white focus:outline-none placeholder:text-slate-300" placeholder="0" />
-                             </div>
+                             <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Item Cost <span className="text-amber-500 dark:text-amber-400 ml-1">(Optional)</span></label>
+                             <div className="relative"><span className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" value={costPrice} onChange={e => setCostPrice(e.target.value)} className="w-full bg-transparent pl-3 text-lg font-bold text-slate-900 dark:text-white focus:outline-none placeholder:text-slate-300" placeholder="0" /></div>
                           </div>
-                          <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700">
-                             <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Shipping</label>
-                             <div className="relative">
-                               <span className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
-                               <input type="number" value={shipping} onChange={e => setShipping(e.target.value)} className="w-full bg-transparent pl-3 text-lg font-bold text-slate-900 dark:text-white focus:outline-none placeholder:text-slate-300" placeholder="0" />
-                             </div>
-                          </div>
+                          <div className="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700"><label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Shipping</label><div className="relative"><span className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" value={shipping} onChange={e => setShipping(e.target.value)} className="w-full bg-transparent pl-3 text-lg font-bold text-slate-900 dark:text-white focus:outline-none placeholder:text-slate-300" placeholder="0" /></div></div>
                        </div>
                     </div>
-
-                    {/* METRICS & CHART COLUMN */}
                     <div className="flex flex-col items-center justify-center relative">
-                        {/* THE DONUT CHART */}
                         <DonutChart profitPct={margin || 0} />
-                        
                         <div className="w-full mt-6 space-y-3">
-                           <div className="flex justify-between items-center text-sm border-b border-slate-100 dark:border-slate-700 pb-2">
-                              <span className="text-slate-500 dark:text-slate-400">Profit Margin</span>
-                              <span className={`font-bold ${margin && margin > 20 ? 'text-emerald-500' : 'text-slate-900 dark:text-white'}`}>{margin ? margin.toFixed(2) : 0}%</span>
-                           </div>
-                           <div className="flex justify-between items-center text-sm border-b border-slate-100 dark:border-slate-700 pb-2">
-                              <span className="text-slate-500 dark:text-slate-400">Return on Cost</span>
-                              <span className={`font-bold ${roi && roi > 50 ? 'text-emerald-500' : 'text-slate-900 dark:text-white'}`}>{roi ? roi.toFixed(2) : 0}%</span>
-                           </div>
-                           <div className="flex justify-between items-center text-sm border-b border-slate-100 dark:border-slate-700 pb-2">
-                              <span className="text-slate-500 dark:text-slate-400">Breakeven Price</span>
-                              <span className="font-bold text-slate-900 dark:text-white">${breakeven.toFixed(2)}</span>
-                           </div>
+                           <div className="flex justify-between items-center text-sm border-b border-slate-100 dark:border-slate-700 pb-2"><span className="text-slate-500 dark:text-slate-400">Profit Margin</span><span className={`font-bold ${margin && margin > 20 ? 'text-emerald-500' : 'text-slate-900 dark:text-white'}`}>{margin ? margin.toFixed(2) : 0}%</span></div>
+                           <div className="flex justify-between items-center text-sm border-b border-slate-100 dark:border-slate-700 pb-2"><span className="text-slate-500 dark:text-slate-400">Return on Cost</span><span className={`font-bold ${roi && roi > 50 ? 'text-emerald-500' : 'text-slate-900 dark:text-white'}`}>{roi ? roi.toFixed(2) : 0}%</span></div>
+                           <div className="flex justify-between items-center text-sm border-b border-slate-100 dark:border-slate-700 pb-2"><span className="text-slate-500 dark:text-slate-400">Breakeven Price</span><span className="font-bold text-slate-900 dark:text-white">${breakeven.toFixed(2)}</span></div>
                         </div>
                     </div>
                 </div>
-
-                {/* DETAILED LEDGER FOOTER */}
-                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
-                   <div className="grid grid-cols-4 gap-2 text-center">
-                      <div>
-                         <div className="text-[10px] text-slate-400 uppercase">Revenue</div>
-                         <div className="font-bold text-slate-900 dark:text-white">${sellPrice || '0.00'}</div>
-                      </div>
-                      <div>
-                         <div className="text-[10px] text-slate-400 uppercase">Fees</div>
-                         <div className="font-bold text-red-400">-${fees.toFixed(2)}</div>
-                      </div>
-                      <div>
-                         <div className="text-[10px] text-slate-400 uppercase">Costs</div>
-                         <div className="font-bold text-orange-400">-${totalCost.toFixed(2)}</div>
-                      </div>
-                      <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-1">
-                         <div className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold">Net Profit</div>
-                         <div className="font-black text-emerald-600 dark:text-emerald-400">${profit ? profit.toFixed(2) : '0.00'}</div>
-                      </div>
-                   </div>
-                </div>
-
+                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700"><div className="grid grid-cols-4 gap-2 text-center"><div><div className="text-[10px] text-slate-400 uppercase">Revenue</div><div className="font-bold text-slate-900 dark:text-white">${sellPrice || '0.00'}</div></div><div><div className="text-[10px] text-slate-400 uppercase">Fees</div><div className="font-bold text-red-400">-${fees.toFixed(2)}</div></div><div><div className="text-[10px] text-slate-400 uppercase">Costs</div><div className="font-bold text-orange-400">-${totalCost.toFixed(2)}</div></div><div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-1"><div className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold">Net Profit</div><div className="font-black text-emerald-600 dark:text-emerald-400">${profit ? profit.toFixed(2) : '0.00'}</div></div></div></div>
             </div>
             </div>
 
-            {/* 2. METRICS ROW (ALWAYS VISIBLE PLACEHOLDERS) */}
+            {/* 2. METRICS ROW (REDESIGNED) */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Metric 1 */}
-                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex justify-between"><span>Sell-Through</span><span className="text-slate-300">AI Est.</span></div>
-                    <div className="mt-2">
-                        <div className="flex items-end gap-1"><span className={`text-3xl font-black ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300'}`}>{hasData ? scoutResult.metrics?.sell_through : 0}%</span></div>
-                        <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full mt-3 overflow-hidden"><div className={`h-full rounded-full transition-all ${hasData ? (scoutResult.metrics?.sell_through > 50 ? 'bg-green-500' : 'bg-orange-500') : 'bg-slate-300'}`} style={{ width: `${hasData ? scoutResult.metrics?.sell_through : 0}%` }}></div></div>
-                    </div>
+                {/* 🔵 SELL-THROUGH (RADIAL) */}
+                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col items-center justify-center text-center">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Sell-Through</div>
+                    {hasData ? <RadialChart value={scoutResult.metrics?.sell_through || 0} /> : <div className="w-16 h-16 rounded-full border-4 border-slate-200 dark:border-slate-700"></div>}
                 </div>
-                {/* Metric 2 */}
+                {/* 📅 AVG TIME */}
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg Time to Sell</div>
-                    <div className="mt-2"><div className={`text-3xl font-black ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300'}`}>{hasData ? scoutResult.metrics?.days_to_sell : '--'} <span className="text-sm font-bold text-slate-400">Days</span></div></div>
+                    <div className="mt-2"><div className={`text-3xl font-black ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'}`}>{hasData ? scoutResult.metrics?.days_to_sell : '--'} <span className="text-sm font-bold text-slate-400">Days</span></div></div>
                 </div>
-                {/* Metric 3 */}
+                {/* 📶 COMPETITION (SIGNAL BARS) */}
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Competition</div>
-                    <div className="mt-2"><div className={`text-xl font-black uppercase ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300'}`}>{hasData ? scoutResult.metrics?.competition : '---'}</div></div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Competition</div>
+                    {hasData ? <SignalBars level={scoutResult.metrics?.competition} /> : <div className="flex gap-1 items-end h-6"><div className="w-1.5 h-1/4 bg-slate-200 rounded-sm"></div><div className="w-1.5 h-2/4 bg-slate-200 rounded-sm"></div><div className="w-1.5 h-3/4 bg-slate-200 rounded-sm"></div><div className="w-1.5 h-full bg-slate-200 rounded-sm"></div></div>}
+                    <div className="text-xs font-bold text-slate-500 mt-1 uppercase">{hasData ? scoutResult.metrics?.competition : '---'}</div>
                 </div>
-                {/* Metric 4 */}
+                {/* 📈 PRICE STABILITY */}
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Price Stability</div>
-                    <div className="mt-2"><div className={`text-xl font-black ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300'}`}>{hasData ? (scoutResult.metrics?.volatility || 'Stable') : '---'}</div></div>
+                    <div className="mt-2"><div className={`text-xl font-black ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'}`}>{hasData ? (scoutResult.metrics?.volatility || 'Stable') : '---'}</div></div>
+                    {/* Smoother Sparkline */}
+                    <svg className={`w-full h-8 mt-1 transition-all ${hasData ? 'text-blue-500 opacity-50' : 'text-slate-300 opacity-20'}`} viewBox="0 0 100 20" preserveAspectRatio="none">
+                        <path d="M0,15 C20,15 20,5 40,10 C60,15 60,5 80,5 C90,5 90,15 100,15" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                    </svg>
                 </div>
             </div>
 
-            {/* 3. KEYWORDS ROW (ALWAYS VISIBLE PLACEHOLDERS) */}
-            <div className={`bg-gradient-to-r p-1 rounded-[24px] shadow-lg transition-all ${hasData ? 'from-blue-600 to-indigo-700' : 'from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800'}`}>
+            {/* 🧠 STRATEGY CARD (REPLACED KEYWORDS) */}
+            <div className={`bg-gradient-to-r p-1 rounded-[24px] shadow-lg transition-all ${hasData ? 'from-indigo-600 to-purple-700' : 'from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800'}`}>
                 <div className="bg-[#0F172A] p-6 rounded-[22px] relative overflow-hidden min-h-[100px] flex items-center">
                     <div className="relative z-10 w-full">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className={`text-xl ${hasData ? '' : 'grayscale opacity-50'}`}>💎</span>
-                            <h3 className={`text-xs font-bold uppercase tracking-widest ${hasData ? 'text-white' : 'text-slate-400'}`}>Winning Keywords</h3>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className={`text-xl ${hasData ? '' : 'grayscale opacity-50'}`}>🧠</span>
+                            <h3 className={`text-xs font-bold uppercase tracking-widest ${hasData ? 'text-white' : 'text-slate-400'}`}>Pro Sourcing Strategy</h3>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                            {hasData && scoutResult.keywords ? (
-                                scoutResult.keywords.map((kw: string, i: number) => (
-                                <span key={i} className="bg-white/10 hover:bg-white/20 text-white text-sm font-bold px-4 py-2 rounded-lg border border-white/10 cursor-pointer transition-colors select-all">{kw}</span>
-                                ))
-                            ) : (
-                                ['Keyword 1', 'Keyword 2', 'Keyword 3', 'Keyword 4'].map((kw, i) => (
-                                    <span key={i} className="bg-white/5 text-slate-500 text-sm font-bold px-4 py-2 rounded-lg border border-white/5 select-none">{kw}</span>
-                                ))
-                            )}
-                        </div>
+                        <p className={`text-sm font-medium leading-relaxed ${hasData ? 'text-white/90' : 'text-slate-500'}`}>
+                           {hasData ? scoutResult.strategy_tip : "Scan an item to reveal the optimal selling strategy, pricing model, and listing format."}
+                        </p>
                     </div>
+                    {/* Background Decoration */}
+                    <div className={`absolute right-0 top-0 w-64 h-64 blur-[80px] rounded-full pointer-events-none transition-all ${hasData ? 'bg-purple-500/20' : 'bg-slate-500/10'}`}></div>
                 </div>
             </div>
 
         </div>
-
       </div>
     </div>
   );
