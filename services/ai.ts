@@ -118,7 +118,7 @@ export async function scoutProduct(productName: string, imageFile?: File) {
           "saturation": "Low" | "Medium" | "High",
           "liquidity": "High" | "Medium" | "Low"
         },
-        "keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
+        "strategy_tip": "One concise, actionable sentence on how to sell this specific item for max profit (e.g., 'Auction starting at $X recommended due to rarity' or 'List high with Best Offer')."
       }
       
       *Definitions:*
