@@ -18,7 +18,7 @@ const SourcingPage: React.FC = () => {
   const [costPrice, setCostPrice] = useState<string>('');
   const [sellPrice, setSellPrice] = useState<string>('');
   const [shipping, setShipping] = useState<string>('0');
-  const [platform, setPlatform] = useState<'ebay' | 'posh' | 'mercari' | 'shopify' | 'etsy' | 'depop'>('ebay');
+  const [platform, setPlatform] = useState<'ebay' | 'posh' | 'mercari' | 'depop'>('ebay');
 
   // 3. RESULTS STATE
   const [profit, setProfit] = useState<number | null>(null);
@@ -32,8 +32,6 @@ const SourcingPage: React.FC = () => {
     if (file) {
       setError(null);
       setSelectedFile(file);
-      
-      // Create immediate preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -45,9 +43,7 @@ const SourcingPage: React.FC = () => {
   const handleRemoveImage = () => {
     setImagePreview(null);
     setSelectedFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const safeParse = (val: any) => {
@@ -59,7 +55,6 @@ const SourcingPage: React.FC = () => {
 
   // 🤖 AI SCOUT HANDLER
   const handleScout = async () => {
-    // Validation: Must have either text OR an image
     if (!query.trim() && !selectedFile) {
       setError("Please enter item keywords or upload a photo to start.");
       return;
@@ -71,15 +66,11 @@ const SourcingPage: React.FC = () => {
     
     try {
       const fullQuery = condition === 'New' ? `${query} new with tags` : query;
-      
-      // AI Call
       const data = await scoutProduct(fullQuery, selectedFile || undefined);
-      
       if (!data) throw new Error("No data received from AI.");
       
       setScoutResult(data);
 
-      // Auto-populate Calculator
       const min = safeParse(data.minPrice);
       const max = safeParse(data.maxPrice);
       
@@ -112,8 +103,6 @@ const SourcingPage: React.FC = () => {
         case 'ebay': feeRate = 0.1325; flatFee = 0.30; break;
         case 'posh': feeRate = 0.20; flatFee = 0; break;
         case 'mercari': feeRate = 0.10; flatFee = 0.50; break;
-        case 'shopify': feeRate = 0.029; flatFee = 0.30; break;
-        case 'etsy': feeRate = 0.095; flatFee = 0.45; break;
         case 'depop': feeRate = 0.13; flatFee = 0.30; break;
       }
 
@@ -129,25 +118,32 @@ const SourcingPage: React.FC = () => {
       setMargin(profitMargin);
     } else {
       setProfit(null);
+      setFees(0);
+      setRoi(null);
+      setMargin(null);
     }
   }, [costPrice, sellPrice, shipping, platform]);
 
+  // Expanded Platform Button
   const PlatformBtn = ({ p, label }: any) => (
     <button 
       onClick={() => setPlatform(p)} 
-      className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+      className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
         platform === p 
-          ? `bg-white text-slate-900 shadow-md transform scale-105` 
-          : 'text-slate-400 hover:text-white hover:bg-white/10'
+          ? `bg-blue-600 text-white shadow-md` 
+          : 'bg-slate-800/50 text-slate-400 hover:bg-slate-800 hover:text-white'
       }`}
     >
       {label}
     </button>
   );
 
+  // Helper to determine if we have data
+  const hasData = !!scoutResult;
+
   return (
     <div className="min-h-screen !bg-slate-50 dark:!bg-slate-900 pb-24 pt-24 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-300">
-      <div className="max-w-5xl mx-auto relative">
+      <div className="max-w-6xl mx-auto relative">
         
         {/* HEADER */}
         <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
@@ -172,7 +168,6 @@ const SourcingPage: React.FC = () => {
                  className="w-full !bg-slate-50 dark:!bg-slate-900 rounded-xl pl-4 pr-14 py-3.5 font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                />
                
-               {/* 📸 NEON TOGGLE CAMERA BUTTON */}
                <button 
                  onClick={() => fileInputRef.current?.click()}
                  className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all duration-300 shadow-sm ${
@@ -200,7 +195,6 @@ const SourcingPage: React.FC = () => {
             </button>
           </div>
 
-          {/* ERROR MESSAGE */}
           {error && (
             <div className="mt-2 mx-2 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-xl flex items-center gap-2 animate-in slide-in-from-top-1">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -208,7 +202,6 @@ const SourcingPage: React.FC = () => {
             </div>
           )}
 
-          {/* IMAGE PREVIEW BAR */}
           {(imagePreview || query) && !error && (
             <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700 animate-in slide-in-from-top-2 duration-300 flex items-center justify-between px-2 pb-1">
                <div className="flex gap-2">
@@ -222,7 +215,6 @@ const SourcingPage: React.FC = () => {
                     </button>
                   ))}
                </div>
-               
                {imagePreview && (
                  <div className="flex items-center gap-3">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Image Attached</span>
@@ -233,177 +225,213 @@ const SourcingPage: React.FC = () => {
           )}
         </div>
 
-        {/* ==================== PREMIUM MARKET DASHBOARD ==================== */}
-        {scoutResult && !loading && !error && (
-          <div className="animate-in slide-in-from-bottom-8 duration-700 space-y-6">
-             
-             {/* 1. TOP ROW: VERDICT & CALCULATOR */}
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* ==================== ALWAYS-VISIBLE DASHBOARD ==================== */}
+        {/* Removed the condition so this block is always visible */}
+        <div className={`space-y-6 transition-all duration-500 ${loading ? 'opacity-50 pointer-events-none grayscale' : 'opacity-100'}`}>
+            
+            {/* 1. TOP ROW: VERDICT & CALCULATOR */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            {/* 💎 THE AI VERDICT CARD (Left Side - 5 Cols) */}
+            <div className="lg:col-span-5 !bg-white dark:!bg-slate-800 rounded-[32px] p-8 shadow-xl border border-slate-100 dark:border-slate-700 relative overflow-hidden flex flex-col justify-between min-h-[320px]">
+                {/* Verdict Status Bar */}
+                <div className={`absolute top-0 left-0 w-2 h-full transition-all ${hasData ? (scoutResult.verdict?.includes('PASS') ? 'bg-red-500' : 'bg-emerald-500') : 'bg-slate-300 dark:bg-slate-700'}`}></div>
                 
-                {/* 💎 THE AI VERDICT CARD */}
-                <div className="!bg-white dark:!bg-slate-800 rounded-[32px] p-8 shadow-xl border border-slate-100 dark:border-slate-700 relative overflow-hidden flex flex-col justify-between">
-                   <div className={`absolute top-0 left-0 w-2 h-full ${scoutResult.verdict?.includes('PASS') ? 'bg-red-500' : 'bg-emerald-500'}`}></div>
-                   
-                   {imagePreview && (
-                     <div className="absolute top-6 right-6 w-16 h-16 rounded-lg border-2 border-white dark:border-slate-600 shadow-md overflow-hidden">
-                       <img src={imagePreview} className="w-full h-full object-cover" />
-                     </div>
-                   )}
+                {imagePreview && hasData && (
+                    <div className="absolute top-6 right-6 w-16 h-16 rounded-lg border-2 border-white dark:border-slate-600 shadow-md overflow-hidden">
+                    <img src={imagePreview} className="w-full h-full object-cover" />
+                    </div>
+                )}
 
-                   <div>
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">AI Market Verdict</div>
-                      <div className={`text-4xl sm:text-5xl font-black tracking-tight leading-tight mb-2 ${scoutResult.verdict?.includes('PASS') ? 'text-red-500' : 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600'}`}>
-                        {scoutResult.verdict || "ANALYZED"}
-                      </div>
-                      <div className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <span>${scoutResult.minPrice} - ${scoutResult.maxPrice}</span>
-                        <span className="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 px-2 py-1 rounded">Est. Market Value</span>
-                      </div>
-                   </div>
-                   
-                   <div className="mt-6 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700">
-                     <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
-                       💡 <strong>Analyst Note:</strong> {scoutResult.reason}
-                     </p>
-                   </div>
+                <div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">AI Market Verdict</div>
+                    {/* Verdict Placeholder vs Data */}
+                    <div className={`text-4xl sm:text-5xl font-black tracking-tight leading-tight mb-3 transition-all ${hasData ? (scoutResult.verdict?.includes('PASS') ? 'text-red-500' : 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600') : 'text-slate-300 dark:text-slate-600'}`}>
+                    {hasData ? scoutResult.verdict : "READY TO SCAN"}
+                    </div>
+                    {/* Price Placeholder vs Data */}
+                    <div className={`text-2xl font-bold flex items-center gap-2 transition-all ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'}`}>
+                    <span>{hasData ? `$${scoutResult.minPrice} - $${scoutResult.maxPrice}` : "$0.00"}</span>
+                    <span className={`text-[10px] px-2 py-1 rounded ${hasData ? 'bg-slate-100 dark:bg-slate-700 text-slate-500' : 'bg-slate-50 dark:bg-slate-800 text-slate-300'}`}>Est. Market Value</span>
+                    </div>
                 </div>
-
-                {/* 🧮 PREMIUM PROFIT CALCULATOR */}
-                <div className="!bg-[#0F172A] dark:!bg-slate-800 rounded-[32px] p-8 shadow-2xl border border-slate-800 dark:border-slate-700 text-white relative">
-                   <div className="flex justify-between items-center mb-6">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Profit Engine</div>
-                      <div className="flex bg-slate-800 dark:bg-slate-900 p-1 rounded-lg gap-1">
-                         <PlatformBtn p="ebay" label="EB" />
-                         <PlatformBtn p="posh" label="PM" />
-                         <PlatformBtn p="mercari" label="MC" />
-                         <PlatformBtn p="depop" label="DP" />
-                      </div>
-                   </div>
-
-                   <div className="grid grid-cols-2 gap-6 mb-6">
-                      <div>
-                         <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Item Cost</label>
-                         <div className="relative">
-                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
-                           <input type="number" value={costPrice} onChange={e => setCostPrice(e.target.value)} className="w-full bg-slate-800 dark:bg-slate-900 rounded-xl pl-6 pr-3 py-3 text-lg font-bold text-white border border-slate-700 focus:border-blue-500 focus:outline-none" placeholder="0" />
-                         </div>
-                      </div>
-                      <div>
-                         <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Shipping</label>
-                         <div className="relative">
-                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
-                           <input type="number" value={shipping} onChange={e => setShipping(e.target.value)} className="w-full bg-slate-800 dark:bg-slate-900 rounded-xl pl-6 pr-3 py-3 text-lg font-bold text-white border border-slate-700 focus:border-blue-500 focus:outline-none" placeholder="0" />
-                         </div>
-                      </div>
-                   </div>
-
-                   <div className="border-t border-slate-700/50 pt-6">
-                      <div className="flex justify-between items-end">
-                         <div>
-                            <div className="text-[10px] text-slate-400 mb-1">Net Profit</div>
-                            <div className={`text-5xl font-black tracking-tight ${profit && profit > 0 ? 'text-emerald-400' : 'text-slate-500'}`}>
-                               ${profit ? profit.toFixed(2) : '0.00'}
-                            </div>
-                         </div>
-                         <div className="text-right space-y-1">
-                            <div className={`text-sm font-bold ${roi && roi >= 100 ? 'text-emerald-400' : 'text-slate-300'}`}>
-                               {roi ? roi.toFixed(0) : 0}% ROI
-                            </div>
-                            <div className="text-xs text-slate-400">
-                               {margin ? margin.toFixed(0) : 0}% Margin
-                            </div>
-                            <div className="text-[10px] text-slate-500">
-                               -${fees.toFixed(2)} Fees
-                            </div>
-                         </div>
-                      </div>
-                   </div>
-                </div>
-             </div>
-
-             {/* 2. MIDDLE ROW: BENTO METRICS GRID */}
-             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 
-                {/* METRIC 1: SELL-THROUGH */}
-                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex justify-between">
-                     <span>Sell-Through</span>
-                     <span className="text-slate-300">AI Est.</span>
-                   </div>
-                   <div className="mt-2">
-                      <div className="flex items-end gap-1">
-                         <span className="text-3xl font-black text-slate-900 dark:text-white">{scoutResult.metrics?.sell_through || 50}%</span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full mt-3 overflow-hidden">
-                         <div className={`h-full rounded-full ${scoutResult.metrics?.sell_through > 50 ? 'bg-green-500' : 'bg-orange-500'}`} style={{ width: `${scoutResult.metrics?.sell_through || 50}%` }}></div>
-                      </div>
-                   </div>
+                {/* Reason Placeholder vs Data */}
+                <div className={`mt-8 p-4 rounded-2xl border transition-all ${hasData ? 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-700' : 'bg-slate-50/50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800'}`}>
+                    <p className={`text-sm font-medium leading-relaxed ${hasData ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400 dark:text-slate-600'}`}>
+                    💡 <strong>Analyst Note:</strong> {hasData ? scoutResult.reason : "Upload photo or enter keywords to generate market analysis."}
+                    </p>
+                </div>
+            </div>
+
+            {/* 🧮 PREMIUM PROFIT CALCULATOR (Right Side - 7 Cols) */}
+            <div className="lg:col-span-7 !bg-[#0F172A] dark:!bg-slate-800 rounded-[32px] p-8 shadow-2xl border border-slate-800 dark:border-slate-700 text-white relative flex flex-col justify-between min-h-[320px]">
+                
+                {/* Header & Tabs */}
+                <div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Profit Engine</div>
+                    {/* BIGGER, BETTER TABS */}
+                    <div className="flex bg-slate-900/50 dark:bg-slate-900 p-1.5 rounded-2xl gap-1.5 mb-8">
+                        <PlatformBtn p="ebay" label="eBay" />
+                        <PlatformBtn p="posh" label="Poshmark" />
+                        <PlatformBtn p="mercari" label="Mercari" />
+                        <PlatformBtn p="depop" label="Depop" />
+                    </div>
                 </div>
 
-                {/* METRIC 2: DAYS TO SELL */}
-                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg Time to Sell</div>
-                   <div className="mt-2">
-                      <div className="text-3xl font-black text-slate-900 dark:text-white">{scoutResult.metrics?.days_to_sell || 30} <span className="text-sm font-bold text-slate-400">Days</span></div>
-                      <p className="text-[10px] text-slate-400 mt-1">Based on category velocity</p>
-                   </div>
-                </div>
+                {/* Inputs & Financials Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    
+                    {/* Inputs Column */}
+                    <div className="space-y-6">
+                        <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1.5">Item Cost</label>
+                            <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg font-bold">$</span>
+                            <input type="number" value={costPrice} onChange={e => setCostPrice(e.target.value)} className="w-full bg-slate-800 dark:bg-slate-900 rounded-2xl pl-8 pr-4 py-4 text-xl font-bold text-white border border-slate-700 focus:border-blue-500 focus:outline-none transition-all" placeholder="0.00" />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase block mb-1.5">Shipping Cost</label>
+                            <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg font-bold">$</span>
+                            <input type="number" value={shipping} onChange={e => setShipping(e.target.value)} className="w-full bg-slate-800 dark:bg-slate-900 rounded-2xl pl-8 pr-4 py-4 text-xl font-bold text-white border border-slate-700 focus:border-blue-500 focus:outline-none transition-all" placeholder="0.00" />
+                            </div>
+                        </div>
+                    </div>
 
-                {/* METRIC 3: COMPETITION */}
-                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Competition</div>
-                   <div className="mt-2">
-                      <div className={`text-xl font-black uppercase ${scoutResult.metrics?.competition === 'Low' ? 'text-green-500' : 'text-orange-500'}`}>
-                         {scoutResult.metrics?.competition || 'Medium'}
-                      </div>
-                      <div className="flex gap-1 mt-3">
-                         {[1,2,3,4].map(i => (
-                            <div key={i} className={`h-1.5 flex-1 rounded-full ${
-                               (scoutResult.metrics?.competition === 'High' && i <= 3) ? 'bg-red-400' : 
-                               (scoutResult.metrics?.competition === 'Medium' && i <= 2) ? 'bg-orange-400' :
-                               (scoutResult.metrics?.competition === 'Low' && i <= 1) ? 'bg-green-400' : 'bg-slate-100 dark:bg-slate-700'
-                            }`}></div>
-                         ))}
-                      </div>
-                   </div>
-                </div>
+                    {/* Financials Column - THE BIG UPGRADE */}
+                    <div className="flex flex-col justify-end">
+                        <div>
+                            <div className="text-[10px] text-slate-400 mb-1 uppercase tracking-wider">Projected Profit</div>
+                            <div className={`text-5xl font-black tracking-tight truncate ${profit && profit > 0 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                                ${profit ? profit.toFixed(2) : '0.00'}
+                            </div>
+                        </div>
+                        
+                        {/* BOLD METRICS GRID */}
+                        <div className="grid grid-cols-3 gap-3 mt-6 pt-6 border-t border-slate-700/50">
+                            <div className="bg-slate-800/50 dark:bg-slate-900/50 rounded-xl p-3 text-center">
+                                <div className={`text-xl font-black ${roi && roi >= 100 ? 'text-emerald-400' : 'text-slate-300'}`}>
+                                    {roi ? roi.toFixed(0) : 0}%
+                                </div>
+                                <div className="text-[10px] text-slate-400 uppercase font-bold mt-1">ROI</div>
+                            </div>
+                             <div className="bg-slate-800/50 dark:bg-slate-900/50 rounded-xl p-3 text-center">
+                                <div className={`text-xl font-black ${margin && margin >= 30 ? 'text-emerald-400' : 'text-slate-300'}`}>
+                                    {margin ? margin.toFixed(0) : 0}%
+                                </div>
+                                <div className="text-[10px] text-slate-400 uppercase font-bold mt-1">Margin</div>
+                            </div>
+                             <div className="bg-slate-800/50 dark:bg-slate-900/50 rounded-xl p-3 text-center">
+                                <div className="text-xl font-black text-slate-300">
+                                    ${fees.toFixed(2)}
+                                </div>
+                                <div className="text-[10px] text-slate-400 uppercase font-bold mt-1">Est. Fees</div>
+                            </div>
+                        </div>
 
-                {/* METRIC 4: VOLATILITY */}
-                <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Price Stability</div>
-                   <div className="mt-2">
-                      <div className="text-xl font-black text-slate-900 dark:text-white">{scoutResult.metrics?.volatility || 'Stable'}</div>
-                      {/* Fake sparkline for visuals */}
-                      <svg className="w-full h-8 text-blue-500 mt-1 opacity-50" viewBox="0 0 100 20" preserveAspectRatio="none">
-                         <path d="M0,15 Q20,5 40,10 T80,5 T100,15" fill="none" stroke="currentColor" strokeWidth="3" />
-                      </svg>
-                   </div>
+                    </div>
                 </div>
-             </div>
+            </div>
+            </div>
 
-             {/* 3. BOTTOM ROW: SEO KEYWORDS */}
-             <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-1 rounded-[24px] shadow-lg">
-                <div className="bg-[#0F172A] p-6 rounded-[22px] relative overflow-hidden">
-                   <div className="relative z-10">
-                      <div className="flex items-center gap-2 mb-4">
-                         <span className="text-xl">💎</span>
-                         <h3 className="text-xs font-bold text-white uppercase tracking-widest">Winning Keywords (Copy These)</h3>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                         {scoutResult.keywords?.map((kw: string, i: number) => (
+            {/* 2. MIDDLE ROW: BENTO METRICS GRID (Always Visible, Placeholder data if none) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            
+            {/* METRIC 1: SELL-THROUGH */}
+            <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex justify-between"><span>Sell-Through</span><span className="text-slate-300">AI Est.</span></div>
+                <div className="mt-2">
+                    <div className="flex items-end gap-1">
+                        <span className={`text-3xl font-black ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'}`}>
+                            {hasData ? scoutResult.metrics?.sell_through : 0}%
+                        </span>
+                    </div>
+                    <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full mt-3 overflow-hidden">
+                        <div className={`h-full rounded-full transition-all ${hasData ? (scoutResult.metrics?.sell_through > 50 ? 'bg-green-500' : 'bg-orange-500') : 'bg-slate-300 dark:bg-slate-600'}`} style={{ width: `${hasData ? scoutResult.metrics?.sell_through : 0}%` }}></div>
+                    </div>
+                </div>
+            </div>
+
+            {/* METRIC 2: DAYS TO SELL */}
+            <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg Time to Sell</div>
+                <div className="mt-2">
+                    <div className={`text-3xl font-black ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'}`}>
+                        {hasData ? scoutResult.metrics?.days_to_sell : '--'} <span className="text-sm font-bold text-slate-400">Days</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1">Based on category velocity</p>
+                </div>
+            </div>
+
+            {/* METRIC 3: COMPETITION */}
+            <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Competition</div>
+                <div className="mt-2">
+                    <div className={`text-xl font-black uppercase ${hasData ? (scoutResult.metrics?.competition === 'Low' ? 'text-green-500' : 'text-orange-500') : 'text-slate-300 dark:text-slate-600'}`}>
+                        {hasData ? scoutResult.metrics?.competition : '---'}
+                    </div>
+                    <div className="flex gap-1 mt-3">
+                        {[1,2,3,4].map(i => (
+                        <div key={i} className={`h-1.5 flex-1 rounded-full transition-all ${
+                            hasData ? 
+                                (scoutResult.metrics?.competition === 'High' && i <= 3 ? 'bg-red-400' : 
+                                scoutResult.metrics?.competition === 'Medium' && i <= 2 ? 'bg-orange-400' :
+                                scoutResult.metrics?.competition === 'Low' && i <= 1 ? 'bg-green-400' : 'bg-slate-100 dark:bg-slate-700')
+                            : 'bg-slate-100 dark:bg-slate-700'
+                        }`}></div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* METRIC 4: VOLATILITY */}
+            <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Price Stability</div>
+                <div className="mt-2">
+                    <div className={`text-xl font-black ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'}`}>
+                        {hasData ? (scoutResult.metrics?.volatility || 'Stable') : '---'}
+                    </div>
+                    {/* Fake sparkline for visuals */}
+                    <svg className={`w-full h-8 mt-1 transition-all ${hasData ? 'text-blue-500 opacity-50' : 'text-slate-300 dark:text-slate-700 opacity-30'}`} viewBox="0 0 100 20" preserveAspectRatio="none">
+                        <path d="M0,15 Q20,5 40,10 T80,5 T100,15" fill="none" stroke="currentColor" strokeWidth="3" />
+                    </svg>
+                </div>
+            </div>
+            </div>
+
+            {/* 3. BOTTOM ROW: SEO KEYWORDS (Always Visible Placeholder) */}
+            <div className={`bg-gradient-to-r p-1 rounded-[24px] shadow-lg transition-all ${hasData ? 'from-blue-600 to-indigo-700' : 'from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800'}`}>
+            <div className="bg-[#0F172A] p-6 rounded-[22px] relative overflow-hidden min-h-[120px] flex items-center">
+                <div className="relative z-10 w-full">
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className={`text-xl ${hasData ? '' : 'grayscale opacity-50'}`}>💎</span>
+                        <h3 className={`text-xs font-bold uppercase tracking-widest ${hasData ? 'text-white' : 'text-slate-400'}`}>Winning Keywords (Copy These)</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {hasData && scoutResult.keywords ? (
+                            scoutResult.keywords.map((kw: string, i: number) => (
                             <span key={i} className="bg-white/10 hover:bg-white/20 text-white text-sm font-bold px-4 py-2 rounded-lg border border-white/10 cursor-pointer transition-colors select-all">
-                               {kw}
+                                {kw}
                             </span>
-                         )) || <span className="text-slate-400 text-xs">No keywords found.</span>}
-                      </div>
-                   </div>
-                   {/* Background Decoration */}
-                   <div className="absolute right-0 top-0 w-64 h-64 bg-blue-500/20 blur-[80px] rounded-full pointer-events-none"></div>
+                            ))
+                        ) : (
+                            // PLACEHOLDER KEYWORDS
+                            ['Keyword 1', 'Keyword 2', 'Keyword 3'].map((kw, i) => (
+                                <span key={i} className="bg-white/5 text-slate-500 text-sm font-bold px-4 py-2 rounded-lg border border-white/5 select-none">
+                                    {kw}
+                                </span>
+                            ))
+                        )}
+                    </div>
                 </div>
-             </div>
+                {/* Background Decoration */}
+                <div className={`absolute right-0 top-0 w-64 h-64 blur-[80px] rounded-full pointer-events-none transition-all ${hasData ? 'bg-blue-500/20' : 'bg-slate-500/10'}`}></div>
+            </div>
+            </div>
 
-          </div>
-        )}
+        </div>
 
       </div>
     </div>
