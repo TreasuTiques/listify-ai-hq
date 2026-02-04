@@ -18,7 +18,7 @@ const SourcingPage: React.FC = () => {
   const [costPrice, setCostPrice] = useState<string>('');
   const [sellPrice, setSellPrice] = useState<string>('');
   const [shipping, setShipping] = useState<string>('0');
-  const [platform, setPlatform] = useState<'ebay' | 'posh' | 'mercari' | 'depop'>('ebay');
+  const [platform, setPlatform] = useState<'ebay' | 'posh' | 'mercari' | 'depop' | 'etsy' | 'shopify'>('ebay');
 
   // 3. RESULTS STATE
   const [profit, setProfit] = useState<number | null>(null);
@@ -53,6 +53,15 @@ const SourcingPage: React.FC = () => {
     const str = String(val);
     const num = parseFloat(str.replace(/[^0-9.]/g, ''));
     return isNaN(num) ? 0 : num;
+  };
+
+  // ⚖️ DETERMINISTIC VERDICT GENERATOR
+  const getVerdictFromScore = (score: number) => {
+    if (score >= 80) return { label: "💎 UNICORN FIND", color: "text-emerald-400", bar: "bg-emerald-500" };
+    if (score >= 60) return { label: "🚀 FAST FLIP", color: "text-green-400", bar: "bg-green-500" };
+    if (score >= 40) return { label: "⚖️ STEADY SELLER", color: "text-blue-400", bar: "bg-blue-500" };
+    if (score >= 20) return { label: "⏳ LONG TAIL", color: "text-orange-400", bar: "bg-orange-500" };
+    return { label: "🛑 HARD PASS", color: "text-red-500", bar: "bg-red-500" };
   };
 
   // 🤖 AI SCOUT HANDLER
@@ -105,7 +114,9 @@ const SourcingPage: React.FC = () => {
         case 'ebay': feeRate = 0.1325; flatFee = 0.30; break;
         case 'posh': feeRate = 0.20; flatFee = 0; break;
         case 'mercari': feeRate = 0.10; flatFee = 0.50; break;
-        case 'depop': feeRate = 0.10; flatFee = 0.30; break; // Updated Depop fee
+        case 'depop': feeRate = 0.10; flatFee = 0.30; break;
+        case 'etsy': feeRate = 0.065; flatFee = 0.20; break; // Approx Etsy fees
+        case 'shopify': feeRate = 0.029; flatFee = 0.30; break; // Basic Shopify
       }
 
       // 1. Calculate Fees
@@ -142,10 +153,10 @@ const SourcingPage: React.FC = () => {
   const PlatformBtn = ({ p, label }: any) => (
     <button 
       onClick={() => setPlatform(p)} 
-      className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+      className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all border ${
         platform === p 
-          ? `bg-blue-600 text-white shadow-md` 
-          : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-600'
+          ? `bg-blue-600 text-white border-blue-600 shadow-md transform scale-105` 
+          : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-600 hover:border-blue-400'
       }`}
     >
       {label}
@@ -153,13 +164,14 @@ const SourcingPage: React.FC = () => {
   );
 
   const hasData = !!scoutResult;
+  const verdictStyle = hasData ? getVerdictFromScore(scoutResult.demand_score || 50) : { label: "READY TO SCAN", color: "text-slate-300 dark:text-slate-600", bar: "bg-slate-300 dark:bg-slate-700" };
 
   // 🎨 Donut Chart Helper
   const DonutChart = ({ profitPct }: { profitPct: number }) => {
-    // Clamp between 0 and 100
+    // Clamp between 0 and 100 for visual sanity
     const value = Math.max(0, Math.min(100, profitPct));
-    const size = 120;
-    const strokeWidth = 12;
+    const size = 140;
+    const strokeWidth = 14;
     const center = size / 2;
     const radius = center - strokeWidth;
     const circumference = 2 * Math.PI * radius;
@@ -176,7 +188,7 @@ const SourcingPage: React.FC = () => {
             fill="transparent"
             stroke="currentColor"
             strokeWidth={strokeWidth}
-            className="text-slate-200 dark:text-slate-700"
+            className="text-slate-100 dark:text-slate-700"
           />
           {/* Progress Circle */}
           <circle
@@ -189,12 +201,12 @@ const SourcingPage: React.FC = () => {
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
-            className={`${value > 0 ? 'text-emerald-400' : 'text-slate-400'} transition-all duration-1000 ease-out`}
+            className={`${value > 0 ? 'text-emerald-400' : 'text-slate-300'} transition-all duration-1000 ease-out`}
           />
         </svg>
         <div className="absolute flex flex-col items-center justify-center">
-           <span className="text-xl font-black text-slate-900 dark:text-white">{value.toFixed(0)}%</span>
-           <span className="text-[8px] font-bold text-slate-400 uppercase">Margin</span>
+           <span className={`text-2xl font-black ${value > 0 ? 'text-slate-900 dark:text-white' : 'text-slate-300'}`}>{value.toFixed(0)}%</span>
+           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Margin</span>
         </div>
       </div>
     );
@@ -293,7 +305,7 @@ const SourcingPage: React.FC = () => {
             
             {/* 💎 AI VERDICT CARD (Left - 5 Cols) */}
             <div className="lg:col-span-5 !bg-white dark:!bg-slate-800 rounded-[32px] p-8 shadow-xl border border-slate-100 dark:border-slate-700 relative overflow-hidden flex flex-col justify-between min-h-[320px]">
-                <div className={`absolute top-0 left-0 w-2 h-full transition-all ${hasData ? (scoutResult.verdict?.includes('PASS') ? 'bg-red-500' : 'bg-emerald-500') : 'bg-slate-300 dark:bg-slate-700'}`}></div>
+                <div className={`absolute top-0 left-0 w-2 h-full transition-all ${verdictStyle.bar}`}></div>
                 
                 {imagePreview && hasData && (
                     <div className="absolute top-6 right-6 w-16 h-16 rounded-lg border-2 border-white dark:border-slate-600 shadow-md overflow-hidden">
@@ -303,8 +315,8 @@ const SourcingPage: React.FC = () => {
 
                 <div>
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">AI Market Verdict</div>
-                    <div className={`text-4xl sm:text-5xl font-black tracking-tight leading-tight mb-3 transition-all ${hasData ? (scoutResult.verdict?.includes('PASS') ? 'text-red-500' : 'text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600') : 'text-slate-300 dark:text-slate-600'}`}>
-                    {hasData ? scoutResult.verdict : "READY TO SCAN"}
+                    <div className={`text-4xl sm:text-5xl font-black tracking-tight leading-tight mb-3 transition-all ${verdictStyle.color}`}>
+                    {verdictStyle.label}
                     </div>
                     <div className={`text-2xl font-bold flex items-center gap-2 transition-all ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300 dark:text-slate-600'}`}>
                     <span>{hasData ? `$${scoutResult.minPrice} - $${scoutResult.maxPrice}` : "$0.00"}</span>
@@ -323,20 +335,25 @@ const SourcingPage: React.FC = () => {
             <div className="lg:col-span-7 !bg-white dark:!bg-slate-800 rounded-[32px] p-8 shadow-xl border border-slate-100 dark:border-slate-700 relative flex flex-col justify-between min-h-[320px]">
                 
                 {/* Header & Tabs */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                    <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                       Financial Command
-                    </h3>
-                    <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl gap-1">
+                <div className="flex flex-col gap-6">
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Financial Command
+                        </h3>
+                    </div>
+                    {/* FULL WIDTH PLATFORM SELECTOR */}
+                    <div className="flex flex-wrap gap-2">
                         <PlatformBtn p="ebay" label="eBay" />
-                        <PlatformBtn p="posh" label="Posh" />
-                        <PlatformBtn p="mercari" label="Merc" />
+                        <PlatformBtn p="posh" label="Poshmark" />
+                        <PlatformBtn p="mercari" label="Mercari" />
                         <PlatformBtn p="depop" label="Depop" />
+                        <PlatformBtn p="etsy" label="Etsy" />
+                        <PlatformBtn p="shopify" label="Shopify" />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
                     
                     {/* INPUTS COLUMN */}
                     <div className="space-y-5">
@@ -416,14 +433,14 @@ const SourcingPage: React.FC = () => {
             </div>
             </div>
 
-            {/* 2. METRICS ROW */}
+            {/* 2. METRICS ROW (ALWAYS VISIBLE PLACEHOLDERS) */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Metric 1 */}
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex flex-col justify-between">
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex justify-between"><span>Sell-Through</span><span className="text-slate-300">AI Est.</span></div>
                     <div className="mt-2">
                         <div className="flex items-end gap-1"><span className={`text-3xl font-black ${hasData ? 'text-slate-900 dark:text-white' : 'text-slate-300'}`}>{hasData ? scoutResult.metrics?.sell_through : 0}%</span></div>
-                        <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full mt-3 overflow-hidden"><div className={`h-full rounded-full transition-all ${hasData ? 'bg-green-500' : 'bg-slate-300'}`} style={{ width: `${hasData ? scoutResult.metrics?.sell_through : 0}%` }}></div></div>
+                        <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full mt-3 overflow-hidden"><div className={`h-full rounded-full transition-all ${hasData ? (scoutResult.metrics?.sell_through > 50 ? 'bg-green-500' : 'bg-orange-500') : 'bg-slate-300'}`} style={{ width: `${hasData ? scoutResult.metrics?.sell_through : 0}%` }}></div></div>
                     </div>
                 </div>
                 {/* Metric 2 */}
@@ -443,7 +460,7 @@ const SourcingPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* 3. KEYWORDS ROW */}
+            {/* 3. KEYWORDS ROW (ALWAYS VISIBLE PLACEHOLDERS) */}
             <div className={`bg-gradient-to-r p-1 rounded-[24px] shadow-lg transition-all ${hasData ? 'from-blue-600 to-indigo-700' : 'from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800'}`}>
                 <div className="bg-[#0F172A] p-6 rounded-[22px] relative overflow-hidden min-h-[100px] flex items-center">
                     <div className="relative z-10 w-full">
@@ -457,7 +474,7 @@ const SourcingPage: React.FC = () => {
                                 <span key={i} className="bg-white/10 hover:bg-white/20 text-white text-sm font-bold px-4 py-2 rounded-lg border border-white/10 cursor-pointer transition-colors select-all">{kw}</span>
                                 ))
                             ) : (
-                                ['Keyword 1', 'Keyword 2', 'Keyword 3'].map((kw, i) => (
+                                ['Keyword 1', 'Keyword 2', 'Keyword 3', 'Keyword 4'].map((kw, i) => (
                                     <span key={i} className="bg-white/5 text-slate-500 text-sm font-bold px-4 py-2 rounded-lg border border-white/5 select-none">{kw}</span>
                                 ))
                             )}
