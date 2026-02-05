@@ -183,9 +183,10 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     - Select a [THEME_DARK] (Main Color) and a [THEME_LIGHT] (Background Pastel) that matches perfectly.
     - **FALLBACK:** If unsure, use "High-Voltage Blue" (#0056b3) and "Cloud White" (#f8f9fa).
 
-    **2. MOBILE-FIRST LAYOUT (FLEXBOX):**
-    - The Header MUST use 'display: flex' to separate the Title and SKU Pill.
-    - NEVER use 'position: absolute' for the SKU badge; it breaks on mobile screens.
+    **2. DYNAMIC CONTENT GENERATION (CRITICAL):**
+    - **RED ZONE (Condition):** You MUST write a detailed, full-sentence narrative about the condition. Combine the user's input with your own visual analysis of wear, flaws, or preservation. Do NOT leave this brief.
+    - **YELLOW ZONE (The 3 Bullets):** Generate 3 UNIQUE, FUN, and ITEM-SPECIFIC reasons to buy this item. Do NOT use generic text like "Ships Fast". (e.g., if it's a fragile vase: "✓ Double-Boxed Armor", "✓ Insured Safe-Arrival", "✓ Instant Decor Upgrade").
+    - **BLUE ZONE (Closing Hook):** Write a witty, item-specific closing line. (e.g., "Don't let this slice of history fly away!").
 
     **HTML STRUCTURE (Strictly follow this layout):**
 
@@ -224,7 +225,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
 
             <h2 style="color: [THEME_DARK]; border-bottom: 2px dashed [THEME_DARK]; padding-bottom: 5px; margin-top: 30px; font-size: 20px;">🔍 Condition Report</h2>
             <p style="font-size: 16px;">
-                [Honest condition summary. Mention flaws clearly but gently.]
+                [INSERT DETAILED NARRATIVE CONDITION REPORT HERE. Do not summarize. Describe every flaw and feature mentioned in analysis.]
             </p>
 
         </div>
@@ -234,12 +235,12 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
                 ⭐ [URGENT & FUN HEADLINE]
             </h2>
             <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 20px 0; font-size: 14px; opacity: 0.9;">
-                <span>✓ Bomb-proof Packaging</span>
-                <span>✓ Ships in 24hrs</span>
-                <span>✓ 5-Star Service</span>
+                <span>✓ [UNIQUE_PROP_1]</span>
+                <span>✓ [UNIQUE_PROP_2]</span>
+                <span>✓ [UNIQUE_PROP_3]</span>
             </div>
             <p style="margin: 0; font-size: 16px; font-weight: bold;">
-                ✨ [Warm closing line: "Make it yours today!"]
+                ✨ [INSERT WITTY CLOSING HOOK HERE]
             </p>
         </div>
 
