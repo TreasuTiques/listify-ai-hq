@@ -15,7 +15,6 @@ const MODEL_NAME = "gemini-2.0-flash";
 
 /**
  * 📊 TRACKING UTILITY
- * Calculates cost and saves to Supabase usage_logs
  */
 const logUsage = async (usage: any, action: string) => {
   if (!usage) {
@@ -25,8 +24,6 @@ const logUsage = async (usage: any, action: string) => {
 
   const tokensIn = usage.promptTokenCount || 0;
   const tokensOut = usage.candidatesTokenCount || 0;
-
-  // Gemini 2.0 Flash pricing per 1M tokens: $0.15 Input / $0.60 Output
   const costIn = (tokensIn / 1_000_000) * 0.15;
   const costOut = (tokensOut / 1_000_000) * 0.60;
   const totalCost = costIn + costOut;
@@ -116,6 +113,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
         <h1 style="font-size: 24px; margin: 10px 0;">{{TITLE}}</h1>
         <p style="color: #555; font-size: 16px;">{{SEMANTIC_INTRO}}</p>
       </div>
+      
       <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e5e7eb;">
         <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666; letter-spacing: 1px;">Item Specifics</h3>
         <ul style="list-style: none; padding: 0; margin: 0;">
@@ -125,12 +123,14 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
           <li style="margin-bottom: 8px;"><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
         </ul>
       </div>
+
       <div style="margin-bottom: 30px;">
         <h3 style="font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px; margin-bottom: 10px;">Detailed Analysis</h3>
         <p>{{DETAILED_ANALYSIS}}</p>
         <br>
         <p><strong>Defects/Notes:</strong> {{DEFECT_REPORT}}</p>
       </div>
+
       <div style="text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #f0f0f0; padding-top: 20px;">
         <p>⚡ Fast Shipping • 📦 Professional Packaging</p>
       </div>
@@ -141,14 +141,17 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
   const SHOPIFY_HTML_TEMPLATE = `
     <div class="product-description" style="font-family: inherit;">
       <p class="intro">{{SEMANTIC_INTRO}}</p>
+      
       <h2>Product Specifications</h2>
       <ul>
         <li><strong>Material:</strong> {{MATERIAL}}</li>
         <li><strong>Color:</strong> {{COLOR}}</li>
         <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
       </ul>
+
       <h2>Detailed Analysis</h2>
       <p>{{DETAILED_ANALYSIS}}</p>
+
       <h2>Frequently Asked Questions</h2>
       <dl>
         <dt><strong>Is this item true to size?</strong></dt>
@@ -159,76 +162,58 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     </div>
   `;
 
-  // 🔥 JUAN ACUÑA'S PREMIUM ENGINE (FULL VERBOSE VERSION)
+  // 🔥 JUAN ACUÑA'S PREMIUM ENGINE (UPDATED: Fixed SKU, Clean Titles, Boxed Layout)
   const PREMIUM_PRO_PROMPT = `
-    You are **Juan Acuña’s Premium eBay Listing Generator**, designed to transform RAW DATA into high-quality, themed, Cassini-optimized eBay listings.
-
-    Follow these rules with ZERO exceptions:
-
-    -----------------------------------------------------------------------
-    1. SKU RULES (MANDATORY)
-    -----------------------------------------------------------------------
-    Generate a unique SKU: [CATEGORY-PREFIX]-[RANDOM-4-CHARS] (e.g. VINT-A29X).
+    🚨 ACTIVATE "JUAN ACUÑA PREMIUM ENGINE" 🚨
     
-    ⭐ UNBREAKABLE RULE: SKU must ALWAYS appear inside a WHITE PILL-SHAPED BADGE:
-    • White background, thin dark border, bold text, slight drop shadow.
-    • Positioned absolute, top-right of the description container.
-    • Must remain readable against ANY theme.
+    You are transforming raw data into a high-converting, themed eBay listing.
+    
+    **CRITICAL RULES:**
+    1. **TITLES (STRICT):** Clean text ONLY. NO emojis. NO symbols like [], {}, |. NO all-caps (unless brand).
+    2. **TONE:** Warm, light humor, nostalgic (if vintage), and CONFIDENT.
+    3. **THEME AUTO-DETECTION:** Identify the Era/Style (e.g., 90s Vaporwave, 70s Earth Tones) and use specific hex codes for borders/backgrounds.
 
-    -----------------------------------------------------------------------
-    2. PREMIUM HTML DESCRIPTION (ONE SINGLE CODE BLOCK)
-    -----------------------------------------------------------------------
-    Inside ONE fenced code block, output valid HTML:
-
-    1. MAIN TITLE PANEL  
-       • Centered, Themed to the item (era/brand/holiday/color).
-       • Emojis allowed. No cursive fonts.
-
-    2. SKU PILL BADGE (mandatory style above)
-
-    3. DESCRIPTION SECTION  
-       • Detailed, themed.
-       • Insert **micro-lore** + light nostalgia when appropriate.
-       • Add fun, subtle humor when it fits.
-       • Add subtle **collector/seller-confidence lines** (e.g., "Hard to find in this condition").
-
-    4. FEATURES SECTION  
-       • Emoji bullet points. Item-specific.
-
-    5. CONDITION SECTION  
-       • Summary only.
-
-    6. WHY YOU’LL LOVE IT  
-       • Emotional appeal, Nostalgia, Humor.
-
-    7. SHIPPING & CARE  
-       • "Free shipping", "New sturdy box", "Bubble wrap", "Tracking".
-
-    8. CTA PANEL (“Flair” style) - MUST follow the 1–3–1 format:
-       ⭐ Headline (fun, themed, humorous)  
-       • 3 conversational bullets (fresh, tailored to item, nostalgic OR humorous)  
-       ✨ Closing tagline (warm, human, item-specific)
-
-    -----------------------------------------------------------------------
-    3. THEME & VISUAL RULES
-    -----------------------------------------------------------------------
-    The assistant must AUTO-DETECT ERA/STYLE and theme accordingly (colors, fonts, emojis).
-    Examples: 1980s neon retro, 1990s bold teal/purple, Minimalist modern, Rustic.
-
-    -----------------------------------------------------------------------
-    4. TONE RULES
-    -----------------------------------------------------------------------
-    ALWAYS inject: Light humor, Warmth, Personality.
-    **CRITICAL VOCABULARY RULE:** Write at an **8th GRADE READING LEVEL**. Simple, direct.
-    **BANNED WORDS:** Whimsical, Curated, Bespoke, Exquisite, Tapestry, Symphony, Heritage, Provenance, Iconic, Meticulous.
-
-    -----------------------------------------------------------------------
-    5. STRICT DO-NOT RULES
-    -----------------------------------------------------------------------
-    NEVER: Guess missing info, Add images/links, Use cursive fonts, Reuse CTA wording.
+    **HTML STRUCTURE (Output a Single, Self-Contained Block):**
+    
+    **1. MAIN CONTAINER (The "Card"):**
+       - Style: max-width: 850px; margin: 0 auto; border: 3px solid [THEME_COLOR_DARK]; border-radius: 12px; overflow: hidden; font-family: sans-serif; position: relative; background: #fff;
+    
+    **2. SKU BADGE (Fixed Position Bug Solver):** - **PLACEMENT:** Absolute top-right corner of the Main Container.
+       - **STYLE:** position: absolute; top: 15px; right: 15px; background: #fff; border: 1px solid #ccc; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; color: #555; z-index: 10;
+       - **CONTENT:** "SKU: [CATEGORY]-[RANDOM-4]" (e.g., SKU: TOY-X92Z).
+       
+    **3. HEADER PANEL:** - Full width box at top. Background: [THEME_COLOR_LIGHT]. Padding: 30px 20px.
+       - Title: Centered, [THEME_COLOR_DARK], bold, large font (24px+). No emojis in h1 text.
+    
+    **4. MICRO-LORE ROW:**
+       - A centered, italicized sentence right under the header.
+       - Style: color: #666; font-size: 16px; margin-top: 10px;
+       - Content: A specific nostalgic fact or Era-setting line (e.g., "Straight from 1995 dial-up days...").
+       
+    **5. DESCRIPTION BODY:**
+       - Padding: 20px. Text-align: left. Line-height: 1.6.
+       - **The Hook:** 1 paragraph drawing them in.
+       - **Collector Note:** "Hard to find in this condition."
+       
+    **6. "THE SPECS" (Features):**
+       - A styled list. Use simple emoji bullets (▪️ or ➤) if clean, or themed emojis if fun.
+    
+    **7. CONDITION & FLAWS:**
+       - Clear section. Be honest.
+    
+    **8. THE "HIGH VOLTAGE" CTA BOX (Bottom):**
+       - **STYLE:** A distinct colored box at the bottom (like the pink AOL box).
+       - Background: [CONTRAST_COLOR] (e.g. Hot Pink, Electric Blue). Color: White/Dark.
+       - Padding: 20px. Text-align: center. Border-radius: 8px; margin: 20px;
+       - **Headline:** Fun & Urgent (e.g., "START YOUR COLLECTION TONIGHT!").
+       - **Body:** "Don't let this slip away. Click Buy It Now to secure it..."
+       
+    **FORMATTING:** - NO Cursive fonts. 
+    - NO Markdown (**). Use HTML <strong> tags.
+    - NO External CSS. Inline styles only.
   `;
 
-  // 📝 STANDARD PROMPT
+  // 📝 STANDARD EBAY PROMPT
   const STANDARD_PROMPT = `
     **ROLE:** eBay Cassini Algorithm Specialist.
     **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
@@ -239,7 +224,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     ${EBAY_HTML_TEMPLATE}
   `;
 
-  // 🚨 UNIVERSAL JSON OUTPUT STRUCTURE
+  // 🚨 OUTPUT JSON STRUCTURE (CRITICAL FOR AUTO-FILL)
   const OUTPUT_INSTRUCTION = `
     **OUTPUT JSON STRUCTURE (REQUIRED):**
     {
@@ -258,7 +243,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
         "department": "Men/Women",
         "model": "Model",
         "theme": "Aesthetic",
-        "features": "Key features list"
+        "features": "Key features"
       }
     }
   `;
@@ -324,14 +309,9 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
 };
 
 /**
- * 📸 BRAIN 1: THE BUILDER (MULTI-IMAGE)
+ * 📸 BRAIN 1: THE BUILDER
  */
-export async function generateListingFromImages(
-  imageFiles: File[], 
-  platform: string = 'ebay', 
-  isProMode: boolean = false, 
-  userContext: string = ''
-) {
+export async function generateListingFromImages(imageFiles: File[], platform: string = 'ebay', isProMode: boolean = false, userContext: string = '') {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     const imageParts = await Promise.all(imageFiles.map(file => fileToGenerativePart(file)));
@@ -348,7 +328,7 @@ export async function generateListingFromImages(
 }
 
 /**
- * 🩺 BRAIN 2: THE DOCTOR (SEO OPTIMIZER)
+ * 🩺 BRAIN 2: THE DOCTOR
  */
 export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
   try {
@@ -365,15 +345,15 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
 }
 
 /**
- * 🔭 BRAIN 3: THE SCOUT (MARKET ANALYST - STRATEGY EDITION)
- * This uses the NEW Advanced Prompt we built today for the Sourcing Page V2.
+ * 🔭 BRAIN 3: THE SCOUT
+ * IMPORTANT: This preserves the Advanced Strategy logic required for the Sourcing Page
  */
 export async function scoutProduct(productName: string, imageFile?: File) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     let requestParts: any[] = [];
     
-    // 🚨 PREMIUM "MARKET STRATEGIST" PROMPT
+    // 🚨 PREMIUM "MARKET STRATEGIST" PROMPT (Kept for Sourcing Page V2)
     const instruction = `
       Act as a Senior Market Analyst and Expert Flipper. 
       Identify this item: "${productName}". 
