@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { supabase } from "../supabaseClient"; // 👈 Ensure this path is correct
+import { supabase } from "../supabaseClient"; // 👈 Amigo, double check if this should be "./supabaseClient" if it's in the same folder!
 
 // 🔑 ROBUST KEY CHECK
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY;
@@ -11,11 +11,14 @@ const genAI = new GoogleGenerativeAI(apiKey);
 const MODEL_NAME = "gemini-2.0-flash";
 
 /**
- * 📊 TRACKING UTILITY
+ * 📊 DEBUG TRACKING UTILITY
  * Calculates cost and saves to Supabase usage_logs
  */
 const logUsage = async (usage: any, action: string) => {
-  if (!usage) return;
+  if (!usage) {
+    console.warn("DEBUG: No usage metadata returned from Gemini.");
+    return;
+  }
 
   const tokensIn = usage.promptTokenCount || 0;
   const tokensOut = usage.candidatesTokenCount || 0;
@@ -25,6 +28,8 @@ const logUsage = async (usage: any, action: string) => {
   const costOut = (tokensOut / 1_000_000) * 0.60;
   const totalCost = costIn + costOut;
 
+  console.log(`DEBUG: Attempting to log ${totalCost.toFixed(5)} to Supabase for ${action}`);
+
   try {
     const { error } = await supabase.from('usage_logs').insert([{
       platform: action,
@@ -32,10 +37,17 @@ const logUsage = async (usage: any, action: string) => {
       tokens_out: tokensOut,
       cost_est: totalCost
     }]);
-    if (error) throw error;
-    console.log(`💰 [${action}] Logged: $${totalCost.toFixed(5)}`);
+
+    if (error) {
+      // 🚨 THIS WILL POP UP IN YOUR BROWSER IF IT FAILS
+      alert(`SUPABASE LOG ERROR: ${error.message}\nCode: ${error.code}`);
+      console.error("Failed to log usage to Supabase:", error);
+    } else {
+      console.log(`✅ [${action}] Logged successfully: $${totalCost.toFixed(5)}`);
+    }
   } catch (err) {
-    console.error("Failed to log usage to Supabase:", err);
+    alert("CRITICAL SYSTEM ERROR: Check the developer console.");
+    console.error("Critical error in logUsage:", err);
   }
 };
 
