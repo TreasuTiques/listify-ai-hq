@@ -24,6 +24,7 @@ const logUsage = async (usage: any, action: string) => {
 
   const tokensIn = usage.promptTokenCount || 0;
   const tokensOut = usage.candidatesTokenCount || 0;
+  // Gemini 2.0 Flash pricing
   const costIn = (tokensIn / 1_000_000) * 0.15;
   const costOut = (tokensOut / 1_000_000) * 0.60;
   const totalCost = costIn + costOut;
@@ -92,9 +93,8 @@ const NO_MARKDOWN_PROTOCOL = `
   **FORMATTING RULES - STRICT:**
   - OUTPUT MUST BE PLAIN TEXT ONLY (Unless HTML is requested).
   - DO NOT use markdown characters like asterisks (** or *).
-  - DO NOT use hash signs (#) for headers inside the text descriptions.
+  - DO NOT use hash signs (#) for headers.
   - To emphasize a header, use UPPERCASE (e.g. "CONDITION:" instead of "**Condition:**").
-  - Use standard hyphens (-) for bullet points.
 `;
 
 /**
@@ -113,7 +113,6 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
         <h1 style="font-size: 24px; margin: 10px 0;">{{TITLE}}</h1>
         <p style="color: #555; font-size: 16px;">{{SEMANTIC_INTRO}}</p>
       </div>
-      
       <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e5e7eb;">
         <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666; letter-spacing: 1px;">Item Specifics</h3>
         <ul style="list-style: none; padding: 0; margin: 0;">
@@ -123,14 +122,12 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
           <li style="margin-bottom: 8px;"><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
         </ul>
       </div>
-
       <div style="margin-bottom: 30px;">
         <h3 style="font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px; margin-bottom: 10px;">Detailed Analysis</h3>
         <p>{{DETAILED_ANALYSIS}}</p>
         <br>
         <p><strong>Defects/Notes:</strong> {{DEFECT_REPORT}}</p>
       </div>
-
       <div style="text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #f0f0f0; padding-top: 20px;">
         <p>⚡ Fast Shipping • 📦 Professional Packaging</p>
       </div>
@@ -141,17 +138,14 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
   const SHOPIFY_HTML_TEMPLATE = `
     <div class="product-description" style="font-family: inherit;">
       <p class="intro">{{SEMANTIC_INTRO}}</p>
-      
       <h2>Product Specifications</h2>
       <ul>
         <li><strong>Material:</strong> {{MATERIAL}}</li>
         <li><strong>Color:</strong> {{COLOR}}</li>
         <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
       </ul>
-
       <h2>Detailed Analysis</h2>
       <p>{{DETAILED_ANALYSIS}}</p>
-
       <h2>Frequently Asked Questions</h2>
       <dl>
         <dt><strong>Is this item true to size?</strong></dt>
@@ -162,58 +156,80 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     </div>
   `;
 
-  // 🔥 JUAN ACUÑA'S PREMIUM ENGINE (UPDATED: Fixed SKU, Clean Titles, Boxed Layout)
+  // 🔥 JUAN ACUÑA'S PREMIUM ENGINE (VISUAL WEB DESIGNER MODE)
   const PREMIUM_PRO_PROMPT = `
-    🚨 ACTIVATE "JUAN ACUÑA PREMIUM ENGINE" 🚨
+    🚨 ACTIVATE "PREMIUM DESIGNER ENGINE" 🚨
     
-    You are transforming raw data into a high-converting, themed eBay listing.
+    You are not just writing text; you are coding a HIGH-END HTML LAYOUT.
+    The output must look like a professional "Digital Trading Card" or a high-end brochure.
     
-    **CRITICAL RULES:**
-    1. **TITLES (STRICT):** Clean text ONLY. NO emojis. NO symbols like [], {}, |. NO all-caps (unless brand).
-    2. **TONE:** Warm, light humor, nostalgic (if vintage), and CONFIDENT.
-    3. **THEME AUTO-DETECTION:** Identify the Era/Style (e.g., 90s Vaporwave, 70s Earth Tones) and use specific hex codes for borders/backgrounds.
+    **VISUAL & THEME RULES:**
+    1. **AUTO-DETECT THEME:** Pick 2 hex colors based on the item.
+       - [THEME_DARK]: (e.g., #C75000 for Halloween, #008080 for Retro Tech)
+       - [THEME_LIGHT]: A soft pastel version of the dark color (e.g., #FFF4E6).
+    2. **CONTAINER:** The entire listing must be inside a single boxed div with a thick border.
+    3. **SKU BADGE:** Must be a white "pill" floating in the top-right corner, ON TOP of the colored header.
 
-    **HTML STRUCTURE (Output a Single, Self-Contained Block):**
+    **HTML STRUCTURE (Strictly follow this layout):**
+
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 900px; margin: 0 auto; border: 4px solid [THEME_DARK]; background-color: #ffffff; border-radius: 12px; overflow: hidden; position: relative; color: #333;">
     
-    **1. MAIN CONTAINER (The "Card"):**
-       - Style: max-width: 850px; margin: 0 auto; border: 3px solid [THEME_COLOR_DARK]; border-radius: 12px; overflow: hidden; font-family: sans-serif; position: relative; background: #fff;
-    
-    **2. SKU BADGE (Fixed Position Bug Solver):** - **PLACEMENT:** Absolute top-right corner of the Main Container.
-       - **STYLE:** position: absolute; top: 15px; right: 15px; background: #fff; border: 1px solid #ccc; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; color: #555; z-index: 10;
-       - **CONTENT:** "SKU: [CATEGORY]-[RANDOM-4]" (e.g., SKU: TOY-X92Z).
-       
-    **3. HEADER PANEL:** - Full width box at top. Background: [THEME_COLOR_LIGHT]. Padding: 30px 20px.
-       - Title: Centered, [THEME_COLOR_DARK], bold, large font (24px+). No emojis in h1 text.
-    
-    **4. MICRO-LORE ROW:**
-       - A centered, italicized sentence right under the header.
-       - Style: color: #666; font-size: 16px; margin-top: 10px;
-       - Content: A specific nostalgic fact or Era-setting line (e.g., "Straight from 1995 dial-up days...").
-       
-    **5. DESCRIPTION BODY:**
-       - Padding: 20px. Text-align: left. Line-height: 1.6.
-       - **The Hook:** 1 paragraph drawing them in.
-       - **Collector Note:** "Hard to find in this condition."
-       
-    **6. "THE SPECS" (Features):**
-       - A styled list. Use simple emoji bullets (▪️ or ➤) if clean, or themed emojis if fun.
-    
-    **7. CONDITION & FLAWS:**
-       - Clear section. Be honest.
-    
-    **8. THE "HIGH VOLTAGE" CTA BOX (Bottom):**
-       - **STYLE:** A distinct colored box at the bottom (like the pink AOL box).
-       - Background: [CONTRAST_COLOR] (e.g. Hot Pink, Electric Blue). Color: White/Dark.
-       - Padding: 20px. Text-align: center. Border-radius: 8px; margin: 20px;
-       - **Headline:** Fun & Urgent (e.g., "START YOUR COLLECTION TONIGHT!").
-       - **Body:** "Don't let this slip away. Click Buy It Now to secure it..."
-       
-    **FORMATTING:** - NO Cursive fonts. 
-    - NO Markdown (**). Use HTML <strong> tags.
-    - NO External CSS. Inline styles only.
+        <div style="position: absolute; top: 15px; right: 15px; background: #ffffff; padding: 6px 14px; border-radius: 25px; border: 2px solid [THEME_DARK]; font-weight: bold; font-size: 12px; z-index: 100; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);">
+            SKU: [CATEGORY]-[RANDOM_4_CHARS]
+        </div>
+
+        <div style="background-color: [THEME_LIGHT]; padding: 40px 20px; text-align: center; border-bottom: 2px solid [THEME_DARK];">
+            <h1 style="color: [THEME_DARK]; margin: 0; font-size: 32px; line-height: 1.2; text-transform: uppercase; letter-spacing: 1px; font-weight: 900;">
+                [INSERT FUN/THEMED HEADLINE HERE]
+            </h1>
+            <p style="font-style: italic; color: #555; margin-top: 10px; font-size: 18px; font-weight: 500;">
+                [Insert Nostalgic Micro-Lore or Era Setting Line - e.g. "Straight from 1995 dial-up days!"]
+            </p>
+        </div>
+
+        <div style="padding: 30px;">
+            
+            <p style="font-size: 18px; line-height: 1.6; margin-bottom: 25px;">
+                [Detailed, warm, and confident description of the item. Sell the feeling, not just the object. Use 8th-grade reading level.]
+            </p>
+
+            <div style="background: #f8f9fa; border-left: 6px solid [THEME_DARK]; padding: 15px; margin-bottom: 30px; font-style: italic; color: #555;">
+                "💡 <strong>Collector's Note:</strong> [Insert comment about rarity, condition, or why this is a keeper.]"
+            </div>
+
+            <h2 style="color: [THEME_DARK]; border-bottom: 2px dashed [THEME_DARK]; padding-bottom: 5px; margin-top: 30px; font-size: 20px;">✨ The Highlights</h2>
+            <ul style="list-style: none; padding: 0; font-size: 16px; line-height: 1.8; margin-top: 15px;">
+                <li style="margin-bottom: 8px;">[THEMED_EMOJI] <strong>Feature 1:</strong> Detail...</li>
+                <li style="margin-bottom: 8px;">[THEMED_EMOJI] <strong>Feature 2:</strong> Detail...</li>
+                <li style="margin-bottom: 8px;">[THEMED_EMOJI] <strong>Feature 3:</strong> Detail...</li>
+                <li style="margin-bottom: 8px;">[THEMED_EMOJI] <strong>Feature 4:</strong> Detail...</li>
+            </ul>
+
+            <h2 style="color: [THEME_DARK]; border-bottom: 2px dashed [THEME_DARK]; padding-bottom: 5px; margin-top: 30px; font-size: 20px;">🔍 Condition Report</h2>
+            <p style="font-size: 16px;">
+                [Honest condition summary. Mention flaws clearly but gently.]
+            </p>
+
+        </div>
+
+        <div style="background-color: [THEME_DARK]; color: #ffffff; padding: 30px; text-align: center; margin: 0;">
+            <h2 style="margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; color: #fff;">
+                [URGENT & FUN CLOSING HEADLINE]
+            </h2>
+            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
+                [Warm closing line. e.g., "Don't let this one get away! Click Buy It Now to add it to your collection."]
+            </p>
+        </div>
+
+    </div>
+
+    **RULES:**
+    - **NO** Placeholder text like [THEME_DARK]. You must replace them with actual Hex Codes (e.g. #D35400).
+    - **NO** Markdown symbols (**). Use HTML <strong> tags.
+    - **TONE:** Fun, Professional, and Era-Appropriate.
   `;
 
-  // 📝 STANDARD EBAY PROMPT
+  // 📝 STANDARD PROMPT
   const STANDARD_PROMPT = `
     **ROLE:** eBay Cassini Algorithm Specialist.
     **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
@@ -224,7 +240,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     ${EBAY_HTML_TEMPLATE}
   `;
 
-  // 🚨 OUTPUT JSON STRUCTURE (CRITICAL FOR AUTO-FILL)
+  // 🚨 UNIVERSAL JSON OUTPUT STRUCTURE
   const OUTPUT_INSTRUCTION = `
     **OUTPUT JSON STRUCTURE (REQUIRED):**
     {
@@ -243,7 +259,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
         "department": "Men/Women",
         "model": "Model",
         "theme": "Aesthetic",
-        "features": "Key features"
+        "features": "Key features list"
       }
     }
   `;
@@ -309,7 +325,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
 };
 
 /**
- * 📸 BRAIN 1: THE BUILDER
+ * 📸 BRAIN 1: THE BUILDER (MULTI-IMAGE)
  */
 export async function generateListingFromImages(imageFiles: File[], platform: string = 'ebay', isProMode: boolean = false, userContext: string = '') {
   try {
@@ -320,7 +336,7 @@ export async function generateListingFromImages(imageFiles: File[], platform: st
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
     
-    // 📊 Log usage to Supabase
+    // 📊 Log usage
     await logUsage(response.usageMetadata, `Listing: ${platform}`);
 
     return cleanAndParseJSON(response.text());
@@ -328,7 +344,7 @@ export async function generateListingFromImages(imageFiles: File[], platform: st
 }
 
 /**
- * 🩺 BRAIN 2: THE DOCTOR
+ * 🩺 BRAIN 2: THE DOCTOR (SEO OPTIMIZER)
  */
 export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
   try {
@@ -337,7 +353,7 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
     const result = await model.generateContent(prompt);
     const response = await result.response;
 
-    // 📊 Log usage to Supabase
+    // 📊 Log usage
     await logUsage(response.usageMetadata, `Optimizer: ${platform}`);
 
     return cleanAndParseJSON(response.text());
@@ -345,15 +361,15 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
 }
 
 /**
- * 🔭 BRAIN 3: THE SCOUT
- * IMPORTANT: This preserves the Advanced Strategy logic required for the Sourcing Page
+ * 🔭 BRAIN 3: THE SCOUT (MARKET ANALYST - ADVANCED)
+ * NOTE: I kept this advanced logic so your Profit Scout charts keep working.
  */
 export async function scoutProduct(productName: string, imageFile?: File) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     let requestParts: any[] = [];
     
-    // 🚨 PREMIUM "MARKET STRATEGIST" PROMPT (Kept for Sourcing Page V2)
+    // 🚨 PREMIUM "MARKET STRATEGIST" PROMPT
     const instruction = `
       Act as a Senior Market Analyst and Expert Flipper. 
       Identify this item: "${productName}". 
@@ -381,10 +397,6 @@ export async function scoutProduct(productName: string, imageFile?: File) {
         },
         "strategy_tip": "A specific, detailed tactical plan for THIS item. STRICTLY cover: 1. The best Listing Format (Auction vs BIN). 2. Specific features/flaws to highlight in photos. 3. Pricing psychology (e.g. 'List high at $X, accept offers')."
       }
-      
-      *Definitions:*
-      - demand_score: 0-100 (Used to calculate verdict).
-      - confidence: 0-100 (AI certainty).
     `;
 
     if (imageFile) {
@@ -397,7 +409,7 @@ export async function scoutProduct(productName: string, imageFile?: File) {
     const result = await model.generateContent(requestParts);
     const response = await result.response;
 
-    // 📊 Log usage to Supabase
+    // 📊 Log usage
     await logUsage(response.usageMetadata, "Scout Analyst");
 
     return cleanAndParseJSON(response.text());
