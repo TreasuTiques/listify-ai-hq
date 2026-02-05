@@ -24,7 +24,6 @@ const logUsage = async (usage: any, action: string) => {
 
   const tokensIn = usage.promptTokenCount || 0;
   const tokensOut = usage.candidatesTokenCount || 0;
-  // Gemini 2.0 Flash pricing
   const costIn = (tokensIn / 1_000_000) * 0.15;
   const costOut = (tokensOut / 1_000_000) * 0.60;
   const totalCost = costIn + costOut;
@@ -93,8 +92,9 @@ const NO_MARKDOWN_PROTOCOL = `
   **FORMATTING RULES - STRICT:**
   - OUTPUT MUST BE PLAIN TEXT ONLY (Unless HTML is requested).
   - DO NOT use markdown characters like asterisks (** or *).
-  - DO NOT use hash signs (#) for headers.
+  - DO NOT use hash signs (#) for headers inside the text descriptions.
   - To emphasize a header, use UPPERCASE (e.g. "CONDITION:" instead of "**Condition:**").
+  - Use standard hyphens (-) for bullet points.
 `;
 
 /**
@@ -102,18 +102,18 @@ const NO_MARKDOWN_PROTOCOL = `
  */
 const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: string) => {
   const baseHelper = `Analyze these images and return valid JSON.`;
+  // FIX: Force AI to be descriptive even if userContext is brief
   const contextBlock = userContext 
-    ? `\n**IMPORTANT USER CONTEXT & SPECS:**\n${userContext}\n\n*INSTRUCTION:* You MUST incorporate the user's insights (flaws, history, smells) and specific details into the description naturally. If they provided a Brand or Size, USE IT.` 
+    ? `\n**IMPORTANT CONTEXT:** "${userContext}".\n*INSTRUCTION:* Even if context is short, perform a FULL visual analysis.` 
     : '';
 
-  // 🔵 EBAY HTML TEMPLATE (Standard)
+  // 🔵 EBAY HTML TEMPLATE (Standard - Cleaned Up)
   const EBAY_HTML_TEMPLATE = `
-    <div style="font-family: sans-serif; max-width: 900px; margin: 0 auto; color: #1a1a1a; line-height: 1.6;">
-      <div style="text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px;">
-        <h1 style="font-size: 24px; margin: 10px 0;">{{TITLE}}</h1>
-        <p style="color: #555; font-size: 16px;">{{SEMANTIC_INTRO}}</p>
+    <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; color: #333; line-height: 1.6;">
+      <div style="text-align: center; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px;">
+        <h1 style="font-size: 24px; margin: 10px 0; color: #222;">{{TITLE}}</h1>
       </div>
-      <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e5e7eb;">
+      <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;">
         <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666; letter-spacing: 1px;">Item Specifics</h3>
         <ul style="list-style: none; padding: 0; margin: 0;">
           <li style="margin-bottom: 8px;"><strong>Brand:</strong> {{BRAND}}</li>
@@ -123,12 +123,14 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
         </ul>
       </div>
       <div style="margin-bottom: 30px;">
-        <h3 style="font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px; margin-bottom: 10px;">Detailed Analysis</h3>
+        <h3 style="font-size: 18px; color: #007185; margin-bottom: 10px;">Detailed Analysis</h3>
         <p>{{DETAILED_ANALYSIS}}</p>
-        <br>
-        <p><strong>Defects/Notes:</strong> {{DEFECT_REPORT}}</p>
       </div>
-      <div style="text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #f0f0f0; padding-top: 20px;">
+      <div style="margin-bottom: 30px;">
+        <h3 style="font-size: 18px; color: #c45500; margin-bottom: 10px;">Condition Notes</h3>
+        <p>{{DEFECT_REPORT}}</p>
+      </div>
+      <div style="text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px;">
         <p>⚡ Fast Shipping • 📦 Professional Packaging</p>
       </div>
     </div>
@@ -156,7 +158,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     </div>
   `;
 
-  // 🔥 JUAN ACUÑA'S PREMIUM ENGINE (VISUAL WEB DESIGNER MODE)
+  // 🔥 JUAN ACUÑA'S PREMIUM ENGINE (Visual Web Designer Mode)
   const PREMIUM_PRO_PROMPT = `
     🚨 ACTIVATE "PREMIUM DESIGNER ENGINE" 🚨
     
@@ -165,7 +167,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     
     **VISUAL & THEME RULES:**
     1. **AUTO-DETECT THEME:** Pick 2 hex colors based on the item.
-       - [THEME_DARK]: (e.g., #C75000 for Halloween, #008080 for Retro Tech)
+       - [THEME_DARK]: (e.g., #C75000 for Halloween, #008080 for Retro Tech).
        - [THEME_LIGHT]: A soft pastel version of the dark color (e.g., #FFF4E6).
     2. **CONTAINER:** The entire listing must be inside a single boxed div with a thick border.
     3. **SKU BADGE:** Must be a white "pill" floating in the top-right corner, ON TOP of the colored header.
@@ -183,7 +185,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
                 [INSERT FUN/THEMED HEADLINE HERE]
             </h1>
             <p style="font-style: italic; color: #555; margin-top: 10px; font-size: 18px; font-weight: 500;">
-                [Insert Nostalgic Micro-Lore or Era Setting Line - e.g. "Straight from 1995 dial-up days!"]
+                [Insert Nostalgic Micro-Lore or Era Setting Line]
             </p>
         </div>
 
@@ -202,7 +204,6 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
                 <li style="margin-bottom: 8px;">[THEMED_EMOJI] <strong>Feature 1:</strong> Detail...</li>
                 <li style="margin-bottom: 8px;">[THEMED_EMOJI] <strong>Feature 2:</strong> Detail...</li>
                 <li style="margin-bottom: 8px;">[THEMED_EMOJI] <strong>Feature 3:</strong> Detail...</li>
-                <li style="margin-bottom: 8px;">[THEMED_EMOJI] <strong>Feature 4:</strong> Detail...</li>
             </ul>
 
             <h2 style="color: [THEME_DARK]; border-bottom: 2px dashed [THEME_DARK]; padding-bottom: 5px; margin-top: 30px; font-size: 20px;">🔍 Condition Report</h2>
@@ -229,7 +230,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     - **TONE:** Fun, Professional, and Era-Appropriate.
   `;
 
-  // 📝 STANDARD PROMPT
+  // 📝 STANDARD PROMPT (Updated for consistency)
   const STANDARD_PROMPT = `
     **ROLE:** eBay Cassini Algorithm Specialist.
     **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
@@ -240,7 +241,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     ${EBAY_HTML_TEMPLATE}
   `;
 
-  // 🚨 UNIVERSAL JSON OUTPUT STRUCTURE
+  // 🚨 OUTPUT JSON STRUCTURE
   const OUTPUT_INSTRUCTION = `
     **OUTPUT JSON STRUCTURE (REQUIRED):**
     {
@@ -315,7 +316,6 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
 
     case 'ebay':
     default:
-      // 🔥 CHECK FOR PRO MODE HERE
       if (isProMode) {
         return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${PREMIUM_PRO_PROMPT} ${OUTPUT_INSTRUCTION}`;
       } else {
@@ -325,7 +325,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
 };
 
 /**
- * 📸 BRAIN 1: THE BUILDER (MULTI-IMAGE)
+ * 📸 BRAIN 1: THE BUILDER
  */
 export async function generateListingFromImages(imageFiles: File[], platform: string = 'ebay', isProMode: boolean = false, userContext: string = '') {
   try {
@@ -335,16 +335,13 @@ export async function generateListingFromImages(imageFiles: File[], platform: st
 
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
-    
-    // 📊 Log usage
     await logUsage(response.usageMetadata, `Listing: ${platform}`);
-
     return cleanAndParseJSON(response.text());
   } catch (error) { console.error("AI Generation Error:", error); throw error; }
 }
 
 /**
- * 🩺 BRAIN 2: THE DOCTOR (SEO OPTIMIZER)
+ * 🩺 BRAIN 2: THE DOCTOR
  */
 export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
   try {
@@ -352,50 +349,43 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
     const prompt = `Act as an expert reseller on ${platform}. Improve Title: "${currentTitle}", Desc: "${currentDescription}". JSON ONLY.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
-
-    // 📊 Log usage
     await logUsage(response.usageMetadata, `Optimizer: ${platform}`);
-
     return cleanAndParseJSON(response.text());
   } catch (error) { console.error("Optimization Error:", error); throw error; }
 }
 
 /**
- * 🔭 BRAIN 3: THE SCOUT (MARKET ANALYST - ADVANCED)
- * NOTE: I kept this advanced logic so your Profit Scout charts keep working.
+ * 🔭 BRAIN 3: THE SCOUT
  */
 export async function scoutProduct(productName: string, imageFile?: File) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     let requestParts: any[] = [];
     
-    // 🚨 PREMIUM "MARKET STRATEGIST" PROMPT
+    // 🚨 PREMIUM STRATEGY PROMPT
     const instruction = `
-      Act as a Senior Market Analyst and Expert Flipper. 
-      Identify this item: "${productName}". 
-      
-      Perform a deep simulated market analysis based on current trends.
-      
-      **RETURN ONLY RAW JSON** with this exact structure:
+      Act as a Senior Market Analyst. Identify this item: "${productName}". 
+      Perform a deep simulated market analysis.
+      **RETURN ONLY RAW JSON**:
       {
         "item_name": "Short precise item name",
         "minPrice": 10,
         "maxPrice": 20,
         "demand_score": 75,
-        "reason": "1 professional sentence on why (e.g. 'Consistent demand due to 90s nostalgia').",
+        "reason": "1 professional sentence on why.",
         "metrics": {
           "sell_through": 75, 
           "days_to_sell": 14,
-          "volatility": "Low" | "Medium" | "High",
-          "competition": "Low" | "Medium" | "High" | "Saturated"
+          "volatility": "Low",
+          "competition": "Medium"
         },
         "vitals": {
           "confidence": 92,
-          "trend": "Rising" | "Falling" | "Stable",
-          "saturation": "Low" | "Medium" | "High",
-          "liquidity": "High" | "Medium" | "Low"
+          "trend": "Rising",
+          "saturation": "Low",
+          "liquidity": "High"
         },
-        "strategy_tip": "A specific, detailed tactical plan for THIS item. STRICTLY cover: 1. The best Listing Format (Auction vs BIN). 2. Specific features/flaws to highlight in photos. 3. Pricing psychology (e.g. 'List high at $X, accept offers')."
+        "strategy_tip": "A specific, detailed tactical plan: 1. Listing Format. 2. Features to highlight. 3. Pricing strategy."
       }
     `;
 
@@ -408,10 +398,7 @@ export async function scoutProduct(productName: string, imageFile?: File) {
     
     const result = await model.generateContent(requestParts);
     const response = await result.response;
-
-    // 📊 Log usage
     await logUsage(response.usageMetadata, "Scout Analyst");
-
     return cleanAndParseJSON(response.text());
   } catch (error) { console.error("Scout Error:", error); throw error; }
 }
