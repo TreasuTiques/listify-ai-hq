@@ -107,31 +107,45 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     ? `\n**IMPORTANT CONTEXT:** "${userContext}".\n*INSTRUCTION:* Even if context is short, perform a FULL visual analysis.` 
     : '';
 
-  // 🔵 EBAY HTML TEMPLATE (Standard - Cleaned Up)
+  // 🔵 EBAY HTML TEMPLATE (STANDARD - MODERN MINIMALIST)
   const EBAY_HTML_TEMPLATE = `
     <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; color: #333; line-height: 1.6;">
-      <div style="text-align: center; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px;">
-        <h1 style="font-size: 24px; margin: 10px 0; color: #222;">{{TITLE}}</h1>
+      <h2 style="border-bottom: 1px solid #ddd; padding-bottom: 15px; margin-bottom: 25px; color: #222; text-align: center;">{{TITLE}}</h2>
+      
+      <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+        <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666; letter-spacing: 1px;">Product Specifications</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+           <tr>
+             <td style="padding: 8px 0; border-bottom: 1px solid #eee; width: 30%; font-weight: bold;">Brand</td>
+             <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{BRAND}}</td>
+           </tr>
+           <tr>
+             <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Size</td>
+             <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{SIZE}}</td>
+           </tr>
+           <tr>
+             <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Material</td>
+             <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{MATERIAL}}</td>
+           </tr>
+           <tr>
+             <td style="padding: 8px 0; border-bottom: 1px solid #eee; font-weight: bold;">Condition</td>
+             <td style="padding: 8px 0; border-bottom: 1px solid #eee;">{{CONDITION_GRADE}}</td>
+           </tr>
+        </table>
       </div>
-      <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;">
-        <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666; letter-spacing: 1px;">Item Specifics</h3>
-        <ul style="list-style: none; padding: 0; margin: 0;">
-          <li style="margin-bottom: 8px;"><strong>Brand:</strong> {{BRAND}}</li>
-          <li style="margin-bottom: 8px;"><strong>Size:</strong> {{SIZE}}</li>
-          <li style="margin-bottom: 8px;"><strong>Material:</strong> {{MATERIAL}}</li>
-          <li style="margin-bottom: 8px;"><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
-        </ul>
-      </div>
+
       <div style="margin-bottom: 30px;">
-        <h3 style="font-size: 18px; color: #007185; margin-bottom: 10px;">Detailed Analysis</h3>
-        <p>{{DETAILED_ANALYSIS}}</p>
+        <h3 style="font-size: 16px; color: #000; margin-bottom: 10px; font-weight: bold;">Product Overview</h3>
+        <p style="color: #444;">{{DETAILED_ANALYSIS}}</p>
       </div>
-      <div style="margin-bottom: 30px;">
-        <h3 style="font-size: 18px; color: #c45500; margin-bottom: 10px;">Condition Notes</h3>
-        <p>{{DEFECT_REPORT}}</p>
+
+      <div style="margin-bottom: 30px; border-left: 4px solid #e74c3c; padding-left: 15px;">
+        <h3 style="font-size: 16px; color: #e74c3c; margin-bottom: 5px; font-weight: bold;">Condition Details</h3>
+        <p style="margin: 0;">{{DEFECT_REPORT}}</p>
       </div>
-      <div style="text-align: center; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px;">
-        <p>⚡ Fast Shipping • 📦 Professional Packaging</p>
+
+      <div style="text-align: center; font-size: 13px; color: #888; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
+        <p>Ships fast & secure • Tracking included • Professional Seller</p>
       </div>
     </div>
   `;
@@ -162,31 +176,33 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
   const PREMIUM_PRO_PROMPT = `
     🚨 ACTIVATE "PREMIUM DESIGNER ENGINE" 🚨
     
-    You are not just writing text; you are coding a HIGH-END HTML LAYOUT.
-    The output must look like a professional "Digital Trading Card" or a high-end brochure.
+    You are not just writing text; you are coding a HIGH-END HTML LAYOUT (The "Digital Trading Card").
     
-    **VISUAL & THEME RULES:**
-    1. **AUTO-DETECT THEME:** Pick 2 hex colors based on the item.
-       - [THEME_DARK]: (e.g., #C75000 for Halloween, #008080 for Retro Tech).
-       - [THEME_LIGHT]: A soft pastel version of the dark color (e.g., #FFF4E6).
-    2. **CONTAINER:** The entire listing must be inside a single boxed div with a thick border.
-    3. **SKU BADGE:** Must be a white "pill" floating in the top-right corner, ON TOP of the colored header.
+    **1. THEME ENGINE (CRITICAL):**
+    - Auto-detect the item's Era/Vibe (e.g., 90s Grunge, Y2K Tech, 70s Boho, Modern Minimal).
+    - Select a [THEME_DARK] (Main Color) and a [THEME_LIGHT] (Background Pastel) that matches perfectly.
+    - **FALLBACK:** If unsure, use "High-Voltage Blue" (#0056b3) and "Cloud White" (#f8f9fa).
+
+    **2. MOBILE-FIRST LAYOUT (FLEXBOX):**
+    - The Header MUST use 'display: flex' to separate the Title and SKU Pill.
+    - NEVER use 'position: absolute' for the SKU badge; it breaks on mobile screens.
 
     **HTML STRUCTURE (Strictly follow this layout):**
 
-    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 900px; margin: 0 auto; border: 4px solid [THEME_DARK]; background-color: #ffffff; border-radius: 12px; overflow: hidden; position: relative; color: #333;">
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 900px; margin: 0 auto; border: 3px solid [THEME_DARK]; background-color: #ffffff; border-radius: 12px; overflow: hidden; color: #333;">
     
-        <div style="position: absolute; top: 15px; right: 15px; background: #ffffff; padding: 6px 14px; border-radius: 25px; border: 2px solid [THEME_DARK]; font-weight: bold; font-size: 12px; z-index: 100; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);">
-            SKU: [CATEGORY]-[RANDOM_4_CHARS]
-        </div>
-
-        <div style="background-color: [THEME_LIGHT]; padding: 40px 20px; text-align: center; border-bottom: 2px solid [THEME_DARK];">
-            <h1 style="color: [THEME_DARK]; margin: 0; font-size: 32px; line-height: 1.2; text-transform: uppercase; letter-spacing: 1px; font-weight: 900;">
-                [INSERT FUN/THEMED HEADLINE HERE]
-            </h1>
-            <p style="font-style: italic; color: #555; margin-top: 10px; font-size: 18px; font-weight: 500;">
-                [Insert Nostalgic Micro-Lore or Era Setting Line]
-            </p>
+        <div style="background-color: [THEME_LIGHT]; padding: 25px; border-bottom: 2px solid [THEME_DARK]; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div style="flex: 1; min-width: 250px;">
+                <h1 style="color: [THEME_DARK]; margin: 0; font-size: 28px; line-height: 1.2; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 800;">
+                    [INSERT FUN/THEMED HEADLINE HERE]
+                </h1>
+                <p style="font-style: italic; color: #555; margin-top: 8px; font-size: 16px; font-weight: 500;">
+                    [Insert Nostalgic Micro-Lore or Era Setting Line]
+                </p>
+            </div>
+            <div style="background: #ffffff; padding: 8px 16px; border-radius: 50px; border: 2px solid [THEME_DARK]; font-weight: bold; font-size: 12px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); white-space: nowrap;">
+                SKU: [CATEGORY]-[RANDOM_4_CHARS]
+            </div>
         </div>
 
         <div style="padding: 30px;">
@@ -214,18 +230,23 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
         </div>
 
         <div style="background-color: [THEME_DARK]; color: #ffffff; padding: 30px; text-align: center; margin: 0;">
-            <h2 style="margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 1px; color: #fff;">
-                [URGENT & FUN CLOSING HEADLINE]
+            <h2 style="margin: 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; color: #fff;">
+                ⭐ [URGENT & FUN HEADLINE]
             </h2>
-            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">
-                [Warm closing line. e.g., "Don't let this one get away! Click Buy It Now to add it to your collection."]
+            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin: 20px 0; font-size: 14px; opacity: 0.9;">
+                <span>✓ Bomb-proof Packaging</span>
+                <span>✓ Ships in 24hrs</span>
+                <span>✓ 5-Star Service</span>
+            </div>
+            <p style="margin: 0; font-size: 16px; font-weight: bold;">
+                ✨ [Warm closing line: "Make it yours today!"]
             </p>
         </div>
 
     </div>
 
     **RULES:**
-    - **NO** Placeholder text like [THEME_DARK]. You must replace them with actual Hex Codes (e.g. #D35400).
+    - **NO** Placeholder text like [THEME_DARK]. You must replace them with actual Hex Codes.
     - **NO** Markdown symbols (**). Use HTML <strong> tags.
     - **TONE:** Fun, Professional, and Era-Appropriate.
   `;
@@ -233,10 +254,15 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
   // 📝 STANDARD PROMPT (Updated for consistency)
   const STANDARD_PROMPT = `
     **ROLE:** eBay Cassini Algorithm Specialist.
+    **STYLE:** Modern Minimalist / High-End Corporate.
+    
     **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
+    **VISUALS:** No emojis, No lore. Clean, factual, professional.
+    
     **RULES:**
     1. Title: STRICT 80 chars. Brand + Gender + Item + Material + Size.
     2. Description: Use the provided HTML Template.
+    
     **HTML TEMPLATE:**
     ${EBAY_HTML_TEMPLATE}
   `;
