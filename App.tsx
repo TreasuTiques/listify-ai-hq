@@ -23,7 +23,8 @@ import BlogPage from './pages/BlogPage';
 import VisionPage from './pages/VisionPage';
 import SuccessHub from './pages/SuccessHub';
 import PartnersPage from './pages/PartnersPage';
-import AboutPage from './pages/AboutPage'; // ✅ ADDED ABOUT PAGE IMPORT
+import AboutPage from './pages/AboutPage';
+import AdminDashboard from './pages/AdminDashboard'; // ✅ ADDED ADMIN IMPORT
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
@@ -92,6 +93,9 @@ const App: React.FC = () => {
     if (currentPath === '/login') return <LoginPage onNavigate={navigate} />;
     if (currentPath === '/signup') return <SignUpPage onNavigate={navigate} />;
     
+    // Check for Admin even when logged out (The AdminDashboard file itself will handle the email check)
+    if (currentPath === '/admin') return <AdminDashboard />;
+
     if (currentPath === '/doctor') return (
        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 flex flex-col">
           <Navbar session={null} onNavigate={navigate} isLanding={false} isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
@@ -125,9 +129,10 @@ const App: React.FC = () => {
               case '/vision': return <VisionPage />;
               case '/success': return <SuccessHub />;
               case '/partnerships': return <PartnersPage />;
-              case '/about': return <AboutPage />; // ✅ ADDED ABOUT PAGE ROUTE
+              case '/about': return <AboutPage />;
               case '/inventory': return <InventoryPage onNavigate={navigate} />;
               case '/builder': return <BuilderPage />; 
+              case '/admin': return <AdminDashboard />; // ✅ ADDED ADMIN CASE
               default: return <LandingPage onNavigate={navigate} />;
             }
           })()}
@@ -148,7 +153,8 @@ const App: React.FC = () => {
       case '/sourcing': return <SourcingPage />;
       case '/analytics': return <AnalyticsPage />;
       case '/pricing': return <PricingPage />;
-      case '/about': return <AboutPage />; // ✅ ALLOW LOGGED IN USERS TO SEE ABOUT
+      case '/about': return <AboutPage />;
+      case '/admin': return <AdminDashboard />; // ✅ ADDED ADMIN CASE
       default: return <DashboardPage onNavigate={navigate} />;
     }
   };
