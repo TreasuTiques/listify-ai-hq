@@ -7,7 +7,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   // 🔒 GATEKEEPER: Put your email here!
-  const ADMIN_EMAIL = "your-email@example.com"; 
+  const ADMIN_EMAIL = "jma32883@gmail.com"; 
 
   useEffect(() => {
     // Check for user session directly
