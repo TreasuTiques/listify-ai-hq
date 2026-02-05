@@ -1,5 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { supabase } from "../supabaseClient"; // 👈 Amigo, double check if this should be "./supabaseClient" if it's in the same folder!
+import { supabase } from "../supabaseClient"; 
+
+// 🚨 SYSTEM HEARTBEAT TEST - Check your browser console (F12) for this!
+console.log("AI Service Loaded. Supabase status:", supabase ? "Connected ✅" : "Missing ❌");
 
 // 🔑 ROBUST KEY CHECK
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY;
@@ -39,14 +42,13 @@ const logUsage = async (usage: any, action: string) => {
     }]);
 
     if (error) {
-      // 🚨 THIS WILL POP UP IN YOUR BROWSER IF IT FAILS
+      // 🚨 THIS IS THE MOST IMPORTANT ALERT - If you see this, run the SQL fix in Supabase
       alert(`SUPABASE LOG ERROR: ${error.message}\nCode: ${error.code}`);
       console.error("Failed to log usage to Supabase:", error);
     } else {
       console.log(`✅ [${action}] Logged successfully: $${totalCost.toFixed(5)}`);
     }
   } catch (err) {
-    alert("CRITICAL SYSTEM ERROR: Check the developer console.");
     console.error("Critical error in logUsage:", err);
   }
 };
