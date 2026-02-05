@@ -14,7 +14,7 @@ const genAI = new GoogleGenerativeAI(apiKey);
 const MODEL_NAME = "gemini-2.0-flash";
 
 /**
- * 📊 DEBUG TRACKING UTILITY
+ * 📊 TRACKING UTILITY
  * Calculates cost and saves to Supabase usage_logs
  */
 const logUsage = async (usage: any, action: string) => {
@@ -42,7 +42,7 @@ const logUsage = async (usage: any, action: string) => {
     }]);
 
     if (error) {
-      // 🚨 THIS IS THE MOST IMPORTANT ALERT - If you see this, run the SQL fix in Supabase
+      // If this pops up, ensure you have run the SQL "Public Insert" policy!
       alert(`SUPABASE LOG ERROR: ${error.message}\nCode: ${error.code}`);
       console.error("Failed to log usage to Supabase:", error);
     } else {
