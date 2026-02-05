@@ -15,39 +15,24 @@ const MODEL_NAME = "gemini-2.0-flash";
 
 /**
  * 📊 TRACKING UTILITY
- * Calculates cost and saves to Supabase usage_logs
  */
 const logUsage = async (usage: any, action: string) => {
-  if (!usage) {
-    console.warn("DEBUG: No usage metadata returned from Gemini.");
-    return;
-  }
-
+  if (!usage) return;
   const tokensIn = usage.promptTokenCount || 0;
   const tokensOut = usage.candidatesTokenCount || 0;
-
-  // Gemini 2.0 Flash pricing per 1M tokens: $0.15 Input / $0.60 Output
   const costIn = (tokensIn / 1_000_000) * 0.15;
   const costOut = (tokensOut / 1_000_000) * 0.60;
   const totalCost = costIn + costOut;
 
-  console.log(`DEBUG: Attempting to log ${totalCost.toFixed(5)} to Supabase for ${action}`);
-
   try {
-    const { error } = await supabase.from('usage_logs').insert([{
+    await supabase.from('usage_logs').insert([{
       platform: action,
       tokens_in: tokensIn,
       tokens_out: tokensOut,
       cost_est: totalCost
     }]);
-
-    if (error) {
-      console.error("Failed to log usage to Supabase:", error);
-    } else {
-      console.log(`✅ [${action}] Logged successfully: $${totalCost.toFixed(5)}`);
-    }
   } catch (err) {
-    console.error("Critical error in logUsage:", err);
+    console.error("Error logging usage:", err);
   }
 };
 
@@ -93,15 +78,13 @@ const DEEP_VISION_PROTOCOL = `
 `;
 
 /**
- * 🚫 NO MARKDOWN PROTOCOL (RESTORED)
+ * 🚫 NO MARKDOWN PROTOCOL
  */
 const NO_MARKDOWN_PROTOCOL = `
   **FORMATTING RULES - STRICT:**
   - OUTPUT MUST BE PLAIN TEXT ONLY (Unless HTML is requested).
   - DO NOT use markdown characters like asterisks (** or *).
-  - DO NOT use hash signs (#) for headers inside the text descriptions.
-  - To emphasize a header, use UPPERCASE (e.g. "CONDITION:" instead of "**Condition:**").
-  - Use standard hyphens (-) for bullet points.
+  - DO NOT use hash signs (#) for headers.
 `;
 
 /**
@@ -109,36 +92,29 @@ const NO_MARKDOWN_PROTOCOL = `
  */
 const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: string) => {
   const baseHelper = `Analyze these images and return valid JSON.`;
-  
-  // 📥 RICH CONTEXT INJECTION
-  const contextBlock = userContext 
-    ? `\n**IMPORTANT USER CONTEXT & SPECS:**\n${userContext}\n\n*INSTRUCTION:* You MUST incorporate the user's insights (flaws, history, smells) and specific details into the description naturally. If they provided a Brand or Size, USE IT.` 
-    : '';
+  const contextBlock = userContext ? `\n**USER CONTEXT:**\n${userContext}\nInclude these details naturally.` : '';
 
-  // 🔵 EBAY HTML TEMPLATE
+  // 🔵 STANDARD EBAY HTML TEMPLATE (Clean & Informative)
   const EBAY_HTML_TEMPLATE = `
-    <div style="font-family: sans-serif; max-width: 900px; margin: 0 auto; color: #1a1a1a; line-height: 1.6;">
-      <div style="text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px;">
-        <h1 style="font-size: 24px; margin: 10px 0;">{{TITLE}}</h1>
-        <p style="color: #555; font-size: 16px;">{{SEMANTIC_INTRO}}</p>
+    <div style="font-family: sans-serif; max-width: 800px; margin: 0 auto; color: #333; line-height: 1.6;">
+      <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #eee;">
+        <h1 style="font-size: 22px; margin: 10px 0;">{{TITLE}}</h1>
       </div>
-      <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e5e7eb;">
-        <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666; letter-spacing: 1px;">Item Specifics</h3>
+      <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+        <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666;">Item Specifics</h3>
         <ul style="list-style: none; padding: 0; margin: 0;">
-          <li style="margin-bottom: 8px;"><strong>Brand:</strong> {{BRAND}}</li>
-          <li style="margin-bottom: 8px;"><strong>Size:</strong> {{SIZE}}</li>
-          <li style="margin-bottom: 8px;"><strong>Material:</strong> {{MATERIAL}}</li>
-          <li style="margin-bottom: 8px;"><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
+          <li><strong>Brand:</strong> {{BRAND}}</li>
+          <li><strong>Size:</strong> {{SIZE}}</li>
+          <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
         </ul>
       </div>
       <div style="margin-bottom: 30px;">
-        <h3 style="font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px; margin-bottom: 10px;">Detailed Analysis</h3>
+        <h3 style="font-size: 16px; border-left: 3px solid #007bff; padding-left: 10px;">Description</h3>
         <p>{{DETAILED_ANALYSIS}}</p>
-        <br>
-        <p><strong>Defects/Notes:</strong> {{DEFECT_REPORT}}</p>
       </div>
-      <div style="text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #f0f0f0; padding-top: 20px;">
-        <p>⚡ Fast Shipping • 📦 Professional Packaging</p>
+      <div style="margin-bottom: 30px;">
+        <h3 style="font-size: 16px; border-left: 3px solid #dc3545; padding-left: 10px;">Flaws / Notes</h3>
+        <p>{{DEFECT_REPORT}}</p>
       </div>
     </div>
   `;
@@ -147,135 +123,100 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
   const SHOPIFY_HTML_TEMPLATE = `
     <div class="product-description" style="font-family: inherit;">
       <p class="intro">{{SEMANTIC_INTRO}}</p>
-      <h2>Product Specifications</h2>
-      <ul>
-        <li><strong>Material:</strong> {{MATERIAL}}</li>
-        <li><strong>Color:</strong> {{COLOR}}</li>
-        <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
-      </ul>
-      <h2>Detailed Analysis</h2>
+      <h2>Specs</h2>
+      <ul><li><strong>Material:</strong> {{MATERIAL}}</li><li><strong>Color:</strong> {{COLOR}}</li></ul>
+      <h2>Details</h2>
       <p>{{DETAILED_ANALYSIS}}</p>
-      <h2>Frequently Asked Questions</h2>
-      <dl>
-        <dt><strong>Is this item true to size?</strong></dt>
-        <dd>{{SIZE_ANSWER}}</dd>
-        <dt><strong>Any notable flaws?</strong></dt>
-        <dd>{{DEFECT_REPORT}}</dd>
-      </dl>
     </div>
   `;
 
-  // 🔥 ELITE PRO PROMPT (RESTORED)
+  // 🔥 JUAN ACUÑA'S PREMIUM PRO PROMPT (The "Magic" Engine)
   const PREMIUM_PRO_PROMPT = `
-    🚨 ACTIVATE "REAL-TALK RESELLER ENGINE" 🚨
+    🚨 ACTIVATE "JUAN ACUÑA PREMIUM ENGINE" 🚨
     
-    You are an expert flipper writing a high-converting eBay listing. 
+    You are transforming raw data into a high-converting, themed eBay listing.
     
-    **CRITICAL VOCABULARY RULE:** - Write at an **8th GRADE READING LEVEL**. Simple, direct, natural English.
-    - **BANNED WORDS:** Whimsical, Curated, Bespoke, Exquisite, Tapestry, Symphony, Heritage, Provenance, Iconic, Meticulous.
-    - **APPROVED TONE:** "Just found this," "Super clean," "Hard to find," "Great shape," "Cool details," "Ready to ship."
-    
-    **CRITICAL WHITE-LABEL RULE:** - NEVER use specific names (e.g. "Juan Acuña", "Sellistio").
-    - Use generic headers like "Vintage Vault Find", "The Collection", or just the Item Name.
+    **CRITICAL RULES:**
+    1. **TONE:** Warm, light humor, nostalgic (if vintage), and CONFIDENT. No generic fluff.
+    2. **READABILITY:** 8th-grade reading level. Simple, direct.
+    3. **THEME AUTO-DETECTION:** Identify the Era/Style (e.g., 80s Neon, 90s Grunge, Modern Tech) and style the HTML colors/emojis to match.
 
-    1. **THEME DETECTION:** Auto-detect ERA/STYLE (e.g., 80s Neon, 90s Grunge, Minimalist, Y2K).
-    2. **SKU PILL BADGE:** Place a unique SKU in a dedicated <div> ABOVE the main title. Align it to the RIGHT.
-    3. **MICRO-LORE:** Add 1 line of relatable nostalgia if vintage.
-    4. **FORMATTING:** NO Cursive. NO Markdown asterisks (**). Use HTML <strong> tags.
+    **HTML STRUCTURE (Single Block in 'description' field):**
+    
+    1. **CONTAINER:** Use a main div with max-width 900px, centered.
+    
+    2. **SKU BADGE (MANDATORY):** - Generate a unique SKU (e.g. VINT-[RANDOM]).
+       - Style: absolute top-right, white pill shape, border-radius 999px, thin border, shadow.
+       
+    3. **MAIN TITLE PANEL:** Centered, themed fonts/colors.
+    
+    4. **DESCRIPTION:** - Insert **Micro-Lore** (1 line of era-evoking nostalgia).
+       - Insert **Collector Confidence** ("Hard to find in this shape").
+       
+    5. **FEATURES:** Emoji bullet points.
+    
+    6. **WHY YOU'LL LOVE IT:** Emotional appeal/humor.
+    
+    7. **CTA PANEL (1-3-1 Format):**
+       - ⭐ Fun Headline
+       - • 3 Conversational, unique bullets
+       - ✨ Warm closing tagline
+       
+    **FORMATTING:** - NO Cursive fonts. 
+    - NO Markdown (**). Use HTML <strong> tags.
+    - NO External CSS classes. Inline styles only.
   `;
 
-  // 📝 STANDARD EBAY PROMPT
-  const STANDARD_EBAY_PROMPT = `
-    **ROLE:** eBay Cassini Algorithm Specialist.
-    **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
+  // 📝 STANDARD PROMPT (Informative but Simple)
+  const STANDARD_PROMPT = `
+    **ROLE:** eBay Listing Assistant.
+    **GOAL:** Create a clean, professional, and highly informative listing.
     **RULES:**
-    1. Title: STRICT 80 chars. Brand + Gender + Item + Material + Size.
-    2. Description: Use the provided HTML Template.
+    1. Title: Keyword-rich, max 80 chars.
+    2. Description: Detailed but neutral tone. Use the Standard HTML Template provided.
     **HTML TEMPLATE:**
     ${EBAY_HTML_TEMPLATE}
   `;
 
-  // 🚨 OUTPUT JSON STRUCTURE (CRITICAL FOR AUTO-FILL)
+  // 🚨 JSON OUTPUT STRUCTURE
   const OUTPUT_INSTRUCTION = `
     **OUTPUT JSON STRUCTURE (REQUIRED):**
     {
       "title": "Optimized Title (Max 80 chars)",
-      "description": "FULL HTML OR TEXT DESCRIPTION",
+      "description": "FULL HTML CODE STRING HERE",
       "estimated_price": "$20.00",
       "tags": ["tag1", "tag2"],
       "item_specifics": {
-        "brand": "Extract from image or Unknown",
-        "category": "Suggest Category Path",
-        "size": "Estimate dimensions/tag",
-        "color": "Dominant colors",
-        "material": "Visual material ID",
-        "year": "Era",
-        "made_in": "Origin",
-        "department": "Men/Women",
+        "brand": "Brand",
+        "category": "Category Path",
+        "size": "Size",
+        "color": "Color",
+        "material": "Material",
+        "year": "Year/Era",
         "model": "Model",
-        "theme": "Aesthetic",
-        "features": "Key features"
+        "theme": "Theme",
+        "features": "Features list"
       }
     }
   `;
 
-  // 🔀 PLATFORM SWITCH (RESTORED PERSONAS)
   switch (platform.toLowerCase()) {
     case 'poshmark':
-      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
-        **ROLE:** Poshmark SEO Stylist.
-        **RULES:**
-        1. Vertical list layout. Use Emojis as bullets.
-        2. Integrate "Aesthetics" (e.g., #Boho, #Y2K).
-        ${OUTPUT_INSTRUCTION}`;
-    
+      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL} **ROLE:** Poshmark SEO Stylist. Use Emojis & Vertical Lists. ${OUTPUT_INSTRUCTION}`;
     case 'depop':
-      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
-        **ROLE:** Depop Trend Curator.
-        **RULES:**
-        1. Title: Aesthetic Hook.
-        2. Description: Casual tone. Lowercase allowed.
-        ${OUTPUT_INSTRUCTION}`;
-
+      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL} **ROLE:** Depop Trend Curator. Casual tone, lowercase allowed. ${OUTPUT_INSTRUCTION}`;
     case 'mercari':
-      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
-        **ROLE:** Mercari Quick-Flip Assistant.
-        **RULES:**
-        1. Short paragraphs. "Ships Fast" mention.
-        ${OUTPUT_INSTRUCTION}`;
-
+      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL} **ROLE:** Mercari Quick-Flip. Short, punchy text. ${OUTPUT_INSTRUCTION}`;
     case 'etsy':
-      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
-        **ROLE:** Etsy Artisan Guide.
-        **RULES:**
-        1. Description: Storytelling. Focus on "Maker", "History".
-        ${OUTPUT_INSTRUCTION}`;
-
-    case 'facebook':
-      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
-        **ROLE:** Local Commerce Connector.
-        **RULES:**
-        1. Focus: "Proximity" keywords. Simple and direct.
-        ${OUTPUT_INSTRUCTION}`;
-
+      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL} **ROLE:** Etsy Artisan. Focus on story/maker. ${OUTPUT_INSTRUCTION}`;
     case 'shopify':
-      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL}
-        **ROLE:** Shopify SEO Architect.
-        **GOAL:** Semantic Richness for Google SGE.
-        **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
-        **RULES:**
-        1. Use the provided HTML Template.
-        **HTML TEMPLATE:**
-        ${SHOPIFY_HTML_TEMPLATE}
-        ${OUTPUT_INSTRUCTION}`;
-
+      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ROLE: Shopify SEO. HTML: ${SHOPIFY_HTML_TEMPLATE} ${OUTPUT_INSTRUCTION}`;
     case 'ebay':
     default:
-      // 🔥 CHECK FOR PRO MODE HERE
       if (isProMode) {
         return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${PREMIUM_PRO_PROMPT} ${OUTPUT_INSTRUCTION}`;
       } else {
-        return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${STANDARD_EBAY_PROMPT} ${OUTPUT_INSTRUCTION}`;
+        return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${STANDARD_PROMPT} ${OUTPUT_INSTRUCTION}`;
       }
   }
 };
@@ -291,10 +232,7 @@ export async function generateListingFromImages(imageFiles: File[], platform: st
 
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
-    
-    // 📊 Log usage to Supabase
     await logUsage(response.usageMetadata, `Listing: ${platform}`);
-
     return cleanAndParseJSON(response.text());
   } catch (error) { console.error("AI Generation Error:", error); throw error; }
 }
@@ -308,31 +246,27 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
     const prompt = `Act as an expert reseller on ${platform}. Improve Title: "${currentTitle}", Desc: "${currentDescription}". JSON ONLY.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
-
-    // 📊 Log usage to Supabase
     await logUsage(response.usageMetadata, `Optimizer: ${platform}`);
-
     return cleanAndParseJSON(response.text());
   } catch (error) { console.error("Optimization Error:", error); throw error; }
 }
 
 /**
  * 🔭 BRAIN 3: THE SCOUT
- * IMPORTANT: This preserves the Advanced Strategy logic required for the Sourcing Page
  */
 export async function scoutProduct(productName: string, imageFile?: File) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     let requestParts: any[] = [];
     
-    // 🚨 PREMIUM "MARKET STRATEGIST" PROMPT (Kept for Sourcing Page V2)
+    // 🚨 PREMIUM STRATEGY PROMPT
     const instruction = `
       Act as a Senior Market Analyst and Expert Flipper. 
       Identify this item: "${productName}". 
       
-      Perform a deep simulated market analysis based on current trends.
+      Perform deep market analysis.
       
-      **RETURN ONLY RAW JSON** with this exact structure:
+      **RETURN ONLY RAW JSON**:
       {
         "item_name": "Short precise item name",
         "minPrice": 10,
@@ -342,16 +276,16 @@ export async function scoutProduct(productName: string, imageFile?: File) {
         "metrics": {
           "sell_through": 75, 
           "days_to_sell": 14,
-          "volatility": "Low" | "Medium" | "High",
-          "competition": "Low" | "Medium" | "High" | "Saturated"
+          "volatility": "Low",
+          "competition": "Medium"
         },
         "vitals": {
           "confidence": 92,
-          "trend": "Rising" | "Falling" | "Stable",
-          "saturation": "Low" | "Medium" | "High",
-          "liquidity": "High" | "Medium" | "Low"
+          "trend": "Rising",
+          "saturation": "Low",
+          "liquidity": "High"
         },
-        "strategy_tip": "A specific, detailed tactical plan for THIS item. STRICTLY cover: 1. The best Listing Format (Auction vs BIN). 2. Specific features/flaws to highlight in photos. 3. Pricing psychology."
+        "strategy_tip": "Specific tactical plan: 1. Listing Format (Auction vs BIN). 2. Key features to highlight. 3. Pricing strategy."
       }
     `;
 
@@ -364,10 +298,7 @@ export async function scoutProduct(productName: string, imageFile?: File) {
     
     const result = await model.generateContent(requestParts);
     const response = await result.response;
-
-    // 📊 Log usage to Supabase
     await logUsage(response.usageMetadata, "Scout Analyst");
-
     return cleanAndParseJSON(response.text());
   } catch (error) { console.error("Scout Error:", error); throw error; }
 }
