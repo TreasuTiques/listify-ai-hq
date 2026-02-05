@@ -15,24 +15,35 @@ const MODEL_NAME = "gemini-2.0-flash";
 
 /**
  * 📊 TRACKING UTILITY
+ * Calculates cost and saves to Supabase usage_logs
  */
 const logUsage = async (usage: any, action: string) => {
-  if (!usage) return;
+  if (!usage) {
+    console.warn("DEBUG: No usage metadata returned from Gemini.");
+    return;
+  }
+
   const tokensIn = usage.promptTokenCount || 0;
   const tokensOut = usage.candidatesTokenCount || 0;
+
+  // Gemini 2.0 Flash pricing per 1M tokens: $0.15 Input / $0.60 Output
   const costIn = (tokensIn / 1_000_000) * 0.15;
   const costOut = (tokensOut / 1_000_000) * 0.60;
   const totalCost = costIn + costOut;
 
   try {
-    await supabase.from('usage_logs').insert([{
+    const { error } = await supabase.from('usage_logs').insert([{
       platform: action,
       tokens_in: tokensIn,
       tokens_out: tokensOut,
       cost_est: totalCost
     }]);
+
+    if (error) {
+      console.error("Failed to log usage to Supabase:", error);
+    }
   } catch (err) {
-    console.error("Error logging usage:", err);
+    console.error("Critical error in logUsage:", err);
   }
 };
 
@@ -84,7 +95,9 @@ const NO_MARKDOWN_PROTOCOL = `
   **FORMATTING RULES - STRICT:**
   - OUTPUT MUST BE PLAIN TEXT ONLY (Unless HTML is requested).
   - DO NOT use markdown characters like asterisks (** or *).
-  - DO NOT use hash signs (#) for headers.
+  - DO NOT use hash signs (#) for headers inside the text descriptions.
+  - To emphasize a header, use UPPERCASE (e.g. "CONDITION:" instead of "**Condition:**").
+  - Use standard hyphens (-) for bullet points.
 `;
 
 /**
@@ -92,29 +105,34 @@ const NO_MARKDOWN_PROTOCOL = `
  */
 const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: string) => {
   const baseHelper = `Analyze these images and return valid JSON.`;
-  const contextBlock = userContext ? `\n**USER CONTEXT:**\n${userContext}\nInclude these details naturally.` : '';
+  const contextBlock = userContext 
+    ? `\n**IMPORTANT USER CONTEXT & SPECS:**\n${userContext}\n\n*INSTRUCTION:* You MUST incorporate the user's insights (flaws, history, smells) and specific details into the description naturally. If they provided a Brand or Size, USE IT.` 
+    : '';
 
-  // 🔵 STANDARD EBAY HTML TEMPLATE (Clean & Informative)
+  // 🔵 EBAY HTML TEMPLATE (Standard)
   const EBAY_HTML_TEMPLATE = `
-    <div style="font-family: sans-serif; max-width: 800px; margin: 0 auto; color: #333; line-height: 1.6;">
-      <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #eee;">
-        <h1 style="font-size: 22px; margin: 10px 0;">{{TITLE}}</h1>
+    <div style="font-family: sans-serif; max-width: 900px; margin: 0 auto; color: #1a1a1a; line-height: 1.6;">
+      <div style="text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 20px; margin-bottom: 20px;">
+        <h1 style="font-size: 24px; margin: 10px 0;">{{TITLE}}</h1>
+        <p style="color: #555; font-size: 16px;">{{SEMANTIC_INTRO}}</p>
       </div>
-      <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
-        <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666;">Item Specifics</h3>
+      <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e5e7eb;">
+        <h3 style="margin-top: 0; font-size: 14px; text-transform: uppercase; color: #666; letter-spacing: 1px;">Item Specifics</h3>
         <ul style="list-style: none; padding: 0; margin: 0;">
-          <li><strong>Brand:</strong> {{BRAND}}</li>
-          <li><strong>Size:</strong> {{SIZE}}</li>
-          <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
+          <li style="margin-bottom: 8px;"><strong>Brand:</strong> {{BRAND}}</li>
+          <li style="margin-bottom: 8px;"><strong>Size:</strong> {{SIZE}}</li>
+          <li style="margin-bottom: 8px;"><strong>Material:</strong> {{MATERIAL}}</li>
+          <li style="margin-bottom: 8px;"><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
         </ul>
       </div>
       <div style="margin-bottom: 30px;">
-        <h3 style="font-size: 16px; border-left: 3px solid #007bff; padding-left: 10px;">Description</h3>
+        <h3 style="font-size: 18px; border-left: 4px solid #3b82f6; padding-left: 12px; margin-bottom: 10px;">Detailed Analysis</h3>
         <p>{{DETAILED_ANALYSIS}}</p>
+        <br>
+        <p><strong>Defects/Notes:</strong> {{DEFECT_REPORT}}</p>
       </div>
-      <div style="margin-bottom: 30px;">
-        <h3 style="font-size: 16px; border-left: 3px solid #dc3545; padding-left: 10px;">Flaws / Notes</h3>
-        <p>{{DEFECT_REPORT}}</p>
+      <div style="text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #f0f0f0; padding-top: 20px;">
+        <p>⚡ Fast Shipping • 📦 Professional Packaging</p>
       </div>
     </div>
   `;
@@ -123,96 +141,180 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
   const SHOPIFY_HTML_TEMPLATE = `
     <div class="product-description" style="font-family: inherit;">
       <p class="intro">{{SEMANTIC_INTRO}}</p>
-      <h2>Specs</h2>
-      <ul><li><strong>Material:</strong> {{MATERIAL}}</li><li><strong>Color:</strong> {{COLOR}}</li></ul>
-      <h2>Details</h2>
+      <h2>Product Specifications</h2>
+      <ul>
+        <li><strong>Material:</strong> {{MATERIAL}}</li>
+        <li><strong>Color:</strong> {{COLOR}}</li>
+        <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
+      </ul>
+      <h2>Detailed Analysis</h2>
       <p>{{DETAILED_ANALYSIS}}</p>
+      <h2>Frequently Asked Questions</h2>
+      <dl>
+        <dt><strong>Is this item true to size?</strong></dt>
+        <dd>{{SIZE_ANSWER}}</dd>
+        <dt><strong>Any notable flaws?</strong></dt>
+        <dd>{{DEFECT_REPORT}}</dd>
+      </dl>
     </div>
   `;
 
-  // 🔥 JUAN ACUÑA'S PREMIUM PRO PROMPT (The "Magic" Engine)
+  // 🔥 JUAN ACUÑA'S PREMIUM ENGINE (FULL VERBOSE VERSION)
   const PREMIUM_PRO_PROMPT = `
-    🚨 ACTIVATE "JUAN ACUÑA PREMIUM ENGINE" 🚨
-    
-    You are transforming raw data into a high-converting, themed eBay listing.
-    
-    **CRITICAL RULES:**
-    1. **TONE:** Warm, light humor, nostalgic (if vintage), and CONFIDENT. No generic fluff.
-    2. **READABILITY:** 8th-grade reading level. Simple, direct.
-    3. **THEME AUTO-DETECTION:** Identify the Era/Style (e.g., 80s Neon, 90s Grunge, Modern Tech) and style the HTML colors/emojis to match.
+    You are **Juan Acuña’s Premium eBay Listing Generator**, designed to transform RAW DATA into high-quality, themed, Cassini-optimized eBay listings.
 
-    **HTML STRUCTURE (Single Block in 'description' field):**
+    Follow these rules with ZERO exceptions:
+
+    -----------------------------------------------------------------------
+    1. SKU RULES (MANDATORY)
+    -----------------------------------------------------------------------
+    Generate a unique SKU: [CATEGORY-PREFIX]-[RANDOM-4-CHARS] (e.g. VINT-A29X).
     
-    1. **CONTAINER:** Use a main div with max-width 900px, centered.
-    
-    2. **SKU BADGE (MANDATORY):** - Generate a unique SKU (e.g. VINT-[RANDOM]).
-       - Style: absolute top-right, white pill shape, border-radius 999px, thin border, shadow.
-       
-    3. **MAIN TITLE PANEL:** Centered, themed fonts/colors.
-    
-    4. **DESCRIPTION:** - Insert **Micro-Lore** (1 line of era-evoking nostalgia).
-       - Insert **Collector Confidence** ("Hard to find in this shape").
-       
-    5. **FEATURES:** Emoji bullet points.
-    
-    6. **WHY YOU'LL LOVE IT:** Emotional appeal/humor.
-    
-    7. **CTA PANEL (1-3-1 Format):**
-       - ⭐ Fun Headline
-       - • 3 Conversational, unique bullets
-       - ✨ Warm closing tagline
-       
-    **FORMATTING:** - NO Cursive fonts. 
-    - NO Markdown (**). Use HTML <strong> tags.
-    - NO External CSS classes. Inline styles only.
+    ⭐ UNBREAKABLE RULE: SKU must ALWAYS appear inside a WHITE PILL-SHAPED BADGE:
+    • White background, thin dark border, bold text, slight drop shadow.
+    • Positioned absolute, top-right of the description container.
+    • Must remain readable against ANY theme.
+
+    -----------------------------------------------------------------------
+    2. PREMIUM HTML DESCRIPTION (ONE SINGLE CODE BLOCK)
+    -----------------------------------------------------------------------
+    Inside ONE fenced code block, output valid HTML:
+
+    1. MAIN TITLE PANEL  
+       • Centered, Themed to the item (era/brand/holiday/color).
+       • Emojis allowed. No cursive fonts.
+
+    2. SKU PILL BADGE (mandatory style above)
+
+    3. DESCRIPTION SECTION  
+       • Detailed, themed.
+       • Insert **micro-lore** + light nostalgia when appropriate.
+       • Add fun, subtle humor when it fits.
+       • Add subtle **collector/seller-confidence lines** (e.g., "Hard to find in this condition").
+
+    4. FEATURES SECTION  
+       • Emoji bullet points. Item-specific.
+
+    5. CONDITION SECTION  
+       • Summary only.
+
+    6. WHY YOU’LL LOVE IT  
+       • Emotional appeal, Nostalgia, Humor.
+
+    7. SHIPPING & CARE  
+       • "Free shipping", "New sturdy box", "Bubble wrap", "Tracking".
+
+    8. CTA PANEL (“Flair” style) - MUST follow the 1–3–1 format:
+       ⭐ Headline (fun, themed, humorous)  
+       • 3 conversational bullets (fresh, tailored to item, nostalgic OR humorous)  
+       ✨ Closing tagline (warm, human, item-specific)
+
+    -----------------------------------------------------------------------
+    3. THEME & VISUAL RULES
+    -----------------------------------------------------------------------
+    The assistant must AUTO-DETECT ERA/STYLE and theme accordingly (colors, fonts, emojis).
+    Examples: 1980s neon retro, 1990s bold teal/purple, Minimalist modern, Rustic.
+
+    -----------------------------------------------------------------------
+    4. TONE RULES
+    -----------------------------------------------------------------------
+    ALWAYS inject: Light humor, Warmth, Personality.
+    **CRITICAL VOCABULARY RULE:** Write at an **8th GRADE READING LEVEL**. Simple, direct.
+    **BANNED WORDS:** Whimsical, Curated, Bespoke, Exquisite, Tapestry, Symphony, Heritage, Provenance, Iconic, Meticulous.
+
+    -----------------------------------------------------------------------
+    5. STRICT DO-NOT RULES
+    -----------------------------------------------------------------------
+    NEVER: Guess missing info, Add images/links, Use cursive fonts, Reuse CTA wording.
   `;
 
-  // 📝 STANDARD PROMPT (Informative but Simple)
+  // 📝 STANDARD PROMPT
   const STANDARD_PROMPT = `
-    **ROLE:** eBay Listing Assistant.
-    **GOAL:** Create a clean, professional, and highly informative listing.
+    **ROLE:** eBay Cassini Algorithm Specialist.
+    **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
     **RULES:**
-    1. Title: Keyword-rich, max 80 chars.
-    2. Description: Detailed but neutral tone. Use the Standard HTML Template provided.
+    1. Title: STRICT 80 chars. Brand + Gender + Item + Material + Size.
+    2. Description: Use the provided HTML Template.
     **HTML TEMPLATE:**
     ${EBAY_HTML_TEMPLATE}
   `;
 
-  // 🚨 JSON OUTPUT STRUCTURE
+  // 🚨 UNIVERSAL JSON OUTPUT STRUCTURE
   const OUTPUT_INSTRUCTION = `
     **OUTPUT JSON STRUCTURE (REQUIRED):**
     {
       "title": "Optimized Title (Max 80 chars)",
-      "description": "FULL HTML CODE STRING HERE",
+      "description": "FULL HTML OR TEXT DESCRIPTION",
       "estimated_price": "$20.00",
       "tags": ["tag1", "tag2"],
       "item_specifics": {
-        "brand": "Brand",
-        "category": "Category Path",
-        "size": "Size",
-        "color": "Color",
-        "material": "Material",
-        "year": "Year/Era",
+        "brand": "Extract from image or Unknown",
+        "category": "Suggest Category Path",
+        "size": "Estimate dimensions/tag",
+        "color": "Dominant colors",
+        "material": "Visual material ID",
+        "year": "Era",
+        "made_in": "Origin",
+        "department": "Men/Women",
         "model": "Model",
-        "theme": "Theme",
-        "features": "Features list"
+        "theme": "Aesthetic",
+        "features": "Key features list"
       }
     }
   `;
 
   switch (platform.toLowerCase()) {
     case 'poshmark':
-      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL} **ROLE:** Poshmark SEO Stylist. Use Emojis & Vertical Lists. ${OUTPUT_INSTRUCTION}`;
+      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
+        **ROLE:** Poshmark SEO Stylist.
+        **RULES:**
+        1. Vertical list layout. Use Emojis as bullets.
+        2. Integrate "Aesthetics" (e.g., #Boho, #Y2K).
+        ${OUTPUT_INSTRUCTION}`;
+    
     case 'depop':
-      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL} **ROLE:** Depop Trend Curator. Casual tone, lowercase allowed. ${OUTPUT_INSTRUCTION}`;
+      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
+        **ROLE:** Depop Trend Curator.
+        **RULES:**
+        1. Title: Aesthetic Hook.
+        2. Description: Casual tone. Lowercase allowed.
+        ${OUTPUT_INSTRUCTION}`;
+
     case 'mercari':
-      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL} **ROLE:** Mercari Quick-Flip. Short, punchy text. ${OUTPUT_INSTRUCTION}`;
+      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
+        **ROLE:** Mercari Quick-Flip Assistant.
+        **RULES:**
+        1. Short paragraphs. "Ships Fast" mention.
+        ${OUTPUT_INSTRUCTION}`;
+
     case 'etsy':
-      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL} **ROLE:** Etsy Artisan. Focus on story/maker. ${OUTPUT_INSTRUCTION}`;
+      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
+        **ROLE:** Etsy Artisan Guide.
+        **RULES:**
+        1. Description: Storytelling. Focus on "Maker", "History".
+        ${OUTPUT_INSTRUCTION}`;
+
+    case 'facebook':
+      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
+        **ROLE:** Local Commerce Connector.
+        **RULES:**
+        1. Focus: "Proximity" keywords. Simple and direct.
+        ${OUTPUT_INSTRUCTION}`;
+
     case 'shopify':
-      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ROLE: Shopify SEO. HTML: ${SHOPIFY_HTML_TEMPLATE} ${OUTPUT_INSTRUCTION}`;
+      return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL}
+        **ROLE:** Shopify SEO Architect.
+        **GOAL:** Semantic Richness for Google SGE.
+        **CRITICAL RULE:** Do NOT use asterisks (**) inside the text. Use <strong> tags for emphasis.
+        **RULES:**
+        1. Use the provided HTML Template.
+        **HTML TEMPLATE:**
+        ${SHOPIFY_HTML_TEMPLATE}
+        ${OUTPUT_INSTRUCTION}`;
+
     case 'ebay':
     default:
+      // 🔥 CHECK FOR PRO MODE HERE
       if (isProMode) {
         return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${PREMIUM_PRO_PROMPT} ${OUTPUT_INSTRUCTION}`;
       } else {
@@ -222,9 +324,14 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
 };
 
 /**
- * 📸 BRAIN 1: THE BUILDER
+ * 📸 BRAIN 1: THE BUILDER (MULTI-IMAGE)
  */
-export async function generateListingFromImages(imageFiles: File[], platform: string = 'ebay', isProMode: boolean = false, userContext: string = '') {
+export async function generateListingFromImages(
+  imageFiles: File[], 
+  platform: string = 'ebay', 
+  isProMode: boolean = false, 
+  userContext: string = ''
+) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     const imageParts = await Promise.all(imageFiles.map(file => fileToGenerativePart(file)));
@@ -232,13 +339,16 @@ export async function generateListingFromImages(imageFiles: File[], platform: st
 
     const result = await model.generateContent([prompt, ...imageParts]);
     const response = await result.response;
+    
+    // 📊 Log usage to Supabase
     await logUsage(response.usageMetadata, `Listing: ${platform}`);
+
     return cleanAndParseJSON(response.text());
   } catch (error) { console.error("AI Generation Error:", error); throw error; }
 }
 
 /**
- * 🩺 BRAIN 2: THE DOCTOR
+ * 🩺 BRAIN 2: THE DOCTOR (SEO OPTIMIZER)
  */
 export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
   try {
@@ -246,47 +356,55 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
     const prompt = `Act as an expert reseller on ${platform}. Improve Title: "${currentTitle}", Desc: "${currentDescription}". JSON ONLY.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
+
+    // 📊 Log usage to Supabase
     await logUsage(response.usageMetadata, `Optimizer: ${platform}`);
+
     return cleanAndParseJSON(response.text());
   } catch (error) { console.error("Optimization Error:", error); throw error; }
 }
 
 /**
- * 🔭 BRAIN 3: THE SCOUT
+ * 🔭 BRAIN 3: THE SCOUT (MARKET ANALYST - STRATEGY EDITION)
+ * This uses the NEW Advanced Prompt we built today for the Sourcing Page V2.
  */
 export async function scoutProduct(productName: string, imageFile?: File) {
   try {
     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     let requestParts: any[] = [];
     
-    // 🚨 PREMIUM STRATEGY PROMPT
+    // 🚨 PREMIUM "MARKET STRATEGIST" PROMPT
     const instruction = `
       Act as a Senior Market Analyst and Expert Flipper. 
       Identify this item: "${productName}". 
       
-      Perform deep market analysis.
+      Perform a deep simulated market analysis based on current trends.
       
-      **RETURN ONLY RAW JSON**:
+      **RETURN ONLY RAW JSON** with this exact structure:
       {
         "item_name": "Short precise item name",
         "minPrice": 10,
         "maxPrice": 20,
         "demand_score": 75,
-        "reason": "1 professional sentence on why.",
+        "reason": "1 professional sentence on why (e.g. 'Consistent demand due to 90s nostalgia').",
         "metrics": {
           "sell_through": 75, 
           "days_to_sell": 14,
-          "volatility": "Low",
-          "competition": "Medium"
+          "volatility": "Low" | "Medium" | "High",
+          "competition": "Low" | "Medium" | "High" | "Saturated"
         },
         "vitals": {
           "confidence": 92,
-          "trend": "Rising",
-          "saturation": "Low",
-          "liquidity": "High"
+          "trend": "Rising" | "Falling" | "Stable",
+          "saturation": "Low" | "Medium" | "High",
+          "liquidity": "High" | "Medium" | "Low"
         },
-        "strategy_tip": "Specific tactical plan: 1. Listing Format (Auction vs BIN). 2. Key features to highlight. 3. Pricing strategy."
+        "strategy_tip": "A specific, detailed tactical plan for THIS item. STRICTLY cover: 1. The best Listing Format (Auction vs BIN). 2. Specific features/flaws to highlight in photos. 3. Pricing psychology (e.g. 'List high at $X, accept offers')."
       }
+      
+      *Definitions:*
+      - demand_score: 0-100 (Used to calculate verdict).
+      - confidence: 0-100 (AI certainty).
     `;
 
     if (imageFile) {
@@ -298,7 +416,10 @@ export async function scoutProduct(productName: string, imageFile?: File) {
     
     const result = await model.generateContent(requestParts);
     const response = await result.response;
+
+    // 📊 Log usage to Supabase
     await logUsage(response.usageMetadata, "Scout Analyst");
+
     return cleanAndParseJSON(response.text());
   } catch (error) { console.error("Scout Error:", error); throw error; }
 }
