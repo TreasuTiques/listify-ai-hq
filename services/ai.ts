@@ -97,18 +97,8 @@ const NO_MARKDOWN_PROTOCOL = `
   - Use standard hyphens (-) for bullet points.
 `;
 
-/**
- * 🎨 MARKETPLACE PROMPT ENGINEER
- */
-const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: string) => {
-  const baseHelper = `Analyze these images and return valid JSON.`;
-  // FIX: Force AI to be descriptive even if userContext is brief
-  const contextBlock = userContext 
-    ? `\n**IMPORTANT CONTEXT:** "${userContext}".\n*INSTRUCTION:* Even if context is short, perform a FULL visual analysis.` 
-    : '';
-
-  // 🔵 EBAY HTML TEMPLATE (STANDARD - MODERN MINIMALIST)
-  const EBAY_HTML_TEMPLATE = `
+// 🔵 EBAY HTML TEMPLATE (STANDARD - MODERN MINIMALIST)
+const EBAY_HTML_TEMPLATE = `
     <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; color: #333; line-height: 1.6;">
       <h2 style="border-bottom: 1px solid #ddd; padding-bottom: 15px; margin-bottom: 25px; color: #222; text-align: center;">{{TITLE}}</h2>
       
@@ -150,48 +140,31 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     </div>
   `;
 
-  // 🟢 SHOPIFY HTML TEMPLATE
-  const SHOPIFY_HTML_TEMPLATE = `
-    <div class="product-description" style="font-family: inherit;">
-      <p class="intro">{{SEMANTIC_INTRO}}</p>
-      <h2>Product Specifications</h2>
-      <ul>
-        <li><strong>Material:</strong> {{MATERIAL}}</li>
-        <li><strong>Color:</strong> {{COLOR}}</li>
-        <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
-      </ul>
-      <h2>Detailed Analysis</h2>
-      <p>{{DETAILED_ANALYSIS}}</p>
-      <h2>Frequently Asked Questions</h2>
-      <dl>
-        <dt><strong>Is this item true to size?</strong></dt>
-        <dd>{{SIZE_ANSWER}}</dd>
-        <dt><strong>Any notable flaws?</strong></dt>
-        <dd>{{DEFECT_REPORT}}</dd>
-      </dl>
-    </div>
-  `;
-
-  // 🔥 JUAN ACUÑA'S PREMIUM ENGINE (Visual Web Designer Mode)
-  const PREMIUM_PRO_PROMPT = `
+// 🔥 JUAN ACUÑA'S PREMIUM ENGINE (Visual Web Designer Mode)
+const PREMIUM_PRO_PROMPT = `
     🚨 ACTIVATE "PREMIUM DESIGNER ENGINE" 🚨
-    
+
     You are not just writing text; you are coding a HIGH-END HTML LAYOUT (The "Digital Trading Card").
-    
-    **1. THEME ENGINE (CRITICAL):**
+
+    **1. TITLE + FACT INTEGRITY (CRITICAL):**
+    - Title MUST be <= 80 characters, Title Case, no emojis, and no dashes.
+    - Never invent facts. If data is missing, explicitly state Unknown, Not observed, or Not provided.
+
+    **2. THEME ENGINE (CRITICAL):**
     - Auto-detect the item's Era/Vibe (e.g., 90s Grunge, Y2K Tech, 70s Boho, Modern Minimal).
     - Select a [THEME_DARK] (Main Color) and a [THEME_LIGHT] (Background Pastel) that matches perfectly.
     - **FALLBACK:** If unsure, use "High-Voltage Blue" (#0056b3) and "Cloud White" (#f8f9fa).
 
-    **2. DYNAMIC CONTENT GENERATION (CRITICAL):**
-    - **RED ZONE (Condition):** You MUST write a detailed, full-sentence narrative about the condition. Combine the user's input with your own visual analysis of wear, flaws, or preservation. Do NOT leave this brief.
-    - **YELLOW ZONE (The 3 Bullets):** Generate 3 UNIQUE, FUN, and ITEM-SPECIFIC reasons to buy this item. Do NOT use generic text like "Ships Fast". (e.g., if it's a fragile vase: "✓ Double-Boxed Armor", "✓ Insured Safe-Arrival", "✓ Instant Decor Upgrade").
-    - **BLUE ZONE (Closing Hook):** Write a witty, item-specific closing line. (e.g., "Don't let this slice of history fly away!").
+    **3. DYNAMIC CONTENT GENERATION (CRITICAL):**
+    - **RED ZONE (Condition + INAD Resistance):** Write an extremely detailed full-sentence condition narrative. Include measurements (if provided), materials (if provided), completeness, what is included, what is NOT included, visible flaws, edge wear, fading, stains, scratches, function tests performed (only if provided), and any uncertainty. If a detail is unavailable, state Unknown / Not observed / Not provided.
+    - **YELLOW ZONE (The 3 Bullets):** Generate 3 UNIQUE, FUN, and ITEM-SPECIFIC reasons to buy this item. Include clear buyer benefits and a "why you'll love it" angle. Do NOT use generic text like "Ships Fast".
+    - **BLUE ZONE (Closing Hook):** Write urgency without hype, plus collector-confidence language and a concise reason this listing is trustworthy.
+    - **NOSTALGIA MICRO-LORE:** For vintage/collectibles, add exactly 1 short nostalgic micro-lore line that fits the era/item. If not appropriate, skip it.
 
     **HTML STRUCTURE (Strictly follow this layout):**
 
     <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 900px; margin: 0 auto; border: 3px solid [THEME_DARK]; background-color: #ffffff; border-radius: 12px; overflow: hidden; color: #333;">
-    
+
         <div style="background-color: [THEME_LIGHT]; padding: 25px; border-bottom: 2px solid [THEME_DARK]; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div style="flex: 1; min-width: 250px;">
                 <h1 style="color: [THEME_DARK]; margin: 0; font-size: 28px; line-height: 1.2; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 800;">
@@ -207,7 +180,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
         </div>
 
         <div style="padding: 30px;">
-            
+
             <p style="font-size: 18px; line-height: 1.6; margin-bottom: 25px;">
                 [Detailed, warm, and confident description of the item. Sell the feeling, not just the object. Use 8th-grade reading level.]
             </p>
@@ -246,14 +219,21 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
 
     </div>
 
-    **RULES:**
+    **FORMAT + OUTPUT RULES:**
+    - Description field must be HTML-only.
+    - Do NOT output markdown.
+    - Do NOT use ** asterisks in output text; use <strong> for emphasis.
     - **NO** Placeholder text like [THEME_DARK]. You must replace them with actual Hex Codes.
-    - **NO** Markdown symbols (**). Use HTML <strong> tags.
     - **TONE:** Fun, Professional, and Era-Appropriate.
+
+    **PROMPT SELF-CHECK (RUN BEFORE FINAL OUTPUT):**
+    - Self-check 1: Remove or relabel any claim not directly supported by provided data/images as Unknown / Not observed / Not provided.
+    - Self-check 2: Confirm condition coverage includes included items, not included items, flaws/wear, and tests only if provided.
+    - Self-check 3: Confirm title format rules (<=80, Title Case, no emojis, no dashes) and HTML-only description formatting.
   `;
 
-  // 📝 STANDARD PROMPT (Updated for consistency)
-  const STANDARD_PROMPT = `
+// 📝 STANDARD PROMPT (Updated for consistency)
+const STANDARD_PROMPT = `
     **ROLE:** eBay Cassini Algorithm Specialist.
     **STYLE:** Modern Minimalist / High-End Corporate.
     
@@ -266,6 +246,109 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
     
     **HTML TEMPLATE:**
     ${EBAY_HTML_TEMPLATE}
+  `;
+
+const getEbayRegularPrompt = (userContext: string) => {
+  const baseHelper = `Analyze these images and return valid JSON.`;
+  const contextBlock = userContext
+    ? `\n**IMPORTANT CONTEXT:** "${userContext}".\n*INSTRUCTION:* Even if context is short, perform a FULL visual analysis.`
+    : '';
+
+  const OUTPUT_INSTRUCTION = `
+    **OUTPUT JSON STRUCTURE (REQUIRED):**
+    {
+      "title": "Optimized Title (Max 80 chars)",
+      "description": "FULL HTML OR TEXT DESCRIPTION",
+      "estimated_price": "$20.00",
+      "tags": ["tag1", "tag2"],
+      "item_specifics": {
+        "brand": "Extract from image or Unknown",
+        "category": "Suggest Category Path",
+        "size": "Estimate dimensions/tag",
+        "color": "Dominant colors",
+        "material": "Visual material ID",
+        "year": "Era",
+        "made_in": "Origin",
+        "department": "Men/Women",
+        "model": "Model",
+        "theme": "Aesthetic",
+        "features": "Key features list"
+      }
+    }
+  `;
+
+  return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${STANDARD_PROMPT} ${OUTPUT_INSTRUCTION}`;
+};
+
+const getEbayProPrompt = (userContext: string) => {
+  const baseHelper = `Analyze these images and return valid JSON.`;
+  const contextBlock = userContext
+    ? `\n**IMPORTANT CONTEXT:** "${userContext}".\n*INSTRUCTION:* Even if context is short, perform a FULL visual analysis.`
+    : '';
+
+  const OUTPUT_INSTRUCTION = `
+    **OUTPUT JSON STRUCTURE (REQUIRED):**
+    {
+      "title": "Optimized Title (Max 80 chars)",
+      "description": "FULL HTML OR TEXT DESCRIPTION",
+      "estimated_price": "$20.00",
+      "tags": ["tag1", "tag2"],
+      "item_specifics": {
+        "brand": "Extract from image or Unknown",
+        "category": "Suggest Category Path",
+        "size": "Estimate dimensions/tag",
+        "color": "Dominant colors",
+        "material": "Visual material ID",
+        "year": "Era",
+        "made_in": "Origin",
+        "department": "Men/Women",
+        "model": "Model",
+        "theme": "Aesthetic",
+        "features": "Key features list"
+      }
+    }
+  `;
+
+  return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${PREMIUM_PRO_PROMPT} ${OUTPUT_INSTRUCTION}`;
+};
+
+const getEbayPrompt = (isProMode: boolean, userContext: string) => {
+  if (isProMode) {
+    return getEbayProPrompt(userContext);
+  }
+  return getEbayRegularPrompt(userContext);
+};
+
+/**
+ * 🎨 MARKETPLACE PROMPT ENGINEER
+ */
+const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: string) => {
+  const baseHelper = `Analyze these images and return valid JSON.`;
+  // FIX: Force AI to be descriptive even if userContext is brief
+  const contextBlock = userContext 
+    ? `\n**IMPORTANT CONTEXT:** "${userContext}".\n*INSTRUCTION:* Even if context is short, perform a FULL visual analysis.` 
+    : '';
+
+  // 🟢 SHOPIFY HTML TEMPLATE
+  const SHOPIFY_HTML_TEMPLATE = `
+    <div class="product-description" style="font-family: inherit;">
+      <p class="intro">{{SEMANTIC_INTRO}}</p>
+      <h2>Product Specifications</h2>
+      <ul>
+        <li><strong>Material:</strong> {{MATERIAL}}</li>
+        <li><strong>Color:</strong> {{COLOR}}</li>
+        <li><strong>Condition:</strong> {{CONDITION_GRADE}}</li>
+      </ul>
+      <h2>Detailed Analysis</h2>
+      <p>{{DETAILED_ANALYSIS}}</p>
+      <h2>Frequently Asked Questions</h2>
+      <dl>
+        <dt><strong>Is this item true to size?</strong></dt>
+        <dd>{{SIZE_ANSWER}}</dd>
+        <dt><strong>Any notable flaws?</strong></dt>
+        <dd>{{DEFECT_REPORT}}</dd>
+      </dl>
+    </div>
   `;
 
   // 🚨 OUTPUT JSON STRUCTURE
@@ -343,11 +426,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
 
     case 'ebay':
     default:
-      if (isProMode) {
-        return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${PREMIUM_PRO_PROMPT} ${OUTPUT_INSTRUCTION}`;
-      } else {
-        return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${STANDARD_PROMPT} ${OUTPUT_INSTRUCTION}`;
-      }
+      return getEbayPrompt(isProMode, userContext);
   }
 };
 
