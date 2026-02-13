@@ -1,24 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import { generateListingFromImages } from '../services/ai';
-import { saveListingToInventory } from '../services/inventory'; 
+import { saveListingToInventory } from '../services/inventory';
 
 const BuilderPage: React.FC = () => {
   // 1. STATE MANAGEMENT
   const [activePlatform, setActivePlatform] = useState('ebay');
   const [isProMode, setIsProMode] = useState(false);
-  
+
   // 🛠️ Editor Modes
   const [editorTab, setEditorTab] = useState<'visual' | 'html' | 'text'>('visual');
-  const [copySuccess, setCopySuccess] = useState(''); 
-  
+  const [copySuccess, setCopySuccess] = useState('');
+
   // 📝 CORE FIELDS
   const [title, setTitle] = useState('');
-  const [condition, setCondition] = useState(''); 
+  const [condition, setCondition] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [tags, setTags] = useState<string[]>([]);
-  
+
   // 🔍 THE PERFECT 10 ITEM SPECIFICS
   const [brand, setBrand] = useState('');
   const [category, setCategory] = useState('');
@@ -36,12 +36,13 @@ const BuilderPage: React.FC = () => {
   const [sellerInsights, setSellerInsights] = useState('');
 
   // 📸 Multi-Image Memory
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]); 
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  
+
   // UI States
-  const [loading, setLoading] = useState(false); 
-  const [analyzing, setAnalyzing] = useState(false); 
+  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showConditionError, setShowConditionError] = useState(false);
@@ -97,7 +98,8 @@ const BuilderPage: React.FC = () => {
     if (!condition) { setShowConditionError(true); alert("Please select a condition first."); return; }
 
     setAnalyzing(true);
-    
+    setIsLoading(true);
+
     try {
       const richContext = `
         CONDITION: ${condition}.
@@ -117,7 +119,7 @@ const BuilderPage: React.FC = () => {
       `;
 
       const result = await generateListingFromImages(selectedFiles, activePlatform, isProMode, richContext);
-      
+
       // ✅ AUTO-POPULATE LOGIC
       if (result.item_specifics) {
         if (!brand && result.item_specifics.brand) setBrand(result.item_specifics.brand);
@@ -134,17 +136,18 @@ const BuilderPage: React.FC = () => {
       }
 
       setTitle(result.title || '');
-      if (!brand && result.brand) setBrand(result.brand); 
-      
+      if (!brand && result.brand) setBrand(result.brand);
+
       setDescription(result.description || '');
       setPrice(result.estimated_price || '');
       setTags(result.tags || []);
-      setEditorTab('visual'); 
+      setEditorTab('visual');
     } catch (error) {
       console.error("AI Error:", error);
       alert("AI could not analyze images. Try again!");
     } finally {
       setAnalyzing(false);
+      setIsLoading(false);
     }
   };
 
@@ -195,9 +198,9 @@ const BuilderPage: React.FC = () => {
     setCopySuccess(type);
     setTimeout(() => setCopySuccess(''), 2000);
   };
-  
+
   const onDragOver = (e: React.DragEvent) => e.preventDefault();
-  
+
   const handleSaveToInventory = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) { alert("Please log in to save listings!"); return; }
@@ -205,7 +208,7 @@ const BuilderPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const listingData = { 
+      const listingData = {
         title, brand, description, condition, estimated_price: price, tags: tags, platform: activePlatform,
         item_specifics: { size, color, material, year, madeIn, department, model, theme, features }
       };
@@ -226,24 +229,24 @@ const BuilderPage: React.FC = () => {
       <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1">
         {label}
       </label>
-      <input 
-        type="text" 
-        value={value} 
-        onChange={onChange} 
-        className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 text-sm shadow-sm" 
-        placeholder={placeholder} 
+      <input
+        type="text"
+        value={value}
+        onChange={onChange}
+        className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 text-sm shadow-sm"
+        placeholder={placeholder}
       />
     </div>
   );
 
   return (
     <div className="min-h-screen !bg-slate-50 dark:!bg-slate-900 transition-colors duration-300 pb-24 pt-20 px-4 sm:px-6 lg:px-8 relative">
-      
+
       {/* SUCCESS POPUP */}
       {showSuccess && (
         <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-500">
           <div className="bg-[#0F172A] text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-slate-700">
-            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-[#0F172A]"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg></div>
+            <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-[#0F172A]"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg></div>
             <div><h4 className="font-bold text-lg">Listing Saved!</h4><p className="text-slate-400 text-xs font-medium">Redirecting to Inventory...</p></div>
           </div>
         </div>
@@ -258,19 +261,19 @@ const BuilderPage: React.FC = () => {
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">Upload photos, fill details, and let AI work its magic.</p>
         </div>
-        
+
         <div className="flex items-center gap-4">
-           {activePlatform === 'ebay' && (
-             <button onClick={handleProModeToggle} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${isProMode ? 'bg-[#0F172A] dark:bg-blue-600 text-white border-[#0F172A] dark:border-blue-600 shadow-lg' : user ? 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300' : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70'}`}>
-               {!user && <span className="text-xs">🔒</span>}<span className={`w-2 h-2 rounded-full ${isProMode ? 'bg-green-400 animate-pulse' : 'bg-slate-300'}`}></span>Pro Mode: {isProMode ? 'ON' : 'OFF'}
-             </button>
-           )}
-           <div className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">{imagePreviews.length} / 8 Photos • Target: <span className={`font-bold ml-1 ${activePlatform === 'ebay' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-900 dark:text-white'}`}>{activePlatform.toUpperCase()}</span></div>
+          {activePlatform === 'ebay' && (
+            <button onClick={handleProModeToggle} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${isProMode ? 'bg-[#0F172A] dark:bg-blue-600 text-white border-[#0F172A] dark:border-blue-600 shadow-lg' : user ? 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300' : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-70'}`}>
+              {!user && <span className="text-xs">🔒</span>}<span className={`w-2 h-2 rounded-full ${isProMode ? 'bg-green-400 animate-pulse' : 'bg-slate-300'}`}></span>Pro Mode: {isProMode ? 'ON' : 'OFF'}
+            </button>
+          )}
+          <div className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm">{imagePreviews.length} / 8 Photos • Target: <span className={`font-bold ml-1 ${activePlatform === 'ebay' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-900 dark:text-white'}`}>{activePlatform.toUpperCase()}</span></div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
+
         {/* ================= LEFT COLUMN ================= */}
         <div className="lg:col-span-5 space-y-6">
           <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6">
@@ -299,7 +302,7 @@ const BuilderPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="h-full flex flex-col items-center justify-center">
-                  <div className="w-16 h-16 bg-white dark:bg-slate-700 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+                  <div className="w-16 h-16 bg-white dark:bg-slate-700 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></div>
                   <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Drop up to 8 Photos</p><p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Front, Back, Tags, Flaws</p>
                 </div>
               )}
@@ -308,174 +311,174 @@ const BuilderPage: React.FC = () => {
 
           {/* SPECIFICS */}
           <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-6 space-y-6">
-             <div>
-               <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                    <span className="text-lg">💡</span> Seller Insights (Hidden Details)
-                  </h3>
-               </div>
-               <textarea 
-                 value={sellerInsights}
-                 onChange={e => setSellerInsights(e.target.value)}
-                 placeholder="Examples: 'Smells slightly like vanilla', 'Zipper sticks a bit', 'Found at estate sale'. The AI will weave this into the description naturally."
-                 className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 min-h-[80px] resize-none font-medium text-slate-900 dark:text-white"
-               ></textarea>
-             </div>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                  <span className="text-lg">💡</span> Seller Insights (Hidden Details)
+                </h3>
+              </div>
+              <textarea
+                value={sellerInsights}
+                onChange={e => setSellerInsights(e.target.value)}
+                placeholder="Examples: 'Smells slightly like vanilla', 'Zipper sticks a bit', 'Found at estate sale'. The AI will weave this into the description naturally."
+                className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 min-h-[80px] resize-none font-medium text-slate-900 dark:text-white"
+              ></textarea>
+            </div>
 
-             <div className="border-t border-slate-100 dark:border-slate-700 my-4"></div>
+            <div className="border-t border-slate-100 dark:border-slate-700 my-4"></div>
 
-             <div>
-                <div className="flex items-center justify-between mb-4">
-                   <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                     <span className="text-lg">🏷️</span> Key Specifics (Optional)
-                   </h3>
-                   <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">Auto-Fills on Generate</span>
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                  <span className="text-lg">🏷️</span> Key Specifics (Optional)
+                </h3>
+                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">Auto-Fills on Generate</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                <PremiumInput label="Brand / Maker" value={brand} onChange={(e: any) => setBrand(e.target.value)} placeholder="Nike, Sony..." width="half" />
+                <PremiumInput label="Category" value={category} onChange={(e: any) => setCategory(e.target.value)} placeholder="Shoes, Electronics..." width="half" />
+                <PremiumInput label="Size / Dims" value={size} onChange={(e: any) => setSize(e.target.value)} placeholder="Large, 12x10..." width="half" />
+                <PremiumInput label="Color" value={color} onChange={(e: any) => setColor(e.target.value)} placeholder="Red, Black..." width="half" />
+                <PremiumInput label="Material" value={material} onChange={(e: any) => setMaterial(e.target.value)} placeholder="Cotton, Metal..." width="half" />
+                <PremiumInput label="Year / Era" value={year} onChange={(e: any) => setYear(e.target.value)} placeholder="1990s, 2023..." width="half" />
+                <PremiumInput label="Made In" value={madeIn} onChange={(e: any) => setMadeIn(e.target.value)} placeholder="USA, China..." width="half" />
+                <PremiumInput label="Department" value={department} onChange={(e: any) => setDepartment(e.target.value)} placeholder="Men, Women..." width="half" />
+                <PremiumInput label="Model / Style" value={model} onChange={(e: any) => setModel(e.target.value)} placeholder="Air Max, 501..." width="half" />
+                <PremiumInput label="Theme" value={theme} onChange={(e: any) => setTheme(e.target.value)} placeholder="Vintage, Sports..." width="half" />
+                <div className="col-span-2">
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Key Features</label>
+                  <input type="text" value={features} onChange={e => setFeatures(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 text-sm shadow-sm" placeholder="Waterproof, Pockets, Signed, Limited Edition..." />
                 </div>
-                
-                <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-                   <PremiumInput label="Brand / Maker" value={brand} onChange={(e: any) => setBrand(e.target.value)} placeholder="Nike, Sony..." width="half" />
-                   <PremiumInput label="Category" value={category} onChange={(e: any) => setCategory(e.target.value)} placeholder="Shoes, Electronics..." width="half" />
-                   <PremiumInput label="Size / Dims" value={size} onChange={(e: any) => setSize(e.target.value)} placeholder="Large, 12x10..." width="half" />
-                   <PremiumInput label="Color" value={color} onChange={(e: any) => setColor(e.target.value)} placeholder="Red, Black..." width="half" />
-                   <PremiumInput label="Material" value={material} onChange={(e: any) => setMaterial(e.target.value)} placeholder="Cotton, Metal..." width="half" />
-                   <PremiumInput label="Year / Era" value={year} onChange={(e: any) => setYear(e.target.value)} placeholder="1990s, 2023..." width="half" />
-                   <PremiumInput label="Made In" value={madeIn} onChange={(e: any) => setMadeIn(e.target.value)} placeholder="USA, China..." width="half" />
-                   <PremiumInput label="Department" value={department} onChange={(e: any) => setDepartment(e.target.value)} placeholder="Men, Women..." width="half" />
-                   <PremiumInput label="Model / Style" value={model} onChange={(e: any) => setModel(e.target.value)} placeholder="Air Max, 501..." width="half" />
-                   <PremiumInput label="Theme" value={theme} onChange={(e: any) => setTheme(e.target.value)} placeholder="Vintage, Sports..." width="half" />
-                   <div className="col-span-2">
-                      <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Key Features</label>
-                      <input type="text" value={features} onChange={e => setFeatures(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 text-sm shadow-sm" placeholder="Waterproof, Pockets, Signed, Limited Edition..." />
-                   </div>
-                </div>
-             </div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* ================= RIGHT COLUMN ================= */}
         <div className="lg:col-span-7 space-y-6">
           <div className="!bg-white dark:!bg-slate-800 rounded-[24px] border border-slate-200 dark:border-slate-700 shadow-sm p-8 sticky top-24">
-            
+
             {/* PLATFORM SELECTOR */}
             <div className="mb-6">
-               <div className="flex flex-wrap gap-2">
-                 {platforms.map((platform) => (
-                   <button key={platform.id} onClick={() => setActivePlatform(platform.id)} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all border ${activePlatform === platform.id ? 'bg-[#0F172A] dark:bg-blue-600 text-white border-[#0F172A] dark:border-blue-600 shadow-md' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-slate-300'}`}>
-                     <span className={`w-2 h-2 rounded-full ${activePlatform === platform.id ? 'bg-white' : platform.color}`}></span>{platform.label}
-                   </button>
-                 ))}
-               </div>
+              <div className="flex flex-wrap gap-2">
+                {platforms.map((platform) => (
+                  <button key={platform.id} onClick={() => setActivePlatform(platform.id)} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wide transition-all border ${activePlatform === platform.id ? 'bg-[#0F172A] dark:bg-blue-600 text-white border-[#0F172A] dark:border-blue-600 shadow-md' : 'bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-slate-300'}`}>
+                    <span className={`w-2 h-2 rounded-full ${activePlatform === platform.id ? 'bg-white' : platform.color}`}></span>{platform.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* TITLE & BOLD COPY BUTTON */}
             <div className="mb-4">
-               <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Title</label>
-               <div className="relative group">
-                 <input 
-                   type="text" 
-                   value={title} 
-                   onChange={(e) => setTitle(e.target.value)} 
-                   className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 pr-20 font-bold text-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 shadow-sm" 
-                   placeholder="AI Generated Title..." 
-                 />
-                 
-                 {/* 💎 PREMIUM CYAN COPY BUTTON */}
-                 <button 
-                   onClick={() => handleCopy(title, 'title')} 
-                   className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg shadow-lg flex items-center justify-center transition-all transform active:scale-90 ${copySuccess === 'title' ? 'bg-green-500 text-white shadow-green-500/30' : 'bg-cyan-500 hover:bg-cyan-400 text-white shadow-cyan-500/30'}`}
-                   title="Copy Title"
-                 >
-                   {copySuccess === 'title' ? (
-                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>
-                   ) : (
-                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                   )}
-                 </button>
-               </div>
+              <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Title</label>
+              <div className="relative group">
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3.5 pr-20 font-bold text-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 shadow-sm"
+                  placeholder="AI Generated Title..."
+                />
+
+                {/* 💎 PREMIUM CYAN COPY BUTTON */}
+                <button
+                  onClick={() => handleCopy(title, 'title')}
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg shadow-lg flex items-center justify-center transition-all transform active:scale-90 ${copySuccess === 'title' ? 'bg-green-500 text-white shadow-green-500/30' : 'bg-cyan-500 hover:bg-cyan-400 text-white shadow-cyan-500/30'}`}
+                  title="Copy Title"
+                >
+                  {copySuccess === 'title' ? (
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* CONDITION & PRICE */}
             <div className="grid grid-cols-12 gap-4 mb-6">
-               <div className="col-span-8">
-                  <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Condition {showConditionError && <span className="text-red-500">*</span>}</label>
-                  <div className="relative">
-                    <select value={condition} onChange={e => {setCondition(e.target.value); setShowConditionError(false)}} className={`w-full !bg-slate-50 dark:!bg-slate-900 border rounded-xl px-4 py-3.5 font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-4 transition-all appearance-none cursor-pointer shadow-sm ${showConditionError ? 'border-red-300 ring-red-500/10' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/10'}`}>
-                      <option value="" disabled>Select Condition...</option>
-                      <option>New with Tags</option>
-                      <option>New without Tags</option>
-                      <option>Pre-owned (Excellent)</option>
-                      <option>Pre-owned (Good)</option>
-                      <option>For Parts / Not Working</option>
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg></div>
-                  </div>
-               </div>
+              <div className="col-span-8">
+                <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Condition {showConditionError && <span className="text-red-500">*</span>}</label>
+                <div className="relative">
+                  <select value={condition} onChange={e => { setCondition(e.target.value); setShowConditionError(false) }} className={`w-full !bg-slate-50 dark:!bg-slate-900 border rounded-xl px-4 py-3.5 font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-4 transition-all appearance-none cursor-pointer shadow-sm ${showConditionError ? 'border-red-300 ring-red-500/10' : 'border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-blue-500/10'}`}>
+                    <option value="" disabled>Select Condition...</option>
+                    <option>New with Tags</option>
+                    <option>New without Tags</option>
+                    <option>Pre-owned (Excellent)</option>
+                    <option>Pre-owned (Good)</option>
+                    <option>For Parts / Not Working</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg></div>
+                </div>
+              </div>
 
-               <div className="col-span-4">
-                  <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Price ($)</label>
-                  <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 rounded-xl px-4 py-3.5 font-bold focus:outline-none focus:border-emerald-500 transition-all placeholder:text-emerald-300 shadow-sm text-center" placeholder="0.00" />
-               </div>
+              <div className="col-span-4">
+                <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Price ($)</label>
+                <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 rounded-xl px-4 py-3.5 font-bold focus:outline-none focus:border-emerald-500 transition-all placeholder:text-emerald-300 shadow-sm text-center" placeholder="0.00" />
+              </div>
             </div>
 
             {/* MAGIC BUTTON */}
-            <button 
-               onClick={handleGenerateListing} 
-               disabled={analyzing}
-               className="w-full mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-base uppercase tracking-wider rounded-xl shadow-xl shadow-blue-500/20 py-4 transition-all transform active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed border border-white/10"
+            <button
+              onClick={handleGenerateListing}
+              disabled={isLoading}
+              className="w-full mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-base uppercase tracking-wider rounded-xl shadow-xl shadow-blue-500/20 py-4 transition-all transform active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed border border-white/10"
             >
-               {analyzing ? (
-                 <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> AI is Writing...</>
-               ) : (
-                 <>✨ Generate Premium Listing</>
-               )}
+              {isLoading ? (
+                <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Generating...</>
+              ) : (
+                <>✨ Generate Premium Listing</>
+              )}
             </button>
 
             {/* DESCRIPTION EDITOR & SPLIT COPY BUTTONS */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description Preview</label>
-                 
-                 <div className="flex items-center gap-3">
-                    {/* TABS */}
-                    {isHtmlPlatform && (
-                        <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
-                              <button onClick={() => setEditorTab('visual')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'visual' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Visual</button>
-                              <button onClick={() => setEditorTab('html')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'html' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>HTML</button>
-                              <button onClick={() => setEditorTab('text')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'text' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Text</button>
-                        </div>
-                    )}
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Description Preview</label>
 
-                    {/* 🆕 SPLIT COPY BUTTONS */}
-                    <div className="flex gap-2">
-                        {isHtmlPlatform && (
-                            <button 
-                                onClick={() => handleCopy(description, 'html')} 
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all shadow-md shadow-blue-500/20 active:scale-95"
-                            >
-                                {copySuccess === 'html' ? <span>✓ Copied</span> : <><span>&lt;/&gt;</span> Copy HTML</>}
-                            </button>
-                        )}
-                        <button 
-                            onClick={() => handleCopy(description, 'text')} 
-                            className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all active:scale-95"
-                        >
-                            {copySuccess === 'text' ? <span>✓ Copied</span> : <><span>📄</span> Copy Text</>}
-                        </button>
+                <div className="flex items-center gap-3">
+                  {/* TABS */}
+                  {isHtmlPlatform && (
+                    <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                      <button onClick={() => setEditorTab('visual')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'visual' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Visual</button>
+                      <button onClick={() => setEditorTab('html')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'html' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>HTML</button>
+                      <button onClick={() => setEditorTab('text')} className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${editorTab === 'text' ? 'bg-white dark:bg-slate-900 shadow-sm text-slate-900 dark:text-white' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Text</button>
                     </div>
-                 </div>
+                  )}
+
+                  {/* 🆕 SPLIT COPY BUTTONS */}
+                  <div className="flex gap-2">
+                    {isHtmlPlatform && (
+                      <button
+                        onClick={() => handleCopy(description, 'html')}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all shadow-md shadow-blue-500/20 active:scale-95"
+                      >
+                        {copySuccess === 'html' ? <span>✓ Copied</span> : <><span>&lt;/&gt;</span> Copy HTML</>}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleCopy(description, 'text')}
+                      className="bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase flex items-center gap-1 transition-all active:scale-95"
+                    >
+                      {copySuccess === 'text' ? <span>✓ Copied</span> : <><span>📄</span> Copy Text</>}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="relative">
-                 {isHtmlPlatform && editorTab === 'visual' ? (
-                    <div 
-                       className="w-full !bg-white dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert dark:invert dark:hue-rotate-180 shadow-inner" 
-                       dangerouslySetInnerHTML={{ __html: description || '<div class="flex flex-col items-center justify-center h-full text-slate-400 space-y-4"><span class="text-4xl">✨</span><p>Ready to create magic.<br>Upload photos & click Generate.</p></div>' }}
-                    ></div>
-                 ) : isHtmlPlatform && editorTab === 'text' ? (
-                    <textarea readOnly value={formatPlainText(description)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-6 py-6 focus:outline-none h-[500px] resize-none text-left font-sans text-[15px] leading-relaxed text-slate-800 dark:text-slate-200 shadow-inner"></textarea>
-                 ) : (
-                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-[500px] resize-none shadow-inner" placeholder="AI will write this for you..."></textarea>
-                 )}
+                {isHtmlPlatform && editorTab === 'visual' ? (
+                  <div
+                    className="w-full !bg-white dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 h-[500px] overflow-y-auto prose prose-sm max-w-none dark:prose-invert dark:invert dark:hue-rotate-180 shadow-inner"
+                    dangerouslySetInnerHTML={{ __html: description || '<div class="flex flex-col items-center justify-center h-full text-slate-400 space-y-4"><span class="text-4xl">✨</span><p>Ready to create magic.<br>Upload photos & click Generate.</p></div>' }}
+                  ></div>
+                ) : isHtmlPlatform && editorTab === 'text' ? (
+                  <textarea readOnly value={formatPlainText(description)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-6 py-6 focus:outline-none h-[500px] resize-none text-left font-sans text-[15px] leading-relaxed text-slate-800 dark:text-slate-200 shadow-inner"></textarea>
+                ) : (
+                  <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full !bg-slate-50 dark:!bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 font-medium text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all placeholder:text-slate-400 h-[500px] resize-none shadow-inner" placeholder="AI will write this for you..."></textarea>
+                )}
               </div>
             </div>
 
