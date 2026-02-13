@@ -1,17 +1,7 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { supabase } from "../supabaseClient"; 
+import { supabase } from "../supabaseClient";
 
 // 🚨 SYSTEM HEARTBEAT TEST
 console.log("AI Service Loaded. Supabase status:", supabase ? "Connected ✅" : "Missing ❌");
-
-// 🔑 ROBUST KEY CHECK
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY;
-if (!apiKey) console.error("Missing Gemini API Key! Check .env or Vercel settings.");
-
-const genAI = new GoogleGenerativeAI(apiKey);
-
-// 🛑 MODEL LOCKED - GEMINI 2.0 FLASH
-const MODEL_NAME = "gemini-2.0-flash";
 
 /**
  * 📊 TRACKING UTILITY
@@ -44,16 +34,77 @@ const logUsage = async (usage: any, action: string) => {
   }
 };
 
-// Helper: Convert File to Base64
+// 📉 HELPER: SMART IMAGE RESIZER 2.0 (Robust & Safe)
+// Tries to shrink images. If it fails (e.g. HEIC files), it sends the original safely.
 const fileToGenerativePart = async (file: File) => {
-  const base64EncodedDataPromise = new Promise<string>((resolve) => {
+  return new Promise<any>((resolve) => {
     const reader = new FileReader();
-    reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+    reader.onload = (event) => {
+      const img = new Image();
+
+      // 🛡️ SAFETY NET: If resizing fails (e.g. iPhone HEIC), send original
+      img.onerror = () => {
+        console.warn("Resizer skipped (incompatible format), sending original.");
+        const originalBase64 = (event.target?.result as string).split(',')[1];
+        resolve({ inlineData: { data: originalBase64, mimeType: file.type } });
+      };
+
+      img.onload = () => {
+        try {
+          // Calculate new size (Max 800px)
+          const MAX_SIZE = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+          } else {
+            if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.floor(width);   // Fixes browser decimal bugs
+          canvas.height = Math.floor(height);
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) throw new Error("Canvas context missing");
+
+          ctx.drawImage(img, 0, 0, Math.floor(width), Math.floor(height));
+
+          // Compress to JPEG at 70% quality
+          const base64 = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+          resolve({ inlineData: { data: base64, mimeType: 'image/jpeg' } });
+        } catch (err) {
+          // 🛡️ FALLBACK: If canvas crashes, send original
+          console.warn("Resizer error, sending original:", err);
+          const originalBase64 = (event.target?.result as string).split(',')[1];
+          resolve({ inlineData: { data: originalBase64, mimeType: file.type } });
+        }
+      };
+
+      // Load the image data
+      img.src = event.target?.result as string;
+    };
     reader.readAsDataURL(file);
   });
-  return {
-    inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
-  };
+};
+
+/**
+ * 📡 API WRAPPER for Serverless Gemini
+ */
+const callGeminiApi = async (contents: any[]) => {
+  const response = await fetch('/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || `API Error: ${response.status}`);
+  }
+
+  return await response.json();
 };
 
 /**
@@ -103,8 +154,8 @@ const NO_MARKDOWN_PROTOCOL = `
 const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: string) => {
   const baseHelper = `Analyze these images and return valid JSON.`;
   // FIX: Force AI to be descriptive even if userContext is brief
-  const contextBlock = userContext 
-    ? `\n**IMPORTANT CONTEXT:** "${userContext}".\n*INSTRUCTION:* Even if context is short, perform a FULL visual analysis.` 
+  const contextBlock = userContext
+    ? `\n**IMPORTANT CONTEXT:** "${userContext}".\n*INSTRUCTION:* Even if context is short, perform a FULL visual analysis.`
     : '';
 
   // 🔵 EBAY HTML TEMPLATE (STANDARD - MODERN MINIMALIST)
@@ -290,6 +341,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
         "features": "Key features list"
       }
     }
+    CRITICAL FINAL INSTRUCTION: Output RAW JSON only. Do not use markdown backticks or the word 'json'. Just start with { and end with }.
   `;
 
   switch (platform.toLowerCase()) {
@@ -300,7 +352,7 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
         1. Vertical list layout. Use Emojis as bullets.
         2. Integrate "Aesthetics" (e.g., #Boho, #Y2K).
         ${OUTPUT_INSTRUCTION}`;
-    
+
     case 'depop':
       return `${baseHelper} ${contextBlock} ${DEEP_VISION_PROTOCOL} ${NO_MARKDOWN_PROTOCOL}
         **ROLE:** Depop Trend Curator.
@@ -356,14 +408,12 @@ const getPlatformPrompt = (platform: string, isProMode: boolean, userContext: st
  */
 export async function generateListingFromImages(imageFiles: File[], platform: string = 'ebay', isProMode: boolean = false, userContext: string = '') {
   try {
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     const imageParts = await Promise.all(imageFiles.map(file => fileToGenerativePart(file)));
     const prompt = getPlatformPrompt(platform, isProMode, userContext);
 
-    const result = await model.generateContent([prompt, ...imageParts]);
-    const response = await result.response;
-    await logUsage(response.usageMetadata, `Listing: ${platform}`);
-    return cleanAndParseJSON(response.text());
+    const data = await callGeminiApi([prompt, ...imageParts]);
+    await logUsage(data.usageMetadata, `Listing: ${platform}`);
+    return cleanAndParseJSON(data.text);
   } catch (error) { console.error("AI Generation Error:", error); throw error; }
 }
 
@@ -372,12 +422,10 @@ export async function generateListingFromImages(imageFiles: File[], platform: st
  */
 export async function optimizeListing(currentTitle: string, currentDescription: string, platform: string) {
   try {
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     const prompt = `Act as an expert reseller on ${platform}. Improve Title: "${currentTitle}", Desc: "${currentDescription}". JSON ONLY.`;
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    await logUsage(response.usageMetadata, `Optimizer: ${platform}`);
-    return cleanAndParseJSON(response.text());
+    const data = await callGeminiApi([prompt]);
+    await logUsage(data.usageMetadata, `Optimizer: ${platform}`);
+    return cleanAndParseJSON(data.text);
   } catch (error) { console.error("Optimization Error:", error); throw error; }
 }
 
@@ -386,9 +434,8 @@ export async function optimizeListing(currentTitle: string, currentDescription: 
  */
 export async function scoutProduct(productName: string, imageFile?: File) {
   try {
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
     let requestParts: any[] = [];
-    
+
     // 🚨 PREMIUM STRATEGY PROMPT
     const instruction = `
       Act as a Senior Market Analyst. Identify this item: "${productName}". 
@@ -414,7 +461,7 @@ export async function scoutProduct(productName: string, imageFile?: File) {
         },
         "strategy_tip": "A specific, detailed tactical plan: 1. Listing Format. 2. Features to highlight. 3. Pricing strategy."
       }
-    `;
+    CRITICAL FINAL INSTRUCTION: Output RAW JSON only. Do not use markdown backticks or the word 'json'. Just start with { and end with }.`;
 
     if (imageFile) {
       const imagePart = await fileToGenerativePart(imageFile);
@@ -422,10 +469,9 @@ export async function scoutProduct(productName: string, imageFile?: File) {
     } else {
       requestParts = [instruction];
     }
-    
-    const result = await model.generateContent(requestParts);
-    const response = await result.response;
-    await logUsage(response.usageMetadata, "Scout Analyst");
-    return cleanAndParseJSON(response.text());
+
+    const data = await callGeminiApi(requestParts);
+    await logUsage(data.usageMetadata, "Scout Analyst");
+    return cleanAndParseJSON(data.text);
   } catch (error) { console.error("Scout Error:", error); throw error; }
 }

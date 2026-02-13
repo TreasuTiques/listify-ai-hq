@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { generateListingFromImage } from '../services/ai';
+import { generateListingFromImages } from '../services/ai';
 
 const ProfitScoutPage: React.FC = () => {
   // State
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -29,17 +30,19 @@ const ProfitScoutPage: React.FC = () => {
 
     // 2. RUN AI ANALYSIS
     setAnalyzing(true);
+    setIsLoading(true);
     setResult(null); // Clear previous results
 
     try {
       // We reuse the same AI brain, but we focus on the Title for searching
-      const aiData = await generateListingFromImage(file, 'ebay');
+      const aiData = await generateListingFromImages([file], 'ebay');
       setResult(aiData);
     } catch (error) {
       console.error("Scout Error:", error);
       alert("Could not identify item. Please try again.");
     } finally {
       setAnalyzing(false);
+      setIsLoading(false);
     }
   };
 
@@ -67,11 +70,11 @@ const ProfitScoutPage: React.FC = () => {
     // FIX: Main Background with '!' to force override
     <div className="min-h-screen !bg-slate-50 dark:!bg-slate-900 pb-24 pt-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="max-w-3xl mx-auto">
-        
+
         {/* HEADER */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl mb-4 shadow-sm">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           </div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Profit Scout</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2">Snap a photo to instantly check real market value.</p>
@@ -79,21 +82,21 @@ const ProfitScoutPage: React.FC = () => {
 
         {/* SCANNER CARD */}
         <div className="!bg-white dark:!bg-slate-800 rounded-[32px] shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 relative overflow-hidden transition-colors">
-          
+
           {/* CAMERA / DROP ZONE */}
-          <div 
+          <div
             onClick={() => fileInputRef.current?.click()}
             onDragOver={onDragOver}
             onDrop={handleFileUpload}
-            className={`relative min-h-[400px] flex flex-col items-center justify-center cursor-pointer transition-all ${
-              !imagePreview ? 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-900/80' : 'bg-black'
-            }`}
+            className={`relative min-h-[400px] flex flex-col items-center justify-center cursor-pointer transition-all ${isLoading ? 'pointer-events-none opacity-80' : ''
+              } ${!imagePreview ? 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-900/80' : 'bg-black'
+              }`}
           >
-            <input 
-              type="file" 
+            <input
+              type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
-              className="hidden" 
+              className="hidden"
               accept="image/*"
             />
 
@@ -130,7 +133,7 @@ const ProfitScoutPage: React.FC = () => {
           {/* RESULTS PANEL (Visible after analysis) */}
           {result && !analyzing && (
             <div className="p-8 bg-white dark:bg-slate-800 animate-in slide-in-from-bottom-10 duration-500 border-t border-slate-100 dark:border-slate-700">
-              
+
               <div className="flex items-start justify-between gap-4 mb-6">
                 <div>
                   <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">AI Identified</div>
@@ -144,14 +147,14 @@ const ProfitScoutPage: React.FC = () => {
 
               {/* ACTION BUTTONS */}
               <div className="grid grid-cols-1 gap-4">
-                <button 
+                <button
                   onClick={openEbayComps}
                   className="w-full bg-[#2563EB] dark:bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-blue-500/20 hover:bg-blue-600 dark:hover:bg-blue-500 hover:scale-[1.02] transition-all flex items-center justify-center gap-3"
                 >
                   <span>🔎</span> See eBay Sold Comps
                 </button>
-                
-                <button 
+
+                <button
                   onClick={openGoogleSearch}
                   className="w-full bg-white dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 text-slate-700 dark:text-white py-4 rounded-xl font-bold text-lg hover:bg-slate-50 dark:hover:bg-slate-600 hover:border-slate-300 transition-all flex items-center justify-center gap-3"
                 >
