@@ -25,23 +25,21 @@ import SuccessHub from './pages/SuccessHub';
 import PartnersPage from './pages/PartnersPage';
 import AboutPage from './pages/AboutPage';
 import AdminDashboard from './pages/AdminDashboard'; // ✅ ADDED ADMIN IMPORT
+import { useAuthStore } from './stores/authStore.ts';
 
 const App: React.FC = () => {
-  const [session, setSession] = useState<any>(null);
+  //const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentPath, setCurrentPath] = useState(window.location.hash.replace('#', '') || '/');
-
+  const { session, loadSession } = useAuthStore();
   // 🌑 GLOBAL DARK MODE STATE
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
+    loadSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+     // setSession(session);
       setLoading(false);
     });
 
