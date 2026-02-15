@@ -1,37 +1,39 @@
-import React, { useState } from 'react';
-import { supabase } from '../supabaseClient';
-
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient.js';
+import { useAuthStore } from '@/stores/authStore.ts';
 interface LoginPageProps {
   onNavigate: (path: string) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  const {
+    email,
+    password,
+    loading,
+    error,
+    success,
+    setEmail,
+    setPassword,
+    handleLogin,
+    reset
+  } = useAuthStore();
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+  // Reset form on mount
+  useEffect(() => {
+    reset();
+  }, [reset]);
+const onSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    await handleLogin();
+    onNavigate('/dashboard'); // only if login succeeds
+  } catch (err) {
+    console.log('Login failed:', err.message);
+    // error state already set in store, so UI shows message
+  }
+};
 
-      if (error) throw error;
-
-      // Success! Go to the Dashboard
-      onNavigate('/dashboard');
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     // FIX: Main Background with '!' to force override
@@ -46,7 +48,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
           <p className="text-slate-500 dark:text-slate-400 mt-2">Log in to manage your inventory.</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={onSubmit} className="space-y-4">
           
           {error && (
             <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg font-medium border border-red-100 dark:border-red-800">

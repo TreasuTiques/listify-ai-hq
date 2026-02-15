@@ -1,41 +1,18 @@
-import React, { useState } from 'react';
-import { supabase } from '../supabaseClient';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient.ts';
+import { useAuthStore } from '@/stores/authStore.ts';
 
 interface SignUpPageProps {
   onNavigate: (path: string) => void;
 }
 
 const SignUpPage: React.FC<SignUpPageProps> = ({ onNavigate }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+const { email, password, loading, error, success,reset, setEmail, setPassword, handleSignUp } = useAuthStore();
+  useEffect(() => {
+   reset();
+  }, [setEmail, setPassword]);
 
-    // 1. The Real Test: Talking to Supabase
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      // If we get here, the connection works!
-      setSuccess(true);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     // FIX: Main Background with '!' to force override
@@ -64,7 +41,10 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ onNavigate }) => {
           </div>
         ) : (
           /* Form State */
-          <form onSubmit={handleSignUp} className="space-y-4">
+          <form onSubmit={(e) => {
+    e.preventDefault();
+    handleSignUp(); // Zustand store function
+  }} className="space-y-4">
             
             {error && (
               <div className="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg font-medium border border-red-100 dark:border-red-800">
