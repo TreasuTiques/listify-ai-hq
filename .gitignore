@@ -2,3 +2,8 @@ node_modules
 .env
 dist
 .vercel
+
+
+.env
+.env.development.local
+.env.local

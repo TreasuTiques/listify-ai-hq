@@ -92,10 +92,29 @@ handleLogin: async (): Promise<void> => {
 
   
   // ---------------- LOGOUT ----------------
-  handleLogout: () => {
+handleLogout: async () => {
+  const session = get().session;
+
+  try {
+    if (session?.access_token) {
+      await axios.post(
+        `${process.env.API_BASE_URL}${process.env.API_LOGOUT_ENDPOINT}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+    }
+  } catch {
+    // Intentionally ignore errors
+  } finally {
     localStorage.removeItem('supabase_session');
     set({ session: null, user: null, success: false });
-  },
+  }
+},
+
 
   // ---------------- LOAD SESSION ON REFRESH ----------------
   loadSession: () => {
