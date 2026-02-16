@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient.js';
 import { useAuthStore } from '@/stores/authStore.ts';
+import GoogleAuthButton from '@/components/GoogleAuthButton.tsx';
+import AppleAuthButton from '@/components/AppleAuthButton.tsx';
 interface LoginPageProps {
   onNavigate: (path: string) => void;
 }
@@ -87,6 +89,9 @@ const onSubmit = async (e: React.FormEvent) => {
           >
             {loading ? "Verifying..." : "Log In"}
           </button>
+           <AppleAuthButton />
+          <GoogleAuthButton />
+         
         </form>
 
         <div className="text-center mt-6">
