@@ -16,8 +16,7 @@ export default defineConfig(({ mode }) => {
         'process.env.API_BASE_URL': JSON.stringify(env.VITE_APP_API_BASE_URL),
         'process.env.API_LOGIN_ENDPOINT': JSON.stringify(env.VITE_APP_LOGIN_ENDPOINT),
         'process.env.API_REGISTER_ENDPOINT': JSON.stringify(env.VITE_APP_REGISTER_ENDPOINT),
-        'process.env.API_LOGOUT_ENDPOINT': JSON.stringify(env.VITE_APP_LOGOUT_ENDPOINT),
-        'process.env.VITE_SUPABASE_REDIRECT': JSON.stringify(env.VITE_SUPABASE_REDIRECT)
+        'process.env.API_LOGOUT_ENDPOINT': JSON.stringify(env.VITE_APP_LOGOUT_ENDPOINT)
       },
       resolve: {
         alias: {

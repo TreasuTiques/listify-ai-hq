@@ -13,7 +13,7 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ redirectTo, classNa
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: process.env.VITE_SUPABASE_REDIRECT,
+        redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
       },
     });
   console.log("")
