@@ -86,7 +86,7 @@ const { email, password, loading, error, success,reset, setEmail, setPassword, h
             >
               {loading ? "Connecting..." : "Sign Up Free"}
             </button>
-               <AppleAuthButton />
+               
           <GoogleAuthButton />
             <div className="text-center mt-6">
               <p className="text-sm text-slate-500 dark:text-slate-400">

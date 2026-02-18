@@ -12,8 +12,21 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ session, onNavigate, isDarkMode, toggleTheme }) => {
   const {handleLogout} = useAuthStore()
+const getUserDisplay = (session: any) => {
+  if (!session?.user) return { name: null, avatar: null };
+
+  const meta = session.user.user_metadata || {};
+
+  const fullName = meta.full_name || meta.name || "";
+  const firstName = fullName.split(" ")[0] || null;
+  const avatar = meta.avatar_url || null;
+
+  return { name: firstName, avatar };
+};
+const { name, avatar } = getUserDisplay(session);
 
   return (
+    
     <nav className="fixed top-0 left-0 right-0 bg-white/90 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 z-50 transition-all duration-300">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
@@ -93,10 +106,32 @@ const Navbar: React.FC<NavbarProps> = ({ session, onNavigate, isDarkMode, toggle
 
              {session ? (
                <div className="flex items-center gap-3">
-                 <div className="hidden sm:block text-right">
-                   <div className="text-xs font-bold text-slate-900 dark:text-white">{session.user.email}</div>
-                   <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Pro Plan</div>
-                 </div>
+                <div className="hidden sm:flex items-center gap-3">
+  <div className="text-right">
+    <div className="text-xs font-bold text-slate-900 dark:text-white">
+      {name ? `Hi, ${name}` : "Welcome"}
+    </div>
+    <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">
+      Pro Plan
+    </div>
+  </div>
+
+  {avatar ? (
+    <img
+      src={avatar}
+      alt="avatar"
+      referrerPolicy="no-referrer"
+      className="w-9 h-9 rounded-full border border-slate-200 dark:border-slate-700"
+    />
+  ) : (
+    <div className="w-9 h-9 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+      <svg className="w-5 h-5 text-slate-500 dark:text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+      </svg>
+    </div>
+  )}
+</div>
+
                  <button 
                    onClick={handleLogout}
                    className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-lg text-xs font-bold transition-colors"

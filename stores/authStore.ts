@@ -1,6 +1,6 @@
 // stores/authStore.ts
-import { create } from 'zustand';
-import axios from 'axios';
+import { create } from "zustand";
+import { supabase } from "../supabaseClient.js";
 
 interface AuthState {
   email: string;
@@ -8,22 +8,23 @@ interface AuthState {
   loading: boolean;
   error: string | null;
   success: boolean;
-  session: any | null; // store Supabase session
+  session: any | null;
   user: any | null;
 
   setEmail: (email: string) => void;
   setPassword: (password: string) => void;
+
+  init: () => Promise<void>;
   handleSignUp: () => Promise<void>;
   handleLogin: () => Promise<void>;
-  handleLogout: () => void;
-  loadSession: () => void;
+  handleLogout: () => Promise<void>;
   reset: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  email: '',
-  password: '',
-  loading: false,
+  email: "",
+  password: "",
+  loading: true,
   error: null,
   success: false,
   session: null,
@@ -32,112 +33,82 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setEmail: (email) => set({ email }),
   setPassword: (password) => set({ password }),
 
+  // ---------------- INITIAL SESSION (REFRESH / GOOGLE REDIRECT) ----------------
+  init: async () => {
+    const { data } = await supabase.auth.getSession();
+
+    set({
+      session: data.session,
+      user: data.session?.user ?? null,
+      loading: false,
+    });
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      set({
+        session,
+        user: session?.user ?? null,
+        loading: false,
+        success: !!session,
+      });
+    });
+  },
+
   // ---------------- SIGN UP ----------------
-handleSignUp: async () => {
-  const { email, password, reset } = get(); // grab reset from store
-  set({ loading: true, error: null, success: false });
+  handleSignUp: async () => {
+    const { email, password } = get();
+    set({ loading: true, error: null, success: false });
 
-  try {
- const response = await axios.post(`${process.env.API_BASE_URL}${process.env.API_REGISTER_ENDPOINT}`, { email, password });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
 
-    if (response.data?.error) {
-      throw new Error(response.data.error?.message || response.data.error || 'Registration failed');
+    if (error) {
+      set({ error: error.message, loading: false });
+      return;
     }
 
-    const session = response.data?.session;
-    const user = response.data?.user;
-
-    // if (session) localStorage.setItem('supabase_session', JSON.stringify(session));
-
-  
-    set({ success: true});
-
-   
-    set({ email: '', password: '' });
-  } catch (err: any) {
-    const message =
-      err.response?.data?.error?.message || err.response?.data?.message || err.message || 'Something went wrong';
-    set({ error: message });
-  } finally {
-    set({ loading: false });
-  }
-},
-
+    set({
+      success: true,
+      loading: false,
+      email: "",
+      password: "",
+    });
+  },
 
   // ---------------- LOGIN ----------------
-handleLogin: async (): Promise<void> => {
+ handleLogin: async () => {
   const { email, password } = get();
   set({ loading: true, error: null, success: false });
 
-  try {
-    const response = await axios.post(`${process.env.API_BASE_URL}${process.env.API_LOGIN_ENDPOINT}`, { email, password });
-    const session = response.data.data?.session;
-    const user = response.data.data?.user;
+  const { error, data } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-    if (!session || !user) throw new Error('Invalid login response');
-    if (!user.email_confirmed_at) throw new Error('Email not verified');
-
-    localStorage.setItem('supabase_session', JSON.stringify(session));
-    set({ success: true, session, user });
-  } catch (err: any) {
-    const message = err.response?.data?.error?.message || err.message || 'Something went wrong';
-    set({ error: message });
-    throw err;
-  } finally {
-    set({ loading: false });
+  if (error) {
+    set({ error: error.message, loading: false });
+    throw error; // ⚠️ THIS IS THE FIX
   }
+
+  // optionally update store if you want immediate reactive UI
+  // session will still be set by your global listener
+  set({ loading: false });
 },
 
-
-
-  
   // ---------------- LOGOUT ----------------
-handleLogout: async () => {
-  const session = get().session;
-
-  try {
-    if (session?.access_token) {
-      await axios.post(
-        `${process.env.API_BASE_URL}${process.env.API_LOGOUT_ENDPOINT}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        }
-      );
-    }
-  } catch {
-    // Intentionally ignore errors
-  } finally {
-    localStorage.removeItem('supabase_session');
+  handleLogout: async () => {
+    await supabase.auth.signOut();
     set({ session: null, user: null, success: false });
-  }
-},
-
-
-  // ---------------- LOAD SESSION ON REFRESH ----------------
-  loadSession: () => {
-    const stored = localStorage.getItem('supabase_session');
-    if (stored) {
-      try {
-        const session = JSON.parse(stored);
-        set({ session, user: session.user, success: true });
-      } catch {
-        localStorage.removeItem('supabase_session');
-      }
-    }
   },
 
-  // ---------------- RESET STORE ----------------
+  // ---------------- RESET ----------------
   reset: () =>
     set({
-      email: '',
-      password: '',
+      email: "",
+      password: "",
       loading: false,
       error: null,
       success: false,
-      session: null,
-      user: null,
     }),
 }));

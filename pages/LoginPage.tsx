@@ -28,13 +28,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
 const onSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   try {
-    await handleLogin();
-    onNavigate('/dashboard'); // only if login succeeds
-  } catch (err) {
+    await handleLogin(); // now throws if login fails
+    onNavigate('/dashboard'); // only runs if login succeeds
+  } catch (err: any) {
     console.log('Login failed:', err.message);
-    // error state already set in store, so UI shows message
+    // UI will show error automatically from store
   }
 };
+
 
 
   return (
@@ -89,11 +90,12 @@ const onSubmit = async (e: React.FormEvent) => {
           >
             {loading ? "Verifying..." : "Log In"}
           </button>
-           <AppleAuthButton />
-          <GoogleAuthButton />
+          
+        
          
         </form>
-
+        <br></br>
+  <GoogleAuthButton />
         <div className="text-center mt-6">
           <p className="text-sm text-slate-500 dark:text-slate-400">
             Don't have an account?{' '}

@@ -1,43 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabaseClient';
+import { supabase } from './supabaseClient.js';
 
 // 1. IMPORT COMPONENTS
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import Navbar from './components/Navbar.js';
+import Footer from './components/Footer.js';
 
 // 2. IMPORT ALL PAGES
-import LandingPage from './pages/LandingPage';
-import DashboardPage from './pages/DashboardPage';
-import InventoryPage from './pages/InventoryPage';
-import BuilderPage from './pages/BuilderPage';
-import StaleListingsPage from './pages/StaleListingsPage'; 
-import SourcingPage from './pages/SourcingPage'; 
-import AnalyticsPage from './pages/AnalyticsPage';
-import LoginPage from './pages/LoginPage';
-import SignUpPage from './pages/SignUpPage';
-import PricingPage from './pages/PricingPage';
-import ContactPage from './pages/ContactPage';
-import PrivacyPage from './pages/PrivacyPage';
-import TermsPage from './pages/TermsPage';
-import BlogPage from './pages/BlogPage';
-import VisionPage from './pages/VisionPage';
-import SuccessHub from './pages/SuccessHub';
-import PartnersPage from './pages/PartnersPage';
-import AboutPage from './pages/AboutPage';
-import AdminDashboard from './pages/AdminDashboard'; // ✅ ADDED ADMIN IMPORT
-import { useAuthStore } from './stores/authStore.ts';
+import LandingPage from './pages/LandingPage.js';
+import DashboardPage from './pages/DashboardPage.js';
+import InventoryPage from './pages/InventoryPage.js';
+import BuilderPage from './pages/BuilderPage.js';
+import StaleListingsPage from './pages/StaleListingsPage.js'; 
+import SourcingPage from './pages/SourcingPage.js'; 
+import AnalyticsPage from './pages/AnalyticsPage.js';
+import LoginPage from './pages/LoginPage.js';
+import SignUpPage from './pages/SignUpPage.js';
+import PricingPage from './pages/PricingPage.js';
+import ContactPage from './pages/ContactPage.js';
+import PrivacyPage from './pages/PrivacyPage.js';
+import TermsPage from './pages/TermsPage.js';
+import BlogPage from './pages/BlogPage.js';
+import VisionPage from './pages/VisionPage.js';
+import SuccessHub from './pages/SuccessHub.js';
+import PartnersPage from './pages/PartnersPage.js';
+import AboutPage from './pages/AboutPage.js';
+import AdminDashboard from './pages/AdminDashboard.js'; // ✅ ADDED ADMIN IMPORT
+import { useAuthStore } from './stores/authStore.js';
 
 const App: React.FC = () => {
   //const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentPath, setCurrentPath] = useState(window.location.hash.replace('#', '') || '/');
-  const { session, loadSession } = useAuthStore();
+  const { session, init } = useAuthStore();
   // 🌑 GLOBAL DARK MODE STATE
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  useEffect(() => {
-    loadSession();
 
+  useEffect(() => {
+   // loadSession();
+    init()
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
      // setSession(session);
       setLoading(false);

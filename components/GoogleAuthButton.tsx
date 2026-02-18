@@ -10,12 +10,13 @@ interface GoogleAuthButtonProps {
 const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ redirectTo, className }) => {
   const handleGoogleSignIn = async () => {
  
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
       },
     });
+  console.log("")
     if (error) console.error('Google login failed:', error.message);
   };
 
