@@ -60,7 +60,7 @@ const App: React.FC = () => {
 
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
-      subscription.unsubscribe();
+    
     };
   }, []);
 
