@@ -29,9 +29,10 @@ import { useAuthStore } from './stores/authStore.js';
 
 const App: React.FC = () => {
   //const [session, setSession] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+ const { session, init, loading } = useAuthStore();
+
   const [currentPath, setCurrentPath] = useState(window.location.hash.replace('#', '') || '/');
-  const { session, init } = useAuthStore();
+
   // 🌑 GLOBAL DARK MODE STATE
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -39,10 +40,6 @@ const App: React.FC = () => {
   useEffect(() => {
    // loadSession();
     init()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-     // setSession(session);
-      setLoading(false);
-    });
 
     const handleHashChange = () => {
       setCurrentPath(window.location.hash.replace('#', '') || '/');

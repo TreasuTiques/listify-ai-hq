@@ -14,7 +14,7 @@ interface AuthState {
   setEmail: (email: string) => void;
   setPassword: (password: string) => void;
 
-  init: () => Promise<void>;
+  init: () => void;
   handleSignUp: () => Promise<void>;
   handleLogin: () => Promise<void>;
   handleLogout: () => Promise<void>;
@@ -34,24 +34,25 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setPassword: (password) => set({ password }),
 
   // ---------------- INITIAL SESSION (REFRESH / GOOGLE REDIRECT) ----------------
-  init: async () => {
-    const { data } = await supabase.auth.getSession();
+init: () => {
+  set({ loading: true });
 
-    set({
-      session: data.session,
-      user: data.session?.user ?? null,
-      loading: false,
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
+  const { data: listener } = supabase.auth.onAuthStateChange(
+    (_event, session) => {
       set({
         session,
         user: session?.user ?? null,
         loading: false,
         success: !!session,
       });
-    });
-  },
+    }
+  );
+
+  return () => listener.subscription.unsubscribe();
+},
+
+
+
 
   // ---------------- SIGN UP ----------------
   handleSignUp: async () => {
