@@ -3,3 +3,4 @@ export type ChatContext = {
   hasUploadedPhotos?: boolean;
   hasGeneratedListing?: boolean;
 };
+
