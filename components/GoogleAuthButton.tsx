@@ -13,7 +13,7 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ redirectTo, classNa
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: redirectTo || `${window.location.origin}/auth/callback`,
+      redirectTo: 'https://listify-ai-hq.vercel.app',
       },
     });
   console.log("")
