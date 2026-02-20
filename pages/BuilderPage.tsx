@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase } from '../supabaseClient';
-import { generateListingFromImages } from '../services/ai';
-import { saveListingToInventory } from '../services/inventory';
+import { supabase } from '../supabaseClient.js';
+import { generateListingFromImages } from '../services/ai.js';
+import { saveListingToInventory } from '../services/inventory.js';
 
 const BuilderPage: React.FC = () => {
   // 1. STATE MANAGEMENT
@@ -118,7 +118,7 @@ const BuilderPage: React.FC = () => {
         - Features: ${features}
       `;
 
-      const result = await generateListingFromImages(selectedFiles, activePlatform, isProMode, richContext);
+      const {result, html} = await generateListingFromImages(selectedFiles, activePlatform, isProMode, richContext);
 
       // ✅ AUTO-POPULATE LOGIC
       if (result.item_specifics) {
@@ -138,7 +138,7 @@ const BuilderPage: React.FC = () => {
       setTitle(result.title || '');
       if (!brand && result.brand) setBrand(result.brand);
 
-      setDescription(result.description || '');
+      setDescription(html || '');
       setPrice(result.estimated_price || '');
       setTags(result.tags || []);
       setEditorTab('visual');
