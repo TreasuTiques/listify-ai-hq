@@ -144,7 +144,7 @@ const BuilderPage: React.FC = () => {
       setEditorTab('visual');
     } catch (error) {
       console.error("AI Error:", error);
-      alert("AI could not analyze images. Try again!");
+      alert(`AI could not analyze images. ${error}`);
     } finally {
       setAnalyzing(false);
       setIsLoading(false);
