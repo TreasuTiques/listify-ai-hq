@@ -52,7 +52,7 @@ export const useAIStore = create<AIState>((set, get) => ({
       });
 
       const data = await res.json();
-
+      console.log("AI API Response:", data);
       if (!res.ok) {
         throw new Error(data?.error?.message || "Generation failed");
       }
@@ -60,7 +60,7 @@ export const useAIStore = create<AIState>((set, get) => ({
       set({ result: data.data, loading: false });
       return data.data as GenerateResult;
     } catch (err: any) {
-      set({ error: err.message, loading: false });
+      set({ error: err.message, loading: false  });
       throw err;
     }
   },
