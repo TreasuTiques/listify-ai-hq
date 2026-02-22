@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commodore 64 Programming Book - eBay Listing</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --retro-purple: #6b2d91;
+    --retro-pink: #d946a6;
+    --grid-cyan: #00d9ff;
+    --tech-green: #00ff88;
+    --dark-bg: #1a0b2e;
+    --cream: #f5f1e8;
+    --gold: #ffc857;
+    --text-dark: #2d2635;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    max-width: 820px;
+    margin: 0 auto;
+  }
+
+  /* ========== RETRO TECH HEADER ========== */
+  .hero {
+    background: linear-gradient(135deg, var(--dark-bg) 0%, var(--retro-purple) 100%);
+    padding: 40px 30px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 217, 255, 0.03) 2px, rgba(0, 217, 255, 0.03) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0, 217, 255, 0.03) 2px, rgba(0, 217, 255, 0.03) 4px);
+    pointer-events: none;
+  }
+
+  .vintage-chip {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--dark-bg);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    position: relative;
+  }
+
+  .hero-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 42px;
+    color: var(--grid-cyan);
+    text-shadow: 
+      0 0 20px rgba(0, 217, 255, 0.5),
+      3px 3px 0 var(--retro-pink);
+    line-height: 1.1;
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .hero-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    color: var(--tech-green);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .hero-author {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    font-weight: 600;
+  }
+
+  /* ========== TITLE BAR ========== */
+  .title-bar {
+    background: var(--retro-purple);
+    padding: 16px 24px;
+    text-align: center;
+    border-top: 3px solid var(--grid-cyan);
+    border-bottom: 3px solid var(--grid-cyan);
+  }
+
+  .listing-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    color: white;
+    line-height: 1.5;
+    font-weight: 600;
+  }
+
+  /* ========== SPECS BAR ========== */
+  .specs-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: var(--dark-bg);
+    padding: 0;
+  }
+
+  .spec-item {
+    padding: 14px 12px;
+    text-align: center;
+    color: white;
+    border-right: 1px solid rgba(0, 217, 255, 0.2);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+  }
+
+  .spec-item:last-child { border-right: none; }
+
+  .spec-icon {
+    display: block;
+    font-size: 22px;
+    margin-bottom: 4px;
+    color: var(--grid-cyan);
+  }
+
+  /* ========== MAIN CONTENT ========== */
+  .main-content {
+    background: white;
+    padding: 32px 30px;
+  }
+
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 20px;
+    color: var(--retro-purple);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid var(--grid-cyan);
+    display: inline-block;
+  }
+
+  /* ========== DESCRIPTION ========== */
+  .desc-box {
+    background: linear-gradient(135deg, #f0f0ff, #fff8f0);
+    border-left: 4px solid var(--retro-purple);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    font-size: 14.5px;
+    line-height: 1.8;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .desc-box p + p {
+    margin-top: 12px;
+  }
+
+  .desc-box strong {
+    color: var(--retro-purple);
+  }
+
+  /* ========== TECH SPECS ========== */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .tech-card {
+    background: var(--dark-bg);
+    color: white;
+    padding: 16px 18px;
+    border-radius: 8px;
+    border: 2px solid var(--grid-cyan);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .tech-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--grid-cyan);
+    margin-bottom: 6px;
+  }
+
+  .tech-value {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  /* ========== CONDITION TABLE ========== */
+  .condition-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 2px solid var(--retro-purple);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 28px;
+    font-size: 13.5px;
+  }
+
+  .condition-table thead tr {
+    background: var(--retro-purple);
+    color: white;
+  }
+
+  .condition-table th {
+    padding: 12px 16px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    text-align: left;
+  }
+
+  .condition-table td {
+    padding: 11px 16px;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .condition-table tr:nth-child(even) td {
+    background: #f9f9f9;
+  }
+
+  .cond-label {
+    font-weight: 700;
+    color: var(--retro-purple);
+    width: 40%;
+  }
+
+  .status-good { color: #2e7d32; font-weight: 700; }
+  .status-fair { color: #f57c00; font-weight: 700; }
+
+  /* ========== CONTENTS ========== */
+  .contents-box {
+    background: linear-gradient(135deg, #fff8e1, #ffe0f0);
+    border: 2px solid var(--retro-pink);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+  }
+
+  .contents-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .content-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .content-icon {
+    font-size: 18px;
+    color: var(--retro-pink);
+  }
+
+  /* ========== WHY COLLECTORS LOVE ========== */
+  .love-box {
+    background: var(--dark-bg);
+    color: white;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 28px;
+  }
+
+  .love-box .section-title {
+    color: var(--tech-green);
+    border-bottom-color: var(--tech-green);
+  }
+
+  .love-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .love-item {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    font-weight: 600;
+  }
+
+  .love-bullet {
+    color: var(--tech-green);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  /* ========== NOSTALGIA CALLOUT ========== */
+  .nostalgia {
+    background: linear-gradient(135deg, var(--retro-purple), #8b4cb8);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 28px;
+    text-align: center;
+    color: white;
+  }
+
+  .nostalgia-icon {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .nostalgia h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    margin-bottom: 10px;
+    color: var(--gold);
+  }
+
+  .nostalgia p {
+    font-size: 14px;
+    line-height: 1.7;
+    opacity: 0.95;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ========== POLICIES ========== */
+  .policy-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .policy-card {
+    background: #f5f5f5;
+    border: 2px solid var(--grid-cyan);
+    border-radius: 8px;
+    padding: 18px 14px;
+    text-align: center;
+  }
+
+  .policy-icon {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .policy-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    color: var(--retro-purple);
+    margin-bottom: 6px;
+  }
+
+  .policy-text {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  /* ========== FOOTER ========== */
+  .footer {
+    background: linear-gradient(135deg, var(--dark-bg), var(--retro-purple));
+    padding: 24px;
+    text-align: center;
+    color: white;
+  }
+
+  .footer-main {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .footer-sub {
+    font-size: 13px;
+    opacity: 0.85;
+    font-weight: 600;
+  }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 600px) {
+    .hero-title { font-size: 32px; }
+    .tech-grid { grid-template-columns: 1fr; }
+    .love-grid { grid-template-columns: 1fr; }
+    .policy-grid { grid-template-columns: 1fr; }
+    .specs-bar { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO HEADER ===== -->
+<div class="hero">
+  <div class="vintage-chip">⚡ VINTAGE 1983 ⚡</div>
+  <div class="hero-title">Commodore 64<br>Programming</div>
+  <div class="hero-sub">A Step-by-Step Guide</div>
+  <div class="hero-author">by Phil Cornes · Prentice Hall</div>
+</div>
+
+<!-- ===== TITLE BAR ===== -->
+<div class="title-bar">
+  <div class="listing-title">
+    Commodore 64 Programming: A Step-by-Step Guide by Phil Cornes · Prentice Hall 1983 · Vintage Computing Book · ISBN 0-13-152153-3
+  </div>
+</div>
+
+<!-- ===== SPECS BAR ===== -->
+<div class="specs-bar">
+  <div class="spec-item">
+    <span class="spec-icon">📘</span>
+    Book One
+  </div>
+  <div class="spec-item">
+    <span class="spec-icon">🖥️</span>
+    C64 Guide
+  </div>
+  <div class="spec-item">
+    <span class="spec-icon">📅</span>
+    1983 Edition
+  </div>
+  <div class="spec-item">
+    <span class="spec-icon">✨</span>
+    Illustrated
+  </div>
+</div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="main-content">
+
+  <!-- DESCRIPTION -->
+  <h2 class="section-title">📖 About This Book</h2>
+  <div class="desc-box">
+    <p>Step back to the <strong>golden age of home computing</strong> with this authentic 1983 guide to Commodore 64 programming! Written by <strong>Phil Cornes</strong> and published by <strong>Prentice Hall</strong>, this is <strong>Book One</strong> in the comprehensive series designed to teach C64 owners how to unlock the full potential of their machine.</p>
+    <p>This isn't just a programming manual — it's a <strong>fully illustrated, step-by-step course</strong> covering everything from setting up your C64 to writing sophisticated programs with sprites, sound effects, and animations. With over <strong>150 unique program listings</strong> and detailed charts, tables, and reference guides, this book was the ultimate resource for aspiring programmers in the 1980s.</p>
+    <p>Perfect for <strong>vintage computing enthusiasts</strong>, <strong>retro collectors</strong>, or anyone interested in the history of personal computing and the legendary Commodore 64.</p>
+  </div>
+
+  <!-- TECH SPECS -->
+  <h2 class="section-title">💾 Book Details</h2>
+  <div class="tech-grid">
+    <div class="tech-card">
+      <div class="tech-label">Title</div>
+      <div class="tech-value">Commodore 64 Programming: A Step-by-Step Guide</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-label">Author</div>
+      <div class="tech-value">Phil Cornes</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-label">Publisher</div>
+      <div class="tech-value">Prentice Hall, Inc.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-label">Year</div>
+      <div class="tech-value">© 1983</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-label">ISBN</div>
+      <div class="tech-value">0-13-152153-3</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-label">Series</div>
+      <div class="tech-value">Book One (Programming Series)</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-label">Subject</div>
+      <div class="tech-value">C64 BASIC Programming</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-label">Format</div>
+      <div class="tech-value">Paperback, Illustrated</div>
+    </div>
+  </div>
+
+  <!-- CONDITION -->
+  <h2 class="section-title">🔍 Condition Report</h2>
+  <table class="condition-table">
+    <thead>
+      <tr>
+        <th>Component</th>
+        <th>Condition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="cond-label">Overall Condition</td>
+        <td><span class="status-good">Good — Vintage Used</span></td>
+      </tr>
+      <tr>
+        <td class="cond-label">Cover</td>
+        <td><span class="status-good">Purple grid cover intact with colorful C64 illustration — shows age-appropriate wear</span></td>
+      </tr>
+      <tr>
+        <td class="cond-label">Spine</td>
+        <td><span class="status-good">Intact and readable — some shelf wear</span></td>
+      </tr>
+      <tr>
+        <td class="cond-label">Pages</td>
+        <td><span class="status-good">Clean interior pages — all present, readable, and complete</span></td>
+      </tr>
+      <tr>
+        <td class="cond-label">Binding</td>
+        <td><span class="status-good">Tight and functional — pages secure</span></td>
+      </tr>
+      <tr>
+        <td class="cond-label">Writing / Marks</td>
+        <td><span class="status-good">No visible writing or highlighting noted</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- CONTENTS -->
+  <h2 class="section-title">📚 What's Inside</h2>
+  <div class="contents-box">
+    <p style="font-size:14px; font-weight:700; color:var(--retro-purple); margin-bottom:8px;">Topics Covered in This Book:</p>
+    <div class="contents-list">
+      <div class="content-item">
+        <span class="content-icon">✓</span>
+        Setting up and starting off with your Commodore 64
+      </div>
+      <div class="content-item">
+        <span class="content-icon">✓</span>
+        Inside your computer — screen layout and how to control it
+      </div>
+      <div class="content-item">
+        <span class="content-icon">✓</span>
+        Computer conversations — programming with sprites
+      </div>
+      <div class="content-item">
+        <span class="content-icon">✓</span>
+        Animation, special effects, and compiling a data bank
+      </div>
+      <div class="content-item">
+        <span class="content-icon">✓</span>
+        Keyboard graphics, poke and peek, decimal point programming
+      </div>
+      <div class="content-item">
+        <span class="content-icon">✓</span>
+        Sound and special effects, notes, chords, and music
+      </div>
+      <div class="content-item">
+        <span class="content-icon">✓</span>
+        Writing subroutines and unpredictable programs
+      </div>
+      <div class="content-item">
+        <span class="content-icon">✓</span>
+        The screen memory, ASCII character set, and glossary/index
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY COLLECTORS LOVE -->
+  <div class="love-box">
+    <h2 class="section-title">⭐ Why Collectors Love This</h2>
+    <div class="love-grid">
+      <div class="love-item">
+        <span class="love-bullet">▸</span>
+        <span>Authentic 1983 first edition from the height of the C64 era</span>
+      </div>
+      <div class="love-item">
+        <span class="love-bullet">▸</span>
+        <span>Iconic retro purple grid cover design instantly recognizable</span>
+      </div>
+      <div class="love-item">
+        <span class="love-bullet">▸</span>
+        <span>Complete step-by-step course with real working code examples</span>
+      </div>
+      <div class="love-item">
+        <span class="love-bullet">▸</span>
+        <span>Part of a legendary series — also available: Apple IIe and IBM PCjr guides</span>
+      </div>
+      <div class="love-item">
+        <span class="love-bullet">▸</span>
+        <span>Perfect display piece for vintage computer collections</span>
+      </div>
+      <div class="love-item">
+        <span class="love-bullet">▸</span>
+        <span>Great gift for retro computing fans and gaming history buffs</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOSTALGIA -->
+  <div class="nostalgia">
+    <span class="nostalgia-icon">💾</span>
+    <h3>The Legend of the C64</h3>
+    <p>The Commodore 64 is the best-selling single computer model of all time — over 17 million units sold! In 1983, this was THE machine for learning programming, playing games, and exploring the limitless possibilities of personal computing. This book was the key that unlocked it all.</p>
+  </div>
+
+  <!-- POLICIES -->
+  <h2 class="section-title">📦 Shipping & Policies</h2>
+  <div class="policy-grid">
+    <div class="policy-card">
+      <span class="policy-icon">🚚</span>
+      <div class="policy-label">Shipping</div>
+      <div class="policy-text">Carefully packed & shipped within 1–3 business days</div>
+    </div>
+    <div class="policy-card">
+      <span class="policy-icon">↩️</span>
+      <div class="policy-label">Returns</div>
+      <div class="policy-text">30-day returns accepted in same condition</div>
+    </div>
+    <div class="policy-card">
+      <span class="policy-icon">💬</span>
+      <div class="policy-label">Questions?</div>
+      <div class="policy-text">Message anytime — happy to help!</div>
+    </div>
+  </div>
+
+</div><!-- end main-content -->
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  <div class="footer-main">Ready to relive the 8-bit revolution? 💾</div>
+  <div class="footer-sub">Add to cart · Make an offer · Ask a question</div>
+</div>
+
+</body>
+</html>

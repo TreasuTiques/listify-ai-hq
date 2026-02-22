@@ -134,8 +134,8 @@ const cleanAndParseJSON = (text: string, isProMode: boolean = true) => {
     clean = clean.substring(firstBrace, lastBrace + 1);
   
     const result = JSON.parse(clean);
-    
-    const html = isProMode ? renderProListingCard(result) : renderStandardListing(result);
+    console.log("Parsed JSON Result:", result);
+    const html = isProMode ? composeListingHTML(result) : renderStandardListing(result);
    
     return {result, html};
 
@@ -146,51 +146,412 @@ const cleanAndParseJSON = (text: string, isProMode: boolean = true) => {
 };
 
 export default cleanAndParseJSON;
+// -------------------------
+// 1) Canonical Contracts
+// -------------------------
 
-export function renderProListingCard(data: any) {
-  return `
-  <div style="font-family: Helvetica; max-width: 900px; margin: 0 auto; border: 3px solid ${data.theme.primary_color}; background: white; border-radius: 12px; overflow: hidden;">
+export const GOOGLE_FONTS_WHITELIST = [
+  "Orbitron",
+  "IBM Plex Mono",
+  "Inter",
+  "Roboto",
+  "Playfair Display",
+  "Oswald",
+  "Montserrat",
+] as const;
 
-    <div style="background: ${data.theme.secondary_color}; padding: 25px; border-bottom: 2px solid ${data.theme.primary_color};">
-      <h1 style="color: ${data.theme.primary_color}; font-size: 28px; font-weight: 800;">
-        ${data.headline}
-      </h1>
-      <p style="font-style: italic; color: #555;">
-        ${data.subheadline}
-      </p>
-    </div>
+export const APPROVED_SELECTORS = [
+  ":root",
+  "body",
+  "main.listing",
 
-    <div style="padding: 30px;">
-      <p style="font-size: 18px; line-height: 1.6;">
-        ${data.description}
-      </p>
+  "header.hero",
+  "header.hero span.era-tag",
+  "header.hero h1.title-main",
+  "header.hero h2.title-sub",
+  "header.hero p.author-line",
 
-      <div style="background:#f8f9fa;border-left:6px solid ${data.theme.primary_color};padding:15px;margin-bottom:30px;">
-        💡 <strong>Collector's Note:</strong> ${data.collector_note}
-      </div>
+  "section.seo-title",
+  "section.badges",
+  "ul.badge-list",
+  "ul.badge-list li",
+  "section.badges ul.badge-list",
+"section.badges ul.badge-list li",
+"section.collector-points ul.collector-list",
+"table.condition-table th",
+"table.condition-table td",
 
-      <h2 style="color:${data.theme.primary_color};">✨ The Highlights</h2>
-      <ul>
-        ${data.highlights.map(h => `<li>${h.icon} <strong>${h.title}:</strong> ${h.text}</li>`).join("")}
-      </ul>
+  "section.about",
 
-      <h2 style="color:${data.theme.primary_color};">🔍 Condition Report</h2>
-      <p>${data.condition_report}</p>
-    </div>
+  "section.details",
+  "dl.specs",
+  "dl.specs dt",
+  "dl.specs dd",
 
-    <div style="background:${data.theme.primary_color};color:white;padding:30px;text-align:center;">
-      <h2>${data.call_to_action.headline}</h2>
-      <div>
-        ${data.call_to_action.bullets.map(b => `<span>✓ ${b}</span>`).join(" ")}
-      </div>
-      <p><strong>${data.call_to_action.closing_line}</strong></p>
-    </div>
+  "section.condition",
+  "table.condition-table",
+  "table.condition-table thead th",
+  "table.condition-table tbody td",
+  "table.condition-table tbody tr",
 
-  </div>
-  `;
+  "section.contents",
+  "ul.contents-list",
+  "ul.contents-list li",
+
+  "section.collector-points",
+  "ul.collector-list",
+  "ul.collector-list li",
+
+  "section.nostalgia",
+  "section.nostalgia h3",
+  "section.nostalgia p",
+
+  "footer.cta",
+  "footer.cta h2",
+  "footer.cta p",
+] as const;
+
+const APPROVED_SELECTOR_SET = new Set<string>(APPROVED_SELECTORS as readonly string[]);
+
+// Property allowlist (keep intentionally conservative)
+const ALLOWED_CSS_PROPERTIES = new Set([
+  // color + backgrounds
+  "color",
+  "background",
+  "background-color",
+  "background-image",
+  "background-size",
+  "background-position",
+  "background-repeat",
+  "background-attachment",
+
+  // typography
+  "font",
+  "font-family",
+  "font-size",
+  "font-weight",
+  "font-style",
+  "font-variant",
+  "line-height",
+  "letter-spacing",
+  "text-transform",
+  "text-decoration",
+  "text-decoration-color",
+  "text-decoration-thickness",
+  "text-shadow",
+  "text-align",
+  "white-space",
+  "word-break",
+  "overflow-wrap",
+
+  // spacing + layout (safe subset)
+  "margin",
+  "margin-top",
+  "margin-right",
+  "margin-bottom",
+  "margin-left",
+  "padding",
+  "padding-top",
+  "padding-right",
+  "padding-bottom",
+  "padding-left",
+
+  "max-width",
+  "width",
+  "min-width",
+  "height",
+  "min-height",
+
+  "display",
+  "gap",
+  "row-gap",
+  "column-gap",
+
+  "border",
+  "border-top",
+  "border-right",
+  "border-bottom",
+  "border-left",
+  "border-color",
+  "border-radius",
+  "border-style",
+  "border-width",
+
+  "box-shadow",
+  "outline",
+  "outline-color",
+  "outline-width",
+  "outline-style",
+
+  // table niceties
+  "border-collapse",
+  "border-spacing",
+
+  // simple effects (optional but useful)
+  "opacity",
+]);
+
+// -------------------------
+// 2) Helpers
+// -------------------------
+
+const esc = (v: any) =>
+  String(v ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+const normalizeFonts = (fonts: any): string[] => {
+  if (!Array.isArray(fonts)) return [];
+  return fonts
+    .map((f) => String(f || "").trim())
+    .filter(Boolean);
+};
+
+// -------------------------
+// 3) Google Fonts Builder
+// -------------------------
+
+export function buildGoogleFonts(fonts: string[]) {
+  const requested = normalizeFonts(fonts);
+
+  const allowed = requested.filter((f) =>
+    (GOOGLE_FONTS_WHITELIST as readonly string[]).includes(f)
+  );
+
+  if (!allowed.length) return "";
+
+  // eBay-friendly: simple weights; keep URL short
+  const family = allowed
+    .slice(0, 3) // enforce max 3
+    .map((f) => `family=${encodeURIComponent(f)}:wght@400;600;700`)
+    .join("&");
+
+  return `<link href="https://fonts.googleapis.com/css2?${family}&display=swap" rel="stylesheet">`;
 }
 
+// -------------------------
+// 4) CSS Sanitizer (Selector + Property allowlist)
+// -------------------------
+//
+// NOTE: This is not a full CSS parser, but it is much stricter than simple token stripping.
+// It will:
+// - remove dangerous constructs
+// - drop rules whose selector is not in APPROVED_SELECTORS
+// - drop declarations whose property is not in ALLOWED_CSS_PROPERTIES
+// - hard-cap output length to 12k chars
+//
+export function sanitizeAIStyle(style: string) {
+  let safe = String(style ?? "");
 
+  // Hard bans (strip or neutralize)
+  const blocked = [
+    /@import/gi,
+    /url\(/gi,
+    /expression\(/gi,
+    /javascript:/gi,
+    /behavior:/gi,
+    /-moz-binding/gi,
+    /<script/gi,
+    /<\/style/gi,
+    /@keyframes/gi, // optional: disallow animations to reduce risk
+  ];
+
+  for (const rule of blocked) safe = safe.replace(rule, "");
+
+  // Remove CSS comments (often used to smuggle weird stuff)
+  safe = safe.replace(/\/\*[\s\S]*?\*\//g, "");
+
+  // Quick reject: if braces are wildly unbalanced, bail to empty
+  const open = (safe.match(/{/g) || []).length;
+  const close = (safe.match(/}/g) || []).length;
+  if (open !== close) return "";
+
+  // Extract rules: selector { decls }
+  // Ignores nested blocks (we ban @rules anyway).
+  const ruleRegex = /([^{}]+)\{([^{}]*)\}/g;
+  let out = "";
+
+  let match: RegExpExecArray | null;
+  while ((match = ruleRegex.exec(safe))) {
+    const rawSelector = match[1].trim();
+    const rawDecls = match[2].trim();
+
+    // Support comma-separated selectors, but ALL must be approved
+    const selectors = rawSelector
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    if (!selectors.length) continue;
+
+    const allSelectorsApproved = selectors.every((s) =>
+      APPROVED_SELECTOR_SET.has(s)
+    );
+    if (!allSelectorsApproved) continue;
+
+    // Filter declarations to allowed properties
+    const decls = rawDecls
+      .split(";")
+      .map((d) => d.trim())
+      .filter(Boolean);
+
+    const kept: string[] = [];
+
+    for (const d of decls) {
+      const idx = d.indexOf(":");
+      if (idx <= 0) continue;
+
+      const prop = d.slice(0, idx).trim().toLowerCase();
+      const value = d.slice(idx + 1).trim();
+
+      // allow CSS variables like --primary
+      const isCustomProp = prop.startsWith("--");
+
+      // property allowlist (or custom var)
+      if (!isCustomProp && !ALLOWED_CSS_PROPERTIES.has(prop)) continue;
+
+      // extra safety: block any lingering dangerous strings in values
+      if (/url\(|@import|expression\(|javascript:/i.test(value)) continue;
+
+      kept.push(`${prop}: ${value}`);
+    }
+
+    if (!kept.length) continue;
+
+    out += `${selectors.join(", ")} { ${kept.join("; ")}; }\n`;
+
+    // Early cap to avoid runaway
+    if (out.length > 12000) break;
+  }
+
+  return out.slice(0, 12000);
+}
+
+// -------------------------
+// 5) Renderer (Class-stable template)
+// -------------------------
+
+export function composeListingHTML(data: any) {
+  return `${renderPremiumListing(data)}`;
+}
+
+export function renderPremiumListing(data: any) {
+  const fonts = normalizeFonts(data?.presentation?.fonts);
+  const baseCss = `
+section.details { background-color: #fff; color: #111; }
+dl.specs { display: grid; grid-template-columns: max-content 1fr; gap: 0.5em 1em; }
+section.details dl.specs dt { color: inherit; font-weight: 700; }
+section.details dl.specs dd { color: inherit; }
+`.trim();
+  const css = sanitizeAIStyle(data?.presentation?.css);
+
+  const renderList = (arr: any[], ulClass: string) => {
+    const items = (Array.isArray(arr) ? arr : [])
+      .map((v) => `<li>${esc(v)}</li>`)
+      .join("");
+    return `<ul class="${ulClass}">${items}</ul>`;
+  };
+
+  // Single DL with multiple dt/dd pairs (correct semantic structure)
+  const renderSpecs = (items: any[]) => {
+    const rows = (Array.isArray(items) ? items : [])
+      .map((i) => `<dt>${esc(i?.label)}</dt><dd>${esc(i?.value)}</dd>`)
+      .join("");
+    return `<dl class="specs">${rows}</dl>`;
+  };
+
+  const renderCondition = (components: any[], overall: string) => {
+    const rows = (Array.isArray(components) ? components : [])
+      .map(
+        (p) =>
+          `<tr><td>${esc(p?.part)}</td><td>${esc(p?.status)}</td></tr>`
+      )
+      .join("");
+
+    return `
+<table class="condition-table">
+  <thead>
+    <tr><th>Component</th><th>Condition</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Overall</td><td>${esc(overall)}</td></tr>
+    ${rows}
+  </tbody>
+</table>`.trim();
+  };
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${esc(data?.seo?.ebay_title || "Listing")}</title>
+  ${buildGoogleFonts(fonts)}
+<style>
+${css}
+${baseCss}
+</style>
+</head>
+<body>
+
+  <main class="listing">
+
+    <header class="hero">
+      <span class="era-tag">${esc(data?.hero?.era_tag)}</span>
+      <h1 class="title-main">${esc(data?.hero?.title_main)}</h1>
+      <h2 class="title-sub">${esc(data?.hero?.title_sub)}</h2>
+      <p class="author-line">${esc(data?.hero?.author_line)}</p>
+    </header>
+
+    <section class="seo-title">
+      <h2>${esc(data?.seo?.ebay_title)}</h2>
+    </section>
+
+    <section class="badges">
+      ${renderList(data?.badges, "badge-list")}
+    </section>
+
+    <section class="about">
+      ${(data?.about?.paragraphs || [])
+        .map((p: any) => `<p>${esc(p)}</p>`)
+        .join("")}
+    </section>
+
+    <section class="details">
+      ${renderSpecs(data?.details?.items)}
+    </section>
+
+    <section class="condition">
+      ${renderCondition(data?.condition?.components, data?.condition?.overall)}
+    </section>
+
+    <section class="contents">
+      ${renderList(data?.contents, "contents-list")}
+    </section>
+
+    <section class="collector-points">
+      ${renderList(data?.collector_points, "collector-list")}
+    </section>
+
+    <section class="nostalgia">
+      <h3>${esc(data?.nostalgia?.title)}</h3>
+      <p>${esc(data?.nostalgia?.text)}</p>
+    </section>
+
+    <footer class="cta">
+      <h2>${esc(data?.cta?.headline)}</h2>
+      <p>${esc(data?.cta?.sub)}</p>
+    </footer>
+
+  </main>
+
+</body>
+</html>
+`.trim();
+}
 export function renderStandardListing(data: any) {
   return `
   <div style="font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; color: #333; line-height: 1.6;">
