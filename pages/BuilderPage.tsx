@@ -215,7 +215,7 @@ const BuilderPage: React.FC = () => {
       };
       await saveListingToInventory(listingData, selectedFiles[0]);
       setShowSuccess(true);
-    //  setTimeout(() => { window.location.hash = '/inventory'; }, 1500);
+       setTimeout(() => { window.location.hash = '/inventory'; }, 1500);
     } catch (error: any) {
       console.error('Error saving listing:', error);
       alert('Error saving: ' + error.message);

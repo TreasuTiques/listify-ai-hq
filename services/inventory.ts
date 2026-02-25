@@ -1,44 +1,32 @@
-import { supabase } from '../supabaseClient';
+import { supabase } from '../supabaseClient.js';
 
 /**
  * 1. UPLOAD IMAGE TO SUPABASE STORAGE 📸
  */
 export async function uploadImage(file: File): Promise<string | null> {
   try {
-    // Create a simple, safe file name
-    const fileExt = file.name.split('.').pop();
+    const fileExt = file.name.split('.').pop() ?? 'png';
     const fileName = `${Date.now()}_${Math.floor(Math.random() * 1000)}.${fileExt}`;
-    
-    // 🚨 DEBUG: Alert if we start uploading
-    // alert(`Starting upload for: ${fileName}`); 
 
-    // Upload to 'listing-images' bucket
     const { data, error: uploadError } = await supabase.storage
       .from('listing-images')
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
+      .upload(fileName, file, { cacheControl: '3600', upsert: false });
 
-    if (uploadError) {
-      // 🚨 THIS WILL TELL US THE ERROR
-      alert(`UPLOAD FAILED: ${uploadError.message}`);
-      throw uploadError;
-    }
+    if (uploadError) throw uploadError;
 
-    // Get the Public URL
-    const { data: publicUrlData } = supabase.storage
+    // create a signed URL (e.g., valid for 1 hour)
+    const { data: signed, error: signedErr } = await supabase.storage
       .from('listing-images')
-      .getPublicUrl(fileName);
+      .createSignedUrl(data.path, 60 * 60);
 
-    return publicUrlData.publicUrl;
+    if (signedErr) throw signedErr;
 
-  } catch (error: any) {
-    console.error('Error uploading image:', error);
+    return signed.signedUrl;
+  } catch (e) {
+    console.error(e);
     return null;
   }
 }
-
 /**
  * 2. SAVE LISTING TO DATABASE 💾
  */
@@ -55,7 +43,7 @@ export async function saveListingToInventory(listingData: any, imageFile: File |
     let imageUrl = null;
     if (imageFile) {
       imageUrl = await uploadImage(imageFile);
-      
+      console.log("Image uploaded, URL:", imageUrl);
       // If upload failed (returned null), warn the user but continue
       if (!imageUrl) {
         alert("Warning: Image upload failed, saving listing without image.");

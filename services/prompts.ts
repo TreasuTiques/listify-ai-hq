@@ -458,7 +458,8 @@ const STANDARD_PROMPT = `
 CRITICAL FINAL INSTRUCTION: Output RAW JSON only. Start with { and end with }. No HTML, no code fences, no explanations.
 `;
  // 🚨 ULTIMATE OUTPUT JSON STRUCTURE
-const OUTPUT_INSTRUCTION = `You are analyzing product photos and generating structured listing data for a rendering engine.
+const OUTPUT_INSTRUCTION = `
+You are analyzing product photos and generating structured listing data for a rendering engine.
 
 OUTPUT RULES (NON-NEGOTIABLE):
 - Output MUST be valid JSON ONLY. No markdown. No commentary. No HTML.
@@ -523,12 +524,7 @@ footer.cta
 footer.cta h2
 footer.cta p
 
-section.details { background-color: var(--secondary); color: var(--text); }
-section.details dl.specs dt { color: var(--primary); }
-section.details dl.specs dd { color: var(--text); }
-
 CSS RULES:
-
 - No @import, no url(), no external assets, no JS.
 - No <style> tags (CSS only).
 - Max 12,000 characters total.
@@ -536,6 +532,16 @@ CSS RULES:
 - Avoid overly complex selectors. Prefer the approved selectors exactly as listed.
 
 Always set readable base contrast for content sections (details/about/condition): set background-color and color explicitly.
+
+REQUIRED SAFE BASE (you may theme it, but must keep contrast):
+section.details { background-color: var(--secondary, #fff); color: var(--text, #111); }
+section.condition { background-color: var(--background, #fff); color: var(--text, #111); }
+table.condition-table tbody td { background-color: var(--secondary, #fff); color: var(--text, #111); }
+
+PALETTE CONSISTENCY RULE:
+- If --secondary is dark, set --text to a light color.
+- If --secondary is light, set --text to a dark color.
+- --text must be the default readable text color across sections.
 
 FONTS RULES:
 - Max 3 fonts total.
@@ -547,6 +553,18 @@ FONTS RULES:
   Oswald
   Montserrat
 
+CONTRAST & READABILITY (MANDATORY):
+- Never use dark text on a dark background or light text on a light background.
+- For these sections, you MUST explicitly set BOTH background-color AND color:
+  - section.details
+  - section.condition
+  - table.condition-table thead th
+  - table.condition-table tbody td
+  - section.collector-points
+- If you use a dark background (#000–#555 range), you MUST use light text (#EEE–#FFF).
+- If you use a light background (#EEE–#FFF range), you MUST use dark text (#111–#333).
+- Avoid using --text as white while setting body/section color to a dark gray.
+
 OUTPUT JSON STRUCTURE (EXACT SHAPE):
 
 {
@@ -555,31 +573,84 @@ OUTPUT JSON STRUCTURE (EXACT SHAPE):
     "mood": "",
     "accent_words": ["", ""]
   },
+   "title": "Optimized marketplace title (max 80 chars)",
+  "headline": "fun attention-grabbing headline",
+  "subheadline": "short atmospheric supporting line",
+
+  "description": "Warm, confident product description in text form. Sell the feeling, not just the object.",
+
+  "collector_note": "Why this item is special, collectible, or desirable",
+
+  "highlights": [
+    { "title": "Feature name", "text": "Specific benefit", "icon": "single emoji" },
+    { "title": "Feature name", "text": "Specific benefit", "icon": "single emoji" },
+    { "title": "Feature name", "text": "Specific benefit", "icon": "single emoji" }
+  ],
+
+  "condition_report": "Detailed honest condition explanation",
+
+  "call_to_action": {
+    "headline": "Urgent fun phrase",
+    "bullets": ["unique selling point", "unique selling point", "unique selling point"],
+    "closing_line": "witty memorable closing hook"
+  },
+  "estimated_price": "$XX.XX",
+  
+  "tags": ["relevant", "search", "keywords"],
+
+  "item_specifics": {
+    "brand": "",
+    "category": "",
+    "size": "",
+    "color": "",
+    "material": "",
+    "year": "",
+    "made_in": "",
+    "department": "",
+    "model": "",
+    "theme": "",
+    "features": ""
+  },
+
   "hero": {
     "era_tag": "",
     "title_main": "",
     "title_sub": "",
     "author_line": ""
   },
+
   "seo": { "ebay_title": "" },
+
   "badges": ["", "", "", ""],
+
   "about": { "paragraphs": ["", "", ""] },
+
   "details": {
     "items": [{ "label": "", "value": "" }]
   },
+
   "condition": {
     "overall": "",
     "components": [{ "part": "", "status": "" }]
   },
+
   "contents": [""],
   "collector_points": [""],
+
   "nostalgia": { "title": "", "text": "" },
+
   "cta": { "headline": "", "sub": "" },
+
   "presentation": {
     "fonts": ["", ""],
     "css": ""
   }
 }
+
+CRITICAL FINAL RULE:
+Return RAW JSON only.
+Start with { and end with }.
+No markdown. No commentary. No explanations.
 `;
   switch (platform.toLowerCase()) {
     case 'poshmark':
