@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../supabaseClient.ts';
 
 interface ListingDetailModalProps {
   listing: any;
@@ -50,7 +50,7 @@ const ListingDetailModal: React.FC<ListingDetailModalProps> = ({ listing, onClos
         .from('listings')
         .update({
           status: 'sold',
-          sold_price: parseFloat(soldPrice),
+          price: parseFloat(soldPrice),
           fees: parseFloat(fees) || 0,
           shipping_cost: parseFloat(shipping) || 0,
           sold_date: new Date().toISOString()

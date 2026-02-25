@@ -648,6 +648,7 @@ OUTPUT JSON STRUCTURE (EXACT SHAPE):
 }
 
 CRITICAL FINAL RULE:
+Make sure you return price in "estimated_price" field. Do not leave it blank or use placeholders.
 Return RAW JSON only.
 Start with { and end with }.
 No markdown. No commentary. No explanations.

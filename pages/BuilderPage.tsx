@@ -16,7 +16,7 @@ const BuilderPage: React.FC = () => {
   const [title, setTitle] = useState('');
   const [condition, setCondition] = useState('');
   const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
+  const [estimatedPrice, setEstimatedPrice] = useState('');
   const [tags, setTags] = useState<string[]>([]);
 
   // 🔍 THE PERFECT 10 ITEM SPECIFICS
@@ -139,7 +139,7 @@ const BuilderPage: React.FC = () => {
       if (!brand && result.brand) setBrand(result.brand);
 
       setDescription(html || '');
-      setPrice(result.estimated_price || '');
+      setEstimatedPrice(result.estimated_price || '');
       setTags(result.tags || []);
       setEditorTab('visual');
     } catch (error) {
@@ -210,12 +210,12 @@ const BuilderPage: React.FC = () => {
     setLoading(true);
     try {
       const listingData = {
-        title, brand, description, condition, estimated_price: price, tags: tags, platform: activePlatform,
+        title, brand, description, condition, estimated_price: estimatedPrice, tags: tags, platform: activePlatform,
         item_specifics: { size, color, material, year, madeIn, department, model, theme, features }
       };
       await saveListingToInventory(listingData, selectedFiles[0]);
       setShowSuccess(true);
-       setTimeout(() => { window.location.hash = '/inventory'; }, 1500);
+    setTimeout(() => { window.location.hash = '/inventory'; }, 1500);
     } catch (error: any) {
       console.error('Error saving listing:', error);
       alert('Error saving: ' + error.message);
@@ -417,7 +417,7 @@ const BuilderPage: React.FC = () => {
 
               <div className="col-span-4">
                 <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5 ml-1 block">Price ($)</label>
-                <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 rounded-xl px-4 py-3.5 font-bold focus:outline-none focus:border-emerald-500 transition-all placeholder:text-emerald-300 shadow-sm text-center" placeholder="0.00" />
+                <input type="text" value={estimatedPrice} onChange={(e) => setEstimatedPrice(e.target.value)} className="w-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 rounded-xl px-4 py-3.5 font-bold focus:outline-none focus:border-emerald-500 transition-all placeholder:text-emerald-300 shadow-sm text-center" placeholder="0.00" />
               </div>
             </div>
 

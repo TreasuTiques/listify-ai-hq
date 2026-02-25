@@ -5,23 +5,17 @@ import { supabase } from '../supabaseClient.js';
  */
 export async function uploadImage(file: File): Promise<string | null> {
   try {
-    const fileExt = file.name.split('.').pop() ?? 'png';
+    const fileExt = file.name.split(".").pop() ?? "png";
     const fileName = `${Date.now()}_${Math.floor(Math.random() * 1000)}.${fileExt}`;
 
-    const { data, error: uploadError } = await supabase.storage
-      .from('listing-images')
-      .upload(fileName, file, { cacheControl: '3600', upsert: false });
+    const { data, error } = await supabase.storage
+      .from("listing-images")
+      .upload(fileName, file, { cacheControl: "3600", upsert: false });
 
-    if (uploadError) throw uploadError;
+    if (error) throw error;
 
-    // create a signed URL (e.g., valid for 1 hour)
-    const { data: signed, error: signedErr } = await supabase.storage
-      .from('listing-images')
-      .createSignedUrl(data.path, 60 * 60);
-
-    if (signedErr) throw signedErr;
-
-    return signed.signedUrl;
+    // ✅ Save this to your listing (stable forever)
+    return data.path; // usually same as fileName if uploading to root
   } catch (e) {
     console.error(e);
     return null;
@@ -40,36 +34,35 @@ export async function saveListingToInventory(listingData: any, imageFile: File |
     }
 
     // B. Upload Image (If exists)
-    let imageUrl = null;
-    if (imageFile) {
-      imageUrl = await uploadImage(imageFile);
-      console.log("Image uploaded, URL:", imageUrl);
-      // If upload failed (returned null), warn the user but continue
-      if (!imageUrl) {
-        alert("Warning: Image upload failed, saving listing without image.");
-      }
-    } else {
-      console.log("No image file provided to saveListingToInventory");
+   let imagePath = null;
+if (imageFile) {
+  imagePath = await uploadImage(imageFile); // <-- this is a PATH, not a URL
+  console.log("Image uploaded, path:", imagePath);
+
+  if (!imagePath) {
+    alert("Warning: Image upload failed, saving listing without image.");
+  }
+}
+
+// C. Save to DB
+const { error } = await supabase
+  .from('listings')
+  .insert([
+    {
+      user_id: user.id,
+      title: listingData.title,
+      brand: listingData.brand,
+      description: listingData.description,
+      condition: listingData.condition,
+      estimated_price: listingData.estimated_price,
+      status: 'draft',
+      platform: listingData.platform || 'ebay',
+
+      image_url: imagePath,     // ✅ store stable path
+      // image_url: null,        // (optional) don’t store signed url
+      tags: listingData.tags || []
     }
-
-    // C. Save to DB
-    const { error } = await supabase
-      .from('listings')
-      .insert([
-        {
-          user_id: user.id,
-          title: listingData.title,
-          brand: listingData.brand,
-          description: listingData.description,
-          condition: listingData.condition,
-          price: listingData.estimated_price,
-          status: 'draft',
-          platform: listingData.platform || 'ebay',
-          image_url: imageUrl, 
-          tags: listingData.tags || [] 
-        }
-      ]);
-
+  ]);
     if (error) {
       alert(`DATABASE ERROR: ${error.message}`);
       throw error;
